@@ -23,5 +23,5 @@ interface FavoriteQuoteDao {
     fun isFavorite(quoteId: String): Flow<Boolean>
 
     @Query("SELECT id FROM favorite_quotes")
-    fun getFavoriteIds(): Flow<Set<String>>
+    fun getFavoriteIds(): Flow<List<String>>
 }

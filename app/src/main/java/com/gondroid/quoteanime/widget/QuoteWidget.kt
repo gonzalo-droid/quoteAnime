@@ -7,8 +7,9 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.action.actionRunCallback
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -41,7 +42,7 @@ class QuoteWidget : GlanceAppWidget() {
     }
 
     @Composable
-    override fun Content() {
+    fun Content() {
         val prefs = currentState<androidx.datastore.preferences.core.Preferences>()
         val quoteText = prefs[QuoteWidgetState.QUOTE_TEXT]
         val quoteAuthor = prefs[QuoteWidgetState.QUOTE_AUTHOR]
