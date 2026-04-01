@@ -19,7 +19,7 @@ Motivational quotes Android app. Quotes and categories come from **Firebase Fire
 
 - **Language**: Kotlin | **UI**: Jetpack Compose + Material3
 - **minSdk**: 24, **targetSdk**: 36
-- **Package**: `com.gondroid.tokensclaude`
+- **Package**: `com.gondroid.quoteanime`
 - **DI**: Hilt | **DB**: Room (favorites only) | **Remote**: Firestore | **Preferences**: DataStore | **Widget**: Glance API
 
 > **Firebase setup required**: add `google-services.json` to `app/` after registering the app in the Firebase console. Enable Firestore in the project.
@@ -36,7 +36,7 @@ Motivational quotes Android app. Quotes and categories come from **Firebase Fire
 Single-module, Clean Architecture with MVVM in the presentation layer.
 
 ```
-com.gondroid.tokensclaude/
+com.gondroid.quoteanime/
 ├── data/
 │   ├── local/
 │   │   ├── db/                    # Room: AppDatabase, FavoriteQuoteDao, FavoriteQuoteEntity
@@ -74,7 +74,7 @@ com.gondroid.tokensclaude/
 ## Key Wiring
 
 - **`isFavorite` merging**: `QuoteRepositoryImpl.getQuotesByCategory` uses `combine()` to merge the Firestore Flow with `FavoriteQuoteDao.getFavoriteIds()`, so the UI always has an up-to-date favorite state without extra calls.
-- **Application class**: `TokensClaudeApplication` — `@HiltAndroidApp`, implements `Configuration.Provider` to inject `HiltWorkerFactory` into WorkManager (manual init). The `WorkManagerInitializer` startup provider is removed in the manifest to avoid double-init.
+- **Application class**: `QuoteAnimeApplication` — `@HiltAndroidApp`, implements `Configuration.Provider` to inject `HiltWorkerFactory` into WorkManager (manual init). The `WorkManagerInitializer` startup provider is removed in the manifest to avoid double-init.
 - **Hilt + WorkManager**: Workers must use `@HiltWorker` + `@AssistedInject`.
 - **Navigation**: `AppNavGraph` uses a `sealed class Screen(route)` pattern. Screens receive navigation lambdas, not the NavController directly.
 - **Repository binding**: `RepositoryModule` uses `@Binds` (abstract module) — keep it abstract, not `object`.

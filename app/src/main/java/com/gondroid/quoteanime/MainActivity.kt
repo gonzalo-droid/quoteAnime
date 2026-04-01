@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
-import com.gondroid.quoteanime.ui.theme.TokensClaudeTheme
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TokensClaudeTheme {
+            QuoteAnimeTheme {
                 AppNavGraph()
             }
         }

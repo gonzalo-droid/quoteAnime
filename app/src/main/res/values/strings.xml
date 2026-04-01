@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">tokensClaude</string>
+    <string name="app_name">Quote Anime</string>
     <string name="notification_channel_name">Frases motivacionales</string>
     <string name="notification_channel_description">Recibe una frase motivacional según tu horario elegido</string>
     <string name="widget_description">Muestra una frase motivacional en tu pantalla de inicio</string>

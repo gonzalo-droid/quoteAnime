@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "tokensClaude"
+rootProject.name = "quoteAnime"
 include(":app")
  

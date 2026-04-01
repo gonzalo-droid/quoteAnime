@@ -14,7 +14,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.gondroid.tokensclaude"
+        applicationId = "com.gondroid.quoteAnime"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
