@@ -30,6 +30,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -39,10 +40,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,7 +75,6 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Lanzador del diálogo de permiso del sistema
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -97,10 +99,7 @@ fun SettingsScreen(
     }
 
     fun requestNotificationToggle(enabled: Boolean) {
-        if (!enabled) {
-            viewModel.onNotificationsDisabled()
-            return
-        }
+        if (!enabled) { viewModel.onNotificationsDisabled(); return }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS
@@ -113,17 +112,16 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        topBar = {
-            SettingsTopBar(onNavigateBack = onNavigateBack)
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = { SettingsTopBar(onNavigateBack = onNavigateBack) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             LazyColumn(
@@ -142,7 +140,12 @@ fun SettingsScreen(
                     )
                 }
 
-                item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+                item {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
 
                 item {
                     SectionHeader("Notificaciones")
@@ -164,15 +167,25 @@ fun SettingsScreen(
 @Composable
 private fun SettingsTopBar(onNavigateBack: () -> Unit) {
     TopAppBar(
-        title = { Text("Personalización") },
+        title = {
+            Text(
+                text = "Personalización",
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver"
+                    contentDescription = "Volver",
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
     )
 }
 
@@ -183,6 +196,7 @@ private fun SectionHeader(title: String) {
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
+        letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
     )
 }
@@ -241,27 +255,49 @@ private fun NotificationSection(
     onFrequencyChanged: (NotificationFrequency) -> Unit
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
+    val listItemColors = ListItemDefaults.colors(
+        containerColor = MaterialTheme.colorScheme.background
+    )
 
-    // Toggle de activar/desactivar notificaciones
     ListItem(
-        headlineContent = { Text("Activar notificaciones") },
-        supportingContent = { Text("Recibe una frase motivacional según tu horario") },
+        headlineContent = {
+            Text("Activar notificaciones", color = MaterialTheme.colorScheme.onBackground)
+        },
+        supportingContent = {
+            Text(
+                "Recibe una frase motivacional según tu horario",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         trailingContent = {
             Switch(
                 checked = uiState.notificationsEnabled,
-                onCheckedChange = onToggle
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.background,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary
+                )
             )
-        }
+        },
+        colors = listItemColors
     )
 
-    // Opciones visibles solo si las notificaciones están activadas
     if (uiState.notificationsEnabled) {
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.outline
+        )
 
-        // Selector de hora
         ListItem(
-            headlineContent = { Text("Horario") },
-            supportingContent = { Text("Hora a la que recibirás la notificación") },
+            headlineContent = {
+                Text("Horario", color = MaterialTheme.colorScheme.onBackground)
+            },
+            supportingContent = {
+                Text(
+                    "Hora a la que recibirás la notificación",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
             trailingContent = {
                 Text(
                     text = "%02d:%02d".format(uiState.notificationHour, uiState.notificationMinute),
@@ -270,23 +306,25 @@ private fun NotificationSection(
                     fontWeight = FontWeight.Medium
                 )
             },
-            modifier = Modifier.clickable { showTimePicker = true }
+            modifier = Modifier.clickable { showTimePicker = true },
+            colors = listItemColors
         )
 
-        // Selector de frecuencia
         ListItem(
-            headlineContent = { Text("Frecuencia") },
+            headlineContent = {
+                Text("Frecuencia", color = MaterialTheme.colorScheme.onBackground)
+            },
             supportingContent = {
                 Spacer(modifier = Modifier.height(8.dp))
                 FrequencySelector(
                     selected = uiState.notificationFrequency,
                     onSelected = onFrequencyChanged
                 )
-            }
+            },
+            colors = listItemColors
         )
     }
 
-    // Diálogo de selección de hora
     if (showTimePicker) {
         TimePickerDialog(
             initialHour = uiState.notificationHour,
@@ -334,7 +372,10 @@ private fun TimePickerDialog(
     )
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Elige el horario") },
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text("Elige el horario", color = MaterialTheme.colorScheme.onSurface)
+        },
         text = {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
                 TimePicker(state = state)

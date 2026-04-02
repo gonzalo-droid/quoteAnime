@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,16 +46,14 @@ fun CatalogScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = {
-            CatalogTopBar(onNavigateBack = onNavigateBack)
-        }
+        topBar = { CatalogTopBar(onNavigateBack = onNavigateBack) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Fila de filtros por categoría (sticky)
             CategoryFilterRow(
                 categories = uiState.categories,
                 selectedCategoryId = uiState.selectedCategoryId,
@@ -62,13 +61,12 @@ fun CatalogScreen(
                 onCategorySelected = { viewModel.onCategorySelected(it) }
             )
 
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
 
-            // Lista de frases
             when {
                 uiState.isLoading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
 
@@ -79,8 +77,8 @@ fun CatalogScreen(
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(
                             items = uiState.quotes,
@@ -102,15 +100,25 @@ fun CatalogScreen(
 @Composable
 private fun CatalogTopBar(onNavigateBack: () -> Unit) {
     TopAppBar(
-        title = { Text("Catálogo") },
+        title = {
+            Text(
+                text = "Catálogo",
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver"
+                    contentDescription = "Volver",
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
     )
 }
 
@@ -129,17 +137,21 @@ private fun CategoryFilterRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Tab Favoritos
         FilterChip(
             selected = selectedCategoryId == null,
             onClick = onFavoritesSelected,
             label = { Text("Favoritos") },
             leadingIcon = if (selectedCategoryId == null) {
-                { Icon(Icons.Default.Favorite, contentDescription = null) }
+                {
+                    Icon(
+                        Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             } else null
         )
 
-        // Tabs por categoría
         categories.forEach { category ->
             FilterChip(
                 selected = category.id == selectedCategoryId,
@@ -163,6 +175,7 @@ private fun EmptyState(isFavoritesTab: Boolean) {
                        else "No hay frases en esta categoría",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
             Text(

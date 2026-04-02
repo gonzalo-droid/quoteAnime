@@ -43,24 +43,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.ui.theme.AccentPurple
+import com.gondroid.quoteanime.ui.theme.HeartRed
+import com.gondroid.quoteanime.ui.theme.OutlineColor
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
+import com.gondroid.quoteanime.ui.theme.TextPrimary
+import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlin.math.absoluteValue
 
-// ── Palette ──────────────────────────────────────────────────────────────────
-private val BgDark        = Color(0xFF0C0C1E)
-private val TextPrimary   = Color(0xFFF0EAFF)
-private val TextSecondary = Color(0xFF9B8DB3)
-private val AccentPurple  = Color(0xFFA78BFA)
-private val HeartColor    = Color(0xFFFF6B8A)
-private val DividerColor  = Color(0xFF3A3050)
+private val HeartColor = HeartRed
+private val DividerColor = OutlineColor
 
 private val pageGradients = listOf(
     listOf(Color(0xFF0C0C1E), Color(0xFF1A0E2E)),
@@ -70,7 +74,6 @@ private val pageGradients = listOf(
     listOf(Color(0xFF100818), Color(0xFF1E0C30)),
 )
 
-// ── Entry point ──────────────────────────────────────────────────────────────
 @Composable
 fun HomeScreen(
     onNavigateToCatalog: (categoryId: String?) -> Unit,
@@ -80,10 +83,35 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    HomeContent(
+        uiState = uiState,
+        onNavigateToCatalog = onNavigateToCatalog,
+        onNavigateToSettings = onNavigateToSettings,
+        onToggleFavorite = { viewModel.onToggleFavorite(it) },
+        onShare = { currentQuote ->
+            val shareText =
+                "\"${currentQuote.quote}\"\n— ${currentQuote.author}\n(${currentQuote.anime})"
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareText)
+            }
+            context.startActivity(Intent.createChooser(intent, null))
+        }
+    )
+}
+
+@Composable
+private fun HomeContent(
+    uiState: HomeUiState,
+    onNavigateToCatalog: (categoryId: String?) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onToggleFavorite: (quote: Quote) -> Unit,
+    onShare: (quote: Quote) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BgDark)
+        //.background(BgDark)
     ) {
         when {
             uiState.isLoading -> {
@@ -96,7 +124,7 @@ fun HomeScreen(
             uiState.error != null || uiState.quotes.isEmpty() -> {
                 Text(
                     text = if (uiState.error != null) "No se pudo cargar las frases."
-                           else "Sin frases disponibles.",
+                    else "Sin frases disponibles.",
                     color = TextSecondary,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -113,7 +141,6 @@ fun HomeScreen(
                         .fillMaxSize()
                         .navigationBarsPadding()
                         // deja espacio inferior para los botones fijos
-                        .padding(bottom = 120.dp)
                 ) { page ->
                     val quote = uiState.quotes[page]
                     val pageOffset = ((pagerState.currentPage - page) +
@@ -126,7 +153,6 @@ fun HomeScreen(
                     )
                 }
 
-                // ── Settings — top right (fijo) ──────────────────────────────
                 IconButton(
                     onClick = onNavigateToSettings,
                     modifier = Modifier
@@ -142,30 +168,11 @@ fun HomeScreen(
                     )
                 }
 
-                // ── Contador de página — top left (fijo) ─────────────────────
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${uiState.quotes.size}",
-                    color = TextSecondary.copy(alpha = 0.5f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .statusBarsPadding()
-                        .padding(start = 20.dp, top = 16.dp)
-                )
 
-                // ── Botones de acción — FIJOS en la parte inferior ───────────
                 BottomActions(
                     quote = currentQuote,
-                    onToggleFavorite = { viewModel.onToggleFavorite(currentQuote) },
-                    onShare = {
-                        val shareText = "\"${currentQuote.quote}\"\n— ${currentQuote.author}\n(${currentQuote.anime})"
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, shareText)
-                        }
-                        context.startActivity(Intent.createChooser(intent, null))
-                    },
+                    onToggleFavorite = { onToggleFavorite(currentQuote) },
+                    onShare = { onShare(currentQuote) },
                     onNavigateToCatalog = { onNavigateToCatalog(null) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -261,7 +268,6 @@ private fun QuoteContent(
     }
 }
 
-// ── Botones fijos ─────────────────────────────────────────────────────────────
 @Composable
 private fun BottomActions(
     quote: Quote,
@@ -289,8 +295,10 @@ private fun BottomActions(
         ActionButton(onClick = onToggleFavorite) {
             Icon(
                 imageVector = if (quote.isFavorite) Icons.Default.Favorite
-                              else Icons.Default.FavoriteBorder,
-                contentDescription = if (quote.isFavorite) "Quitar favorito" else "Añadir favorito",
+                else Icons.Default.FavoriteBorder,
+                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite) else stringResource(
+                    R.string.add_favorite
+                ),
                 tint = heartTint,
                 modifier = Modifier
                     .size(24.dp)
@@ -301,7 +309,7 @@ private fun BottomActions(
         ActionButton(onClick = onShare) {
             Icon(
                 imageVector = Icons.Outlined.Share,
-                contentDescription = "Compartir",
+                contentDescription = stringResource(R.string.action_shared),
                 tint = TextSecondary,
                 modifier = Modifier.size(22.dp)
             )
@@ -333,5 +341,29 @@ private fun ActionButton(
         IconButton(onClick = onClick) {
             content()
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewHomeContent() {
+    QuoteAnimeTheme {
+        HomeContent(
+            uiState = HomeUiState(
+                isLoading = false,
+                quotes = listOf(
+                    Quote(
+                        id = "1",
+                        quote = "Quote 1",
+                        author = "Author 1",
+                        anime = "Anime 1",
+                    )
+                )
+            ),
+            onNavigateToCatalog = {},
+            onNavigateToSettings = {},
+            onToggleFavorite = {},
+            onShare = {}
+        )
     }
 }

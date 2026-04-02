@@ -6,4 +6,7 @@
     <string name="widget_refresh">Actualizar frase</string>
     <string name="widget_loading">Cargando frase…</string>
     <string name="widget_error">No se pudo cargar la frase. Toca para reintentar.</string>
+    <string name="remove_favorite">Quitar favorito</string>
+    <string name="add_favorite">Añadir favorito</string>
+    <string name="action_shared">Compartir</string>
 </resources>
