@@ -18,7 +18,6 @@ import javax.inject.Singleton
 class NotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
     companion object {
         const val WORK_NAME = "quote_notification_work"
     }
@@ -26,32 +25,24 @@ class NotificationScheduler @Inject constructor(
     private val workManager = WorkManager.getInstance(context)
 
     fun schedule(preferences: UserPreferences) {
-        if (!preferences.notificationsEnabled) {
-            cancel()
-            return
-        }
+        if (!preferences.notificationsEnabled) { cancel(); return }
 
         val initialDelay = calculateInitialDelay(
-            hour = preferences.notificationHour,
-            minute = preferences.notificationMinute
+            preferences.notificationStartHour,
+            preferences.notificationStartMinute
         )
-
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
 
         val request = PeriodicWorkRequestBuilder<QuoteNotificationWorker>(
-            preferences.notificationFrequency.intervalHours,
-            TimeUnit.HOURS
+            preferences.notificationFrequency.intervalHours, TimeUnit.HOURS
         )
             .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-            .setConstraints(constraints)
+            .setConstraints(
+                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+            )
             .build()
 
         workManager.enqueueUniquePeriodicWork(
-            WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            request
+            WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request
         )
     }
 
@@ -59,24 +50,16 @@ class NotificationScheduler @Inject constructor(
         workManager.cancelUniqueWork(WORK_NAME)
     }
 
-    /**
-     * Calcula el tiempo en ms hasta la próxima ocurrencia de [hour]:[minute].
-     * Si la hora ya pasó hoy, devuelve el delay para mañana.
-     */
+    /** Delay in ms until the next occurrence of [hour]:[minute] */
     private fun calculateInitialDelay(hour: Int, minute: Int): Long {
         val now = Calendar.getInstance()
-
         val target = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-
-        if (!target.after(now)) {
-            target.add(Calendar.DAY_OF_MONTH, 1)
-        }
-
+        if (!target.after(now)) target.add(Calendar.DAY_OF_MONTH, 1)
         return target.timeInMillis - now.timeInMillis
     }
 }

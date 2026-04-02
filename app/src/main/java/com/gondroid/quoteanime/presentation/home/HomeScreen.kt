@@ -88,6 +88,7 @@ fun HomeScreen(
         onNavigateToCatalog = onNavigateToCatalog,
         onNavigateToSettings = onNavigateToSettings,
         onToggleFavorite = { viewModel.onToggleFavorite(it) },
+        onScrollConsumed = { viewModel.onScrollToPageConsumed() },
         onShare = { currentQuote ->
             val shareText =
                 "\"${currentQuote.quote}\"\n— ${currentQuote.author}\n(${currentQuote.anime})"
@@ -106,6 +107,7 @@ private fun HomeContent(
     onNavigateToCatalog: (categoryId: String?) -> Unit,
     onNavigateToSettings: () -> Unit,
     onToggleFavorite: (quote: Quote) -> Unit,
+    onScrollConsumed: () -> Unit,
     onShare: (quote: Quote) -> Unit
 ) {
     Box(
@@ -134,13 +136,20 @@ private fun HomeContent(
                 val pagerState = rememberPagerState(pageCount = { uiState.quotes.size })
                 val currentQuote = uiState.quotes[pagerState.currentPage]
 
-                // ── Pager: solo el contenido de la frase scrollea ────────────
+                // Scroll to widget quote when launched from widget tap
+                androidx.compose.runtime.LaunchedEffect(uiState.scrollToPage) {
+                    val page = uiState.scrollToPage
+                    if (page != null && page in uiState.quotes.indices) {
+                        pagerState.animateScrollToPage(page)
+                        onScrollConsumed()
+                    }
+                }
+
                 VerticalPager(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
                         .navigationBarsPadding()
-                        // deja espacio inferior para los botones fijos
                 ) { page ->
                     val quote = uiState.quotes[page]
                     val pageOffset = ((pagerState.currentPage - page) +
@@ -363,6 +372,7 @@ fun PreviewHomeContent() {
             onNavigateToCatalog = {},
             onNavigateToSettings = {},
             onToggleFavorite = {},
+            onScrollConsumed = {},
             onShare = {}
         )
     }

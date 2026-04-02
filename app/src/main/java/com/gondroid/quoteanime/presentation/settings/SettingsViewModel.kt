@@ -3,10 +3,12 @@ package com.gondroid.quoteanime.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.domain.model.NotificationFrequency
+import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
+import com.gondroid.quoteanime.notification.WidgetScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +23,8 @@ class SettingsViewModel @Inject constructor(
     private val getCategories: GetCategoriesUseCase,
     private val getUserPreferences: GetUserPreferencesUseCase,
     private val updatePreferences: UpdateUserPreferencesUseCase,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    private val widgetScheduler: WidgetScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -29,43 +32,45 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(
-                getCategories(),
-                getUserPreferences()
-            ) { categories, prefs ->
+            combine(getCategories(), getUserPreferences()) { categories, prefs ->
                 _uiState.value.copy(
-                    categories = categories,
-                    selectedCategoryIds = prefs.selectedCategoryIds,
-                    notificationsEnabled = prefs.notificationsEnabled,
-                    notificationHour = prefs.notificationHour,
-                    notificationMinute = prefs.notificationMinute,
-                    notificationFrequency = prefs.notificationFrequency,
-                    isLoading = false
+                    categories              = categories,
+                    selectedCategoryIds     = prefs.selectedCategoryIds,
+                    notificationsEnabled    = prefs.notificationsEnabled,
+                    notificationStartHour   = prefs.notificationStartHour,
+                    notificationStartMinute = prefs.notificationStartMinute,
+                    notificationEndHour     = prefs.notificationEndHour,
+                    notificationEndMinute   = prefs.notificationEndMinute,
+                    notificationFrequency   = prefs.notificationFrequency,
+                    widgetSize              = prefs.widgetSize,
+                    widgetUpdateTimesPerDay = prefs.widgetUpdateTimesPerDay,
+                    isLoading               = false
                 )
             }.collect { _uiState.value = it }
         }
     }
 
+    // ── Categories ────────────────────────────────────────────────────────────
     fun onCategoryToggled(categoryId: String) {
         viewModelScope.launch {
             val newIds = _uiState.value.selectedCategoryIds.toggle(categoryId)
             updatePreferences.setCategories(newIds)
-            rescheduleIfEnabled(_uiState.value.copy(selectedCategoryIds = newIds))
+            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedCategoryIds = newIds))
         }
     }
 
     fun onSelectAllCategories() {
         viewModelScope.launch {
             updatePreferences.setCategories(emptySet())
-            rescheduleIfEnabled(_uiState.value.copy(selectedCategoryIds = emptySet()))
+            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedCategoryIds = emptySet()))
         }
     }
 
-    /** Llamado desde la pantalla tras confirmar el permiso POST_NOTIFICATIONS */
+    // ── Notifications ─────────────────────────────────────────────────────────
     fun onNotificationsEnabled() {
         viewModelScope.launch {
             updatePreferences.setNotificationsEnabled(true)
-            rescheduleIfEnabled(_uiState.value.copy(notificationsEnabled = true))
+            rescheduleNotificationIfEnabled(_uiState.value.copy(notificationsEnabled = true))
         }
     }
 
@@ -76,11 +81,19 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun onTimeChanged(hour: Int, minute: Int) {
+    fun onTimeRangeChanged(
+        startHour: Int, startMinute: Int,
+        endHour: Int, endMinute: Int
+    ) {
         viewModelScope.launch {
-            updatePreferences.setNotificationTime(hour, minute)
-            rescheduleIfEnabled(
-                _uiState.value.copy(notificationHour = hour, notificationMinute = minute)
+            updatePreferences.setNotificationTimeRange(startHour, startMinute, endHour, endMinute)
+            rescheduleNotificationIfEnabled(
+                _uiState.value.copy(
+                    notificationStartHour   = startHour,
+                    notificationStartMinute = startMinute,
+                    notificationEndHour     = endHour,
+                    notificationEndMinute   = endMinute
+                )
             )
         }
     }
@@ -88,7 +101,7 @@ class SettingsViewModel @Inject constructor(
     fun onFrequencyChanged(frequency: NotificationFrequency) {
         viewModelScope.launch {
             updatePreferences.setFrequency(frequency)
-            rescheduleIfEnabled(_uiState.value.copy(notificationFrequency = frequency))
+            rescheduleNotificationIfEnabled(_uiState.value.copy(notificationFrequency = frequency))
         }
     }
 
@@ -96,10 +109,25 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(permissionDeniedPermanently = true) }
     }
 
-    private fun rescheduleIfEnabled(state: SettingsUiState) {
-        if (state.notificationsEnabled) {
-            notificationScheduler.schedule(state.toUserPreferences())
+    // ── Widget ────────────────────────────────────────────────────────────────
+    fun onWidgetSizeChanged(size: WidgetSize) {
+        viewModelScope.launch {
+            updatePreferences.setWidgetSize(size)
+            // Apply new size to widget instances immediately
+            widgetScheduler.triggerImmediateUpdate()
         }
+    }
+
+    fun onWidgetUpdateTimesChanged(times: Int) {
+        viewModelScope.launch {
+            updatePreferences.setWidgetUpdateTimesPerDay(times)
+            widgetScheduler.schedule(times)
+        }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    private fun rescheduleNotificationIfEnabled(state: SettingsUiState) {
+        if (state.notificationsEnabled) notificationScheduler.schedule(state.toUserPreferences())
     }
 
     private fun Set<String>.toggle(id: String): Set<String> =

@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.domain.model.Quote
@@ -15,9 +16,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val getAllQuotes: GetAllQuotesUseCase,
     private val toggleFavorite: ToggleFavoriteUseCase
 ) : ViewModel() {
+
+    // Populated when launched from the widget (navigation arg "quoteId")
+    private val widgetQuoteId: String? = savedStateHandle["quoteId"]
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -30,7 +35,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 getAllQuotes().collect { quotes ->
-                    _uiState.update { it.copy(quotes = quotes, isLoading = false, error = null) }
+                    val scrollTo = if (widgetQuoteId != null && _uiState.value.scrollToPage == null) {
+                        quotes.indexOfFirst { it.id == widgetQuoteId }.takeIf { it >= 0 }
+                    } else null
+                    _uiState.update {
+                        it.copy(quotes = quotes, isLoading = false, error = null,
+                            scrollToPage = scrollTo ?: it.scrollToPage)
+                    }
                 }
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, error = error.message) }
@@ -40,5 +51,10 @@ class HomeViewModel @Inject constructor(
 
     fun onToggleFavorite(quote: Quote) {
         viewModelScope.launch { toggleFavorite(quote) }
+    }
+
+    /** Consumed by the UI after scrolling — prevents repeated scroll */
+    fun onScrollToPageConsumed() {
+        _uiState.update { it.copy(scrollToPage = null) }
     }
 }

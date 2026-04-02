@@ -5,5 +5,6 @@ import com.gondroid.quoteanime.domain.model.Quote
 data class HomeUiState(
     val quotes: List<Quote> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val scrollToPage: Int? = null   // set once when widget deep-link arrives
 )

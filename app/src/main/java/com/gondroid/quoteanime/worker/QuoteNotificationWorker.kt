@@ -10,6 +10,7 @@ import com.gondroid.quoteanime.notification.NotificationHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
+import java.util.Calendar
 
 @HiltWorker
 class QuoteNotificationWorker @AssistedInject constructor(
@@ -23,13 +24,22 @@ class QuoteNotificationWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return runCatching {
             val preferences = getUserPreferences().first()
+
+            // Check whether the current time is within the notification window
+            val cal = Calendar.getInstance()
+            val nowMinutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
+            val startMinutes = preferences.notificationStartHour * 60 + preferences.notificationStartMinute
+            val endMinutes   = preferences.notificationEndHour   * 60 + preferences.notificationEndMinute
+            if (nowMinutes < startMinutes || nowMinutes > endMinutes) {
+                return Result.success() // Outside allowed window — skip silently
+            }
+
             val quote = getRandomQuote(preferences.selectedCategoryIds)
-                ?: return Result.retry()  // Sin frases disponibles, reintentar más tarde
+                ?: return Result.retry()
 
             notificationHelper.showQuoteNotification(quote)
             Result.success()
         }.getOrElse {
-            // Error de red u otro fallo transitorio → WorkManager reintentará
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
     }

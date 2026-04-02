@@ -12,11 +12,13 @@ import com.gondroid.quoteanime.presentation.home.HomeScreen
 import com.gondroid.quoteanime.presentation.settings.SettingsScreen
 
 sealed class Screen(val route: String) {
-    data object Home : Screen("home")
+    data object Home : Screen("home") {
+        const val ARG_QUOTE_ID = "quoteId"
+        val routeWithArg = "home?$ARG_QUOTE_ID={$ARG_QUOTE_ID}"
+        fun createRoute(quoteId: String?) =
+            if (quoteId != null) "home?$ARG_QUOTE_ID=$quoteId" else "home"
+    }
     data object Settings : Screen("settings")
-
-    // Soporta navegación opcional con categoryId preseleccionado
-    // Uso: Screen.Catalog.createRoute("cat_id") o Screen.Catalog.createRoute(null) → Favoritos
     data object Catalog : Screen("catalog") {
         const val ARG = "categoryId"
         val routeWithArg = "catalog?$ARG={$ARG}"
@@ -27,13 +29,23 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    startQuoteId: String? = null
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Home.createRoute(startQuoteId)
     ) {
-        composable(Screen.Home.route) {
+        composable(
+            route = Screen.Home.routeWithArg,
+            arguments = listOf(
+                navArgument(Screen.Home.ARG_QUOTE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) {
             HomeScreen(
                 onNavigateToCatalog = { categoryId ->
                     navController.navigate(Screen.Catalog.createRoute(categoryId))
