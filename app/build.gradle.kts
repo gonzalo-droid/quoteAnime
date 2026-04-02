@@ -88,6 +88,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
 
+    // AdMob
+    implementation(libs.google.admob)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -55,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.presentation.components.BannerAd
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.HeartRed
 import com.gondroid.quoteanime.ui.theme.OutlineColor
@@ -178,16 +179,21 @@ private fun HomeContent(
                 }
 
 
-                BottomActions(
-                    quote = currentQuote,
-                    onToggleFavorite = { onToggleFavorite(currentQuote) },
-                    onShare = { onShare(currentQuote) },
-                    onNavigateToCatalog = { onNavigateToCatalog(null) },
+                Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(bottom = 28.dp)
-                )
+                        .navigationBarsPadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BottomActions(
+                        quote = currentQuote,
+                        onToggleFavorite = { onToggleFavorite(currentQuote) },
+                        onShare = { onShare(currentQuote) },
+                        onNavigateToCatalog = { onNavigateToCatalog(null) },
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    BannerAd(modifier = Modifier.fillMaxWidth())
+                }
             }
         }
     }
