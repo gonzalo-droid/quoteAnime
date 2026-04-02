@@ -21,6 +21,14 @@ class QuoteRepositoryImpl @Inject constructor(
     override fun getCategories(): Flow<List<Category>> =
         remoteDataSource.getCategories().map { dtos -> dtos.map { it.toDomain() } }
 
+    override fun getAllQuotes(): Flow<List<Quote>> =
+        combine(
+            remoteDataSource.getAllQuotes(),
+            favoriteQuoteDao.getFavoriteIds()
+        ) { dtos, favoriteIds ->
+            dtos.map { it.toDomain(isFavorite = it.id in favoriteIds) }
+        }
+
     override fun getQuotesByCategory(categoryId: String): Flow<List<Quote>> =
         combine(
             remoteDataSource.getQuotesByCategory(categoryId),

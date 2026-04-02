@@ -7,23 +7,23 @@ import com.gondroid.quoteanime.domain.model.Quote
 @Entity(tableName = "favorite_quotes")
 data class FavoriteQuoteEntity(
     @PrimaryKey val id: String,
-    val text: String,
+    val quote: String,
     val author: String,
-    val categoryId: String,
+    val anime: String,
     val savedAt: Long = System.currentTimeMillis()
 )
 
 fun FavoriteQuoteEntity.toDomain(): Quote = Quote(
     id = id,
-    text = text,
+    quote = quote,
     author = author,
-    categoryId = categoryId,
+    anime = anime,
     isFavorite = true
 )
 
 fun Quote.toFavoriteEntity(): FavoriteQuoteEntity = FavoriteQuoteEntity(
     id = id,
-    text = text,
+    quote = quote,
     author = author,
-    categoryId = categoryId
+    anime = anime
 )

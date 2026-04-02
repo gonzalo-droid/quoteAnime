@@ -42,7 +42,7 @@ class UpdateQuoteWidgetWorker @AssistedInject constructor(
                 ) { prefs ->
                     prefs.toMutablePreferences().apply {
                         if (quote != null) {
-                            this[QuoteWidgetState.QUOTE_TEXT] = quote.text
+                            this[QuoteWidgetState.QUOTE_TEXT] = quote.quote
                             this[QuoteWidgetState.QUOTE_AUTHOR] = quote.author
                             this[QuoteWidgetState.IS_LOADING] = false
                             this[QuoteWidgetState.HAS_ERROR] = false

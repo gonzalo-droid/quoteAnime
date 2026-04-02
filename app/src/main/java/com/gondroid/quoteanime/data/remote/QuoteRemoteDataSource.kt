@@ -2,9 +2,12 @@ package com.gondroid.quoteanime.data.remote
 
 import com.gondroid.quoteanime.data.remote.dto.CategoryDto
 import com.gondroid.quoteanime.data.remote.dto.QuoteDto
-import com.gondroid.quoteanime.data.remote.dto.toCategoryDto
+import com.gondroid.quoteanime.data.remote.dto.toDomain
 import com.gondroid.quoteanime.data.remote.dto.toQuoteDto
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -12,50 +15,66 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class QuoteRemoteDataSource @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val database: FirebaseDatabase
 ) {
+    private val quotesRef = database.getReference("quotes")
 
     fun getCategories(): Flow<List<CategoryDto>> = callbackFlow {
-        val listener = firestore.collection("categories")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val animeSet = mutableSetOf<String>()
+                for (child in snapshot.children) {
+                    child.toQuoteDto()?.anime?.let { animeSet.add(it) }
                 }
-                val categories = snapshot?.documents
-                    ?.mapNotNull { it.toCategoryDto() }
-                    ?: emptyList()
+                val categories = animeSet.sorted().map { CategoryDto(id = it, name = it) }
                 trySend(categories)
             }
-        awaitClose { listener.remove() }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        quotesRef.addValueEventListener(listener)
+        awaitClose { quotesRef.removeEventListener(listener) }
+    }
+
+    fun getAllQuotes(): Flow<List<QuoteDto>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val quotes = snapshot.children.mapNotNull { it.toQuoteDto() }
+                trySend(quotes)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        quotesRef.addValueEventListener(listener)
+        awaitClose { quotesRef.removeEventListener(listener) }
     }
 
     fun getQuotesByCategory(categoryId: String): Flow<List<QuoteDto>> = callbackFlow {
-        val listener = firestore.collection("quotes")
-            .whereEqualTo("categoryId", categoryId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val quotes = snapshot?.documents
-                    ?.mapNotNull { it.toQuoteDto() }
-                    ?: emptyList()
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val quotes = snapshot.children
+                    .mapNotNull { it.toQuoteDto() }
+                    .filter { it.anime == categoryId }
                 trySend(quotes)
             }
-        awaitClose { listener.remove() }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        quotesRef.addValueEventListener(listener)
+        awaitClose { quotesRef.removeEventListener(listener) }
     }
 
-    // Usado por WorkManager y Widget para obtener una frase aleatoria sin Flow
     suspend fun getRandomQuote(categoryIds: Set<String>): QuoteDto? {
-        val query = if (categoryIds.isEmpty()) {
-            firestore.collection("quotes")
-        } else {
-            // Firestore no soporta whereIn con más de 30 valores; se asume uso razonable
-            firestore.collection("quotes")
-                .whereIn("categoryId", categoryIds.toList())
-        }
-        val snapshot = query.get().await()
-        return snapshot.documents.randomOrNull()?.toQuoteDto()
+        val snapshot = quotesRef.get().await()
+        val allQuotes = snapshot.children.mapNotNull { it.toQuoteDto() }
+        val filtered = if (categoryIds.isEmpty()) allQuotes
+                       else allQuotes.filter { it.anime in categoryIds }
+        return filtered.randomOrNull()
     }
 }

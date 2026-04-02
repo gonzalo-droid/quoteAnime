@@ -7,7 +7,7 @@ import com.gondroid.quoteanime.data.local.db.entity.FavoriteQuoteEntity
 
 @Database(
     entities = [FavoriteQuoteEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

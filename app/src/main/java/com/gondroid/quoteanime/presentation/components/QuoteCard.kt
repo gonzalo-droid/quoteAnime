@@ -46,7 +46,7 @@ fun QuoteCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "\u201C${quote.text}\u201D",
+                    text = "\u201C${quote.quote}\u201D",
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = FontStyle.Italic,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

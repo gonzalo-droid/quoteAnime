@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface QuoteRepository {
     fun getCategories(): Flow<List<Category>>
+    fun getAllQuotes(): Flow<List<Quote>>
     fun getQuotesByCategory(categoryId: String): Flow<List<Quote>>
     fun getFavorites(): Flow<List<Quote>>
     fun isFavorite(quoteId: String): Flow<Boolean>

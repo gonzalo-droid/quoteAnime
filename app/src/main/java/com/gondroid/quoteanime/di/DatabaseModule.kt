@@ -22,7 +22,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "quote_anime_db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
     @Provides
