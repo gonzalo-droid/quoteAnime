@@ -1,6 +1,10 @@
 package com.gondroid.quoteanime.worker
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -32,6 +36,13 @@ class QuoteNotificationWorker @AssistedInject constructor(
             val endMinutes   = preferences.notificationEndHour   * 60 + preferences.notificationEndMinute
             if (nowMinutes < startMinutes || nowMinutes > endMinutes) {
                 return Result.success() // Outside allowed window — skip silently
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val granted = ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+                if (!granted) return Result.failure()
             }
 
             val quote = getRandomQuote(preferences.selectedCategoryIds)

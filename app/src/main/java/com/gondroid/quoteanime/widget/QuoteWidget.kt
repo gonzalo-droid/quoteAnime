@@ -131,7 +131,6 @@ class QuoteWidget : GlanceAppWidget() {
                 style = TextStyle(color = ColorTextSecondary, fontSize = 12.sp)
             )
             Spacer(GlanceModifier.height(8.dp))
-            RefreshButton()
         }
     }
 
@@ -152,11 +151,6 @@ class QuoteWidget : GlanceAppWidget() {
                 maxLines = 3,
                 modifier = GlanceModifier.fillMaxWidth()
             )
-            Spacer(GlanceModifier.height(8.dp))
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End
-            ) { RefreshButton() }
         }
     }
 
@@ -188,11 +182,6 @@ class QuoteWidget : GlanceAppWidget() {
                     )
                 )
             }
-            Spacer(GlanceModifier.height(10.dp))
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End
-            ) { RefreshButton() }
         }
     }
 
@@ -241,22 +230,6 @@ class QuoteWidget : GlanceAppWidget() {
                     )
                 )
             }
-            Spacer(GlanceModifier.height(10.dp))
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End
-            ) { RefreshButton() }
         }
-    }
-
-    @Composable
-    private fun RefreshButton() {
-        Image(
-            provider = ImageProvider(R.drawable.ic_refresh),
-            contentDescription = "Actualizar",
-            modifier = GlanceModifier
-                .size(22.dp)
-                .clickable(actionRunCallback<RefreshQuoteAction>())
-        )
     }
 }

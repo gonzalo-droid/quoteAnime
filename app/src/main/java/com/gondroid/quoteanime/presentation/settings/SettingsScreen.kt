@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -168,8 +170,35 @@ fun SettingsScreen(
                     )
                 }
 
+                item { SectionDivider() }
+
+                item {
+                    SectionHeader("Debug")
+                    TestNotificationButton(onClick = viewModel::onTestNotification)
+                }
+
                 item { Spacer(Modifier.height(32.dp)) }
             }
+        }
+    }
+}
+
+// ── Debug ─────────────────────────────────────────────────────────────────────
+@Composable
+private fun TestNotificationButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text("Probar notificación ahora")
         }
     }
 }
