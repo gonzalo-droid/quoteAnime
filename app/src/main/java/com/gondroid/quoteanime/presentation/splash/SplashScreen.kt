@@ -26,11 +26,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.ui.theme.AccentPurple
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.gondroid.quoteanime.ui.theme.TextPrimary
 import com.gondroid.quoteanime.ui.theme.TextSecondary
 
@@ -46,9 +48,9 @@ fun SplashScreen(
 
     LaunchedEffect(destination) {
         when (destination) {
-            SplashDestination.Home       -> onNavigateToHome()
+            SplashDestination.Home -> onNavigateToHome()
             SplashDestination.Onboarding -> onNavigateToOnboarding()
-            null                         -> Unit
+            null -> Unit
         }
     }
 
@@ -129,5 +131,13 @@ private fun SplashContent() {
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSplash(){
+    QuoteAnimeTheme {
+        SplashContent()
     }
 }

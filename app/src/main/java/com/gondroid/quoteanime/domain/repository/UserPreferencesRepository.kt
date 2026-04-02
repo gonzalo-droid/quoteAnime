@@ -16,4 +16,6 @@ interface UserPreferencesRepository {
     suspend fun updateNotificationFrequency(frequency: NotificationFrequency)
     suspend fun updateWidgetSize(size: WidgetSize)
     suspend fun updateWidgetUpdateTimesPerDay(times: Int)
+    fun isOnboardingCompleted(): Flow<Boolean>
+    suspend fun setOnboardingCompleted()
 }

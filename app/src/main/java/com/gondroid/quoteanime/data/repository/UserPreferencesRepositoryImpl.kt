@@ -33,4 +33,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun updateWidgetUpdateTimesPerDay(times: Int) =
         dataStore.updateWidgetUpdateTimesPerDay(times)
+
+    override fun isOnboardingCompleted(): Flow<Boolean> = dataStore.isOnboardingCompleted
+
+    override suspend fun setOnboardingCompleted() = dataStore.setOnboardingCompleted()
 }

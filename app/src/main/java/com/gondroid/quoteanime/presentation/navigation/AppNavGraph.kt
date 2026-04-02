@@ -9,9 +9,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gondroid.quoteanime.presentation.catalog.CatalogScreen
 import com.gondroid.quoteanime.presentation.home.HomeScreen
+import com.gondroid.quoteanime.presentation.onboarding.OnboardingScreen
 import com.gondroid.quoteanime.presentation.settings.SettingsScreen
+import com.gondroid.quoteanime.presentation.splash.SplashScreen
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
+    data object Onboarding : Screen("onboarding")
     data object Home : Screen("home") {
         const val ARG_QUOTE_ID = "quoteId"
         val routeWithArg = "home?$ARG_QUOTE_ID={$ARG_QUOTE_ID}"
@@ -32,10 +36,37 @@ fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
     startQuoteId: String? = null
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Home.createRoute(startQuoteId)
-    ) {
+    // If app was opened via widget tap, skip splash/onboarding and go directly to Home
+    val start = if (startQuoteId != null) Screen.Home.createRoute(startQuoteId)
+                else Screen.Splash.route
+
+    NavHost(navController = navController, startDestination = start) {
+
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToOnboarding = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onFinished = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(
             route = Screen.Home.routeWithArg,
             arguments = listOf(
