@@ -91,6 +91,9 @@ dependencies {
     // AdMob
     implementation(libs.google.admob)
 
+    // SplashScreen
+    implementation(libs.core.splashscreen)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

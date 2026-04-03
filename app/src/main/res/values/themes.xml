@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.QuoteAnime" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Base app theme: dark window background elimina el flash blanco -->
+    <style name="Theme.QuoteAnime" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+    </style>
+
+    <!-- Splash screen theme (core-splashscreen API) -->
+    <style name="Theme.QuoteAnime.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/bg_dark</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_app_logo_round</item>
+        <item name="postSplashScreenTheme">@style/Theme.QuoteAnime</item>
+    </style>
+
 </resources>

@@ -1,7 +1,9 @@
 package com.gondroid.quoteanime.presentation.onboarding
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.AccentPurpleDim
 import com.gondroid.quoteanime.ui.theme.TextPrimary
@@ -46,26 +51,38 @@ import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
-    val number: String,
     val quote: String,
-    val gradient: List<Color>
+    @DrawableRes val imageRes: Int,
+    val overlayGradient: List<Color>
 )
 
 private val pages = listOf(
     OnboardingPage(
-        number = "01",
-        quote = "sabemos que no son solo historias, son hechos que marcaron nuestra vida",
-        gradient = listOf(Color(0xFF0C0C1E), Color(0xFF1A0E2E), Color(0xFF0C0C1E))
+        quote = "No me rindo. \nNunca me rendiré. \nEse es mi camino ninja.",
+        imageRes = R.drawable.onboarding_01,
+        overlayGradient = listOf(
+            Color(0xFF0C0C1E).copy(alpha = 0.55f),
+            Color(0xFF1A0E2E).copy(alpha = 0.75f),
+            Color(0xFF0C0C1E).copy(alpha = 0.95f)
+        )
     ),
     OnboardingPage(
-        number = "02",
-        quote = "hay una historia que nos lleva a cada momento de nuestra vida",
-        gradient = listOf(Color(0xFF0A1020), Color(0xFF0E1E3A), Color(0xFF0A1020))
+        quote = "Un hombre que abandona sus sueños no es más que un cadáver.",
+        imageRes = R.drawable.onboarding_02,
+        overlayGradient = listOf(
+            Color(0xFF0A1020).copy(alpha = 0.55f),
+            Color(0xFF0E1E3A).copy(alpha = 0.75f),
+            Color(0xFF0A1020).copy(alpha = 0.95f)
+        )
     ),
     OnboardingPage(
-        number = "03",
-        quote = "los protagonistas crecieron con nosotros y aprendimos a nunca rendirnos",
-        gradient = listOf(Color(0xFF12080E), Color(0xFF260A20), Color(0xFF12080E))
+        quote = "No importa cuánto poder tengas. Si lo usas para lastimar a otros, no eres mejor que ellos.",
+        imageRes = R.drawable.onboarding_03,
+        overlayGradient = listOf(
+            Color(0xFF12080E).copy(alpha = 0.55f),
+            Color(0xFF260A20).copy(alpha = 0.75f),
+            Color(0xFF12080E).copy(alpha = 0.95f)
+        )
     )
 )
 
@@ -106,7 +123,6 @@ fun OnboardingScreen(
             }
         }
 
-        // Bottom bar: dots + button
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -123,13 +139,8 @@ fun OnboardingScreen(
 
             Button(
                 onClick = {
-                    if (isLastPage) {
-                        finish()
-                    } else {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    }
+                    if (isLastPage) finish()
+                    else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -153,21 +164,24 @@ fun OnboardingScreen(
 
 @Composable
 private fun OnboardingPage(page: OnboardingPage) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(page.gradient))
-    ) {
-        // Large decorative number in background
-        Text(
-            text = page.number,
-            fontSize = 220.sp,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold,
-            color = AccentPurple.copy(alpha = 0.05f),
-            modifier = Modifier.align(Alignment.Center)
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // Background image — full screen
+        Image(
+            painter = painterResource(id = page.imageRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
 
+        // Gradient overlay — oscurece la imagen y resalta el texto
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(page.overlayGradient))
+        )
+
+        // Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -177,22 +191,13 @@ private fun OnboardingPage(page: OnboardingPage) {
         ) {
             Spacer(Modifier.weight(1f))
 
-            // Page number label
-            Text(
-                text = page.number,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = AccentPurple.copy(alpha = 0.7f),
-                letterSpacing = 3.sp
-            )
-
             Spacer(Modifier.height(32.dp))
 
             // Opening quote mark
             Text(
                 text = "\u201C",
                 fontSize = 64.sp,
-                color = AccentPurple.copy(alpha = 0.3f),
+                color = AccentPurple.copy(alpha = 0.5f),
                 fontFamily = FontFamily.Serif,
                 lineHeight = 32.sp,
                 modifier = Modifier.fillMaxWidth(),
