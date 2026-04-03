@@ -3,14 +3,17 @@ package com.gondroid.quoteanime.widget
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
@@ -20,13 +23,11 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
-import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.layout.wrapContentHeight
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -37,7 +38,6 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gondroid.quoteanime.MainActivity
 import com.gondroid.quoteanime.R
-import com.gondroid.quoteanime.domain.model.WidgetSize
 
 // ── Colors (hardcoded for Glance — no MaterialTheme available) ───────────────
 @SuppressLint("RestrictedApi")
@@ -47,9 +47,17 @@ private val ColorTextSecondary = ColorProvider(androidx.compose.ui.graphics.Colo
 @SuppressLint("RestrictedApi")
 private val ColorAccent        = ColorProvider(androidx.compose.ui.graphics.Color(0xFFA78BFA))
 
+// ── Size breakpoints ──────────────────────────────────────────────────────────
+private val SIZE_SMALL  = DpSize(110.dp,  80.dp)
+private val SIZE_MEDIUM = DpSize(180.dp, 120.dp)
+private val SIZE_LARGE  = DpSize(250.dp, 180.dp)
+
 class QuoteWidget : GlanceAppWidget() {
 
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
+
+    // Responsive: Glance renders the right layout based on the actual physical dimensions
+    override val sizeMode = SizeMode.Responsive(setOf(SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE))
 
     override suspend fun provideGlance(
         context: android.content.Context,
@@ -60,16 +68,16 @@ class QuoteWidget : GlanceAppWidget() {
 
     @Composable
     fun Content() {
-        val prefs      = currentState<androidx.datastore.preferences.core.Preferences>()
-        val quoteText  = prefs[QuoteWidgetState.QUOTE_TEXT]
+        val prefs       = currentState<androidx.datastore.preferences.core.Preferences>()
+        val quoteText   = prefs[QuoteWidgetState.QUOTE_TEXT]
         val quoteAuthor = prefs[QuoteWidgetState.QUOTE_AUTHOR]
-        val quoteId    = prefs[QuoteWidgetState.QUOTE_ID] ?: ""
-        val quoteAnime = prefs[QuoteWidgetState.QUOTE_ANIME] ?: ""
-        val isLoading  = prefs[QuoteWidgetState.IS_LOADING] ?: true
-        val hasError   = prefs[QuoteWidgetState.HAS_ERROR] ?: false
-        val widgetSize = prefs[QuoteWidgetState.WIDGET_SIZE]
-            ?.let { runCatching { WidgetSize.valueOf(it) }.getOrNull() }
-            ?: WidgetSize.MEDIUM
+        val quoteId     = prefs[QuoteWidgetState.QUOTE_ID]     ?: ""
+        val quoteAnime  = prefs[QuoteWidgetState.QUOTE_ANIME]  ?: ""
+        val isLoading   = prefs[QuoteWidgetState.IS_LOADING]   ?: true
+        val hasError    = prefs[QuoteWidgetState.HAS_ERROR]    ?: false
+
+        // Physical size reported by the launcher
+        val size = LocalSize.current
 
         val context = LocalContext.current
         val openIntent = Intent(context, MainActivity::class.java).apply {
@@ -79,6 +87,9 @@ class QuoteWidget : GlanceAppWidget() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
+        val isSmall  = size.width < SIZE_MEDIUM.width
+        val isLarge  = size.width >= SIZE_LARGE.width && size.height >= SIZE_LARGE.height
+
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
@@ -86,26 +97,24 @@ class QuoteWidget : GlanceAppWidget() {
                 .cornerRadius(20.dp)
                 .clickable(actionStartActivity(openIntent))
                 .padding(
-                    horizontal = if (widgetSize == WidgetSize.SMALL) 12.dp else 16.dp,
-                    vertical   = if (widgetSize == WidgetSize.SMALL) 10.dp else 14.dp
+                    horizontal = if (isSmall) 12.dp else 16.dp,
+                    vertical   = if (isSmall) 10.dp else 14.dp
                 ),
             contentAlignment = Alignment.Center
         ) {
             when {
                 isLoading -> LoadingContent()
                 hasError  -> ErrorContent()
-                else -> when (widgetSize) {
-                    WidgetSize.SMALL  -> SmallQuoteContent(text = quoteText ?: "")
-                    WidgetSize.MEDIUM -> MediumQuoteContent(
-                        text   = quoteText  ?: "",
-                        author = quoteAuthor ?: ""
-                    )
-                    WidgetSize.LARGE  -> LargeQuoteContent(
-                        text   = quoteText  ?: "",
-                        author = quoteAuthor ?: "",
-                        anime  = quoteAnime
-                    )
-                }
+                isLarge   -> LargeQuoteContent(
+                    text   = quoteText  ?: "",
+                    author = quoteAuthor ?: "",
+                    anime  = quoteAnime
+                )
+                isSmall   -> SmallQuoteContent(text = quoteText ?: "")
+                else      -> MediumQuoteContent(
+                    text   = quoteText  ?: "",
+                    author = quoteAuthor ?: ""
+                )
             }
         }
     }
@@ -134,7 +143,7 @@ class QuoteWidget : GlanceAppWidget() {
         }
     }
 
-    // ── SMALL: solo la frase, tipografía mediana ─────────────────────────────
+    // ── SMALL (< 180dp ancho): solo la frase ─────────────────────────────────
     @Composable
     private fun SmallQuoteContent(text: String) {
         Column(
@@ -154,7 +163,7 @@ class QuoteWidget : GlanceAppWidget() {
         }
     }
 
-    // ── MEDIUM: frase + autor ────────────────────────────────────────────────
+    // ── MEDIUM (180–249dp ancho): frase + autor ───────────────────────────────
     @Composable
     private fun MediumQuoteContent(text: String, author: String) {
         Column(
@@ -185,14 +194,13 @@ class QuoteWidget : GlanceAppWidget() {
         }
     }
 
-    // ── LARGE: frase + autor + anime ─────────────────────────────────────────
+    // ── LARGE (≥ 250dp ancho y ≥ 180dp alto): frase + autor + anime ──────────
     @Composable
     private fun LargeQuoteContent(text: String, author: String, anime: String) {
         Column(
             modifier = GlanceModifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Decorative mark
             Text(
                 text  = "\u201C",
                 style = TextStyle(color = ColorAccent, fontSize = 36.sp),
@@ -224,10 +232,7 @@ class QuoteWidget : GlanceAppWidget() {
                 Spacer(GlanceModifier.height(4.dp))
                 Text(
                     text  = anime.uppercase(),
-                    style = TextStyle(
-                        color    = ColorAccent,
-                        fontSize = 9.sp
-                    )
+                    style = TextStyle(color = ColorAccent, fontSize = 9.sp)
                 )
             }
         }

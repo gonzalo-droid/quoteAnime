@@ -67,7 +67,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.domain.model.Category
 import com.gondroid.quoteanime.domain.model.NotificationFrequency
-import com.gondroid.quoteanime.domain.model.WidgetSize
 import kotlinx.coroutines.launch
 
 @Composable
@@ -163,9 +162,7 @@ fun SettingsScreen(
                 item {
                     SectionHeader("Widget")
                     WidgetSection(
-                        widgetSize = uiState.widgetSize,
                         widgetUpdateTimesPerDay = uiState.widgetUpdateTimesPerDay,
-                        onSizeChanged = viewModel::onWidgetSizeChanged,
                         onUpdateTimesChanged = viewModel::onWidgetUpdateTimesChanged
                     )
                 }
@@ -464,12 +461,9 @@ private fun TimeRangeChip(
 }
 
 // ── Widget ────────────────────────────────────────────────────────────────────
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WidgetSection(
-    widgetSize: WidgetSize,
     widgetUpdateTimesPerDay: Int,
-    onSizeChanged: (WidgetSize) -> Unit,
     onUpdateTimesChanged: (Int) -> Unit
 ) {
     ListItem(
@@ -477,26 +471,11 @@ private fun WidgetSection(
             Text("Tamaño del widget", color = MaterialTheme.colorScheme.onBackground)
         },
         supportingContent = {
-            Column {
-                Spacer(Modifier.height(8.dp))
-
-                val sizes = WidgetSize.entries
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    sizes.forEachIndexed { index, size ->
-                        SegmentedButton(
-                            selected = widgetSize == size,
-                            onClick = { onSizeChanged(size) },
-                            shape = SegmentedButtonDefaults.itemShape(index, sizes.size),
-                            label = {
-                                Text(
-                                    size.label,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+            Text(
+                "Mantén presionado el widget en tu pantalla de inicio y arrastra las esquinas para ajustar el tamaño. El contenido se adapta automáticamente.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
         },
         colors = listItemColors
     )

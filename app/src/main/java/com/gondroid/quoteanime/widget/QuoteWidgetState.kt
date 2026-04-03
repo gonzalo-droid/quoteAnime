@@ -8,7 +8,6 @@ object QuoteWidgetState {
     val QUOTE_AUTHOR = stringPreferencesKey("widget_quote_author")
     val QUOTE_ID     = stringPreferencesKey("widget_quote_id")
     val QUOTE_ANIME  = stringPreferencesKey("widget_quote_anime")
-    val WIDGET_SIZE  = stringPreferencesKey("widget_size")
     val IS_LOADING   = booleanPreferencesKey("widget_is_loading")
     val HAS_ERROR    = booleanPreferencesKey("widget_has_error")
 }
