@@ -1,6 +1,5 @@
 package com.gondroid.quoteanime.domain.usecase
 
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
 import javax.inject.Inject
@@ -19,8 +18,8 @@ class UpdateUserPreferencesUseCase @Inject constructor(
         endHour: Int, endMinute: Int
     ) = repository.updateNotificationTimeRange(startHour, startMinute, endHour, endMinute)
 
-    suspend fun setFrequency(frequency: NotificationFrequency) =
-        repository.updateNotificationFrequency(frequency)
+    suspend fun setFrequency(timesPerDay: Int) =
+        repository.updateNotificationFrequency(timesPerDay)
 
     suspend fun setWidgetSize(size: WidgetSize) =
         repository.updateWidgetSize(size)

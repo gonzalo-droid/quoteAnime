@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
@@ -105,10 +104,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun onFrequencyChanged(frequency: NotificationFrequency) {
+    fun onFrequencyChanged(timesPerDay: Int) {
         viewModelScope.launch {
-            updatePreferences.setFrequency(frequency)
-            rescheduleNotificationIfEnabled(_uiState.value.copy(notificationFrequency = frequency))
+            updatePreferences.setFrequency(timesPerDay)
+            rescheduleNotificationIfEnabled(_uiState.value.copy(notificationFrequency = timesPerDay))
         }
     }
 

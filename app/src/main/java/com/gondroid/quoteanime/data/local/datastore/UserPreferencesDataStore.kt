@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ class UserPreferencesDataStore @Inject constructor(
         val NOTIFICATION_START_MINUTE   = intPreferencesKey("notification_start_minute")
         val NOTIFICATION_END_HOUR       = intPreferencesKey("notification_end_hour")
         val NOTIFICATION_END_MINUTE     = intPreferencesKey("notification_end_minute")
-        val NOTIFICATION_FREQUENCY      = stringPreferencesKey("notification_frequency")
+        val NOTIFICATION_FREQUENCY      = intPreferencesKey("notification_frequency")
         val WIDGET_SIZE                 = stringPreferencesKey("widget_size")
         val WIDGET_UPDATE_TIMES_PER_DAY = intPreferencesKey("widget_update_times_per_day")
         val ONBOARDING_COMPLETED        = booleanPreferencesKey("onboarding_completed")
@@ -38,9 +37,7 @@ class UserPreferencesDataStore @Inject constructor(
             notificationStartMinute = prefs[Keys.NOTIFICATION_START_MINUTE] ?: 0,
             notificationEndHour     = prefs[Keys.NOTIFICATION_END_HOUR] ?: 22,
             notificationEndMinute   = prefs[Keys.NOTIFICATION_END_MINUTE] ?: 0,
-            notificationFrequency   = prefs[Keys.NOTIFICATION_FREQUENCY]
-                ?.let { runCatching { NotificationFrequency.valueOf(it) }.getOrNull() }
-                ?: NotificationFrequency.DAILY,
+            notificationFrequency   = (prefs[Keys.NOTIFICATION_FREQUENCY] ?: 1).coerceIn(1, 10),
             widgetSize              = prefs[Keys.WIDGET_SIZE]
                 ?.let { runCatching { WidgetSize.valueOf(it) }.getOrNull() }
                 ?: WidgetSize.MEDIUM,
@@ -68,8 +65,8 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
-    suspend fun updateNotificationFrequency(frequency: NotificationFrequency) {
-        dataStore.edit { it[Keys.NOTIFICATION_FREQUENCY] = frequency.name }
+    suspend fun updateNotificationFrequency(timesPerDay: Int) {
+        dataStore.edit { it[Keys.NOTIFICATION_FREQUENCY] = timesPerDay.coerceIn(1, 10) }
     }
 
     suspend fun updateWidgetSize(size: WidgetSize) {

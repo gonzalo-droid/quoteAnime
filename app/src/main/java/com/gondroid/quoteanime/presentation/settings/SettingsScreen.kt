@@ -66,7 +66,6 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.domain.model.Category
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import kotlinx.coroutines.launch
 
 @Composable
@@ -169,10 +168,12 @@ fun SettingsScreen(
 
                 item { SectionDivider() }
 
+
+                /* Debug section
                 item {
                     SectionHeader("Debug")
                     TestNotificationButton(onClick = viewModel::onTestNotification)
-                }
+                }*/
 
                 item { Spacer(Modifier.height(32.dp)) }
             }
@@ -300,7 +301,7 @@ private fun NotificationSection(
     uiState: SettingsUiState,
     onToggle: (Boolean) -> Unit,
     onTimeRangeChanged: (startH: Int, startM: Int, endH: Int, endM: Int) -> Unit,
-    onFrequencyChanged: (NotificationFrequency) -> Unit
+    onFrequencyChanged: (Int) -> Unit
 ) {
     // which picker is open: null | "start" | "end"
     var openPicker by remember { mutableStateOf<String?>(null) }
@@ -320,8 +321,11 @@ private fun NotificationSection(
                 checked = uiState.notificationsEnabled,
                 onCheckedChange = onToggle,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.background,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary
+                    checkedThumbColor  = MaterialTheme.colorScheme.background,
+                    checkedTrackColor  = MaterialTheme.colorScheme.primary,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    uncheckedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
         },
@@ -354,10 +358,8 @@ private fun NotificationSection(
         ) {
             TimeRangeChip(
                 label = "Desde",
-                time = "%02d:%02d".format(
-                    uiState.notificationStartHour,
-                    uiState.notificationStartMinute
-                ),
+                time = formatTo12h(uiState.notificationStartHour, uiState.notificationStartMinute),
+                amPm = amPmLabel(uiState.notificationStartHour),
                 onClick = { openPicker = "start" },
                 modifier = Modifier.weight(1f)
             )
@@ -368,10 +370,8 @@ private fun NotificationSection(
             )
             TimeRangeChip(
                 label = "Hasta",
-                time = "%02d:%02d".format(
-                    uiState.notificationEndHour,
-                    uiState.notificationEndMinute
-                ),
+                time = formatTo12h(uiState.notificationEndHour, uiState.notificationEndMinute),
+                amPm = amPmLabel(uiState.notificationEndHour),
                 onClick = { openPicker = "end" },
                 modifier = Modifier.weight(1f)
             )
@@ -388,13 +388,31 @@ private fun NotificationSection(
                 Text("Frecuencia", color = MaterialTheme.colorScheme.onBackground)
             },
             supportingContent = {
-                Spacer(Modifier.height(8.dp))
+                Column {
+                    Text(
+                        "${uiState.notificationFrequency} ${if (uiState.notificationFrequency == 1) "vez" else "veces"} al día",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Slider(
+                        value = uiState.notificationFrequency.toFloat(),
+                        onValueChange = { onFrequencyChanged(it.toInt()) },
+                        valueRange = 1f..10f,
+                        steps = 8,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("1×/día", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("10×/día", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             },
             colors = listItemColors
-        )
-        FrequencySelector(
-            selected = uiState.notificationFrequency,
-            onSelected = onFrequencyChanged
         )
     }
 
@@ -436,6 +454,7 @@ private fun NotificationSection(
 private fun TimeRangeChip(
     label: String,
     time: String,
+    amPm: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -457,8 +476,25 @@ private fun TimeRangeChip(
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary
         )
+        Text(
+            text = amPm,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+        )
     }
 }
+
+private fun formatTo12h(hour: Int, minute: Int): String {
+    val h = when {
+        hour == 0 -> 12
+        hour > 12 -> hour - 12
+        else -> hour
+    }
+    return "%02d:%02d".format(h, minute)
+}
+
+private fun amPmLabel(hour: Int): String = if (hour < 12) "AM" else "PM"
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 @Composable
@@ -522,26 +558,6 @@ private fun WidgetSection(
         },
         colors = listItemColors
     )
-}
-
-// ── Frequency selector ────────────────────────────────────────────────────────
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FrequencySelector(
-    selected: NotificationFrequency,
-    onSelected: (NotificationFrequency) -> Unit
-) {
-    val options = NotificationFrequency.entries
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        options.forEachIndexed { index, frequency ->
-            SegmentedButton(
-                selected = selected == frequency,
-                onClick = { onSelected(frequency) },
-                shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                label = { Text(frequency.label, style = MaterialTheme.typography.labelSmall) }
-            )
-        }
-    }
 }
 
 // ── Time picker dialog ────────────────────────────────────────────────────────

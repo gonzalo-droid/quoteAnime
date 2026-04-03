@@ -32,8 +32,9 @@ class NotificationScheduler @Inject constructor(
             preferences.notificationStartMinute
         )
 
+        val intervalHours = (24L / preferences.notificationFrequency.coerceIn(1, 10))
         val request = PeriodicWorkRequestBuilder<QuoteNotificationWorker>(
-            preferences.notificationFrequency.intervalHours, TimeUnit.HOURS
+            intervalHours, TimeUnit.HOURS
         )
             .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
             .setConstraints(

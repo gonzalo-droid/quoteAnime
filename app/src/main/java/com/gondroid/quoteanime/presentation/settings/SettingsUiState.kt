@@ -1,7 +1,6 @@
 package com.gondroid.quoteanime.presentation.settings
 
 import com.gondroid.quoteanime.domain.model.Category
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
 
@@ -13,7 +12,7 @@ data class SettingsUiState(
     val notificationStartMinute: Int = 0,
     val notificationEndHour: Int = 22,
     val notificationEndMinute: Int = 0,
-    val notificationFrequency: NotificationFrequency = NotificationFrequency.DAILY,
+    val notificationFrequency: Int = 1,
     val widgetSize: WidgetSize = WidgetSize.MEDIUM,
     val widgetUpdateTimesPerDay: Int = 2,
     val isLoading: Boolean = true,

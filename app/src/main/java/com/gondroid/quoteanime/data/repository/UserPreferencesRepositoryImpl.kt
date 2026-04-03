@@ -1,7 +1,6 @@
 package com.gondroid.quoteanime.data.repository
 
 import com.gondroid.quoteanime.data.local.datastore.UserPreferencesDataStore
-import com.gondroid.quoteanime.domain.model.NotificationFrequency
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
@@ -25,8 +24,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         endHour: Int, endMinute: Int
     ) = dataStore.updateNotificationTimeRange(startHour, startMinute, endHour, endMinute)
 
-    override suspend fun updateNotificationFrequency(frequency: NotificationFrequency) =
-        dataStore.updateNotificationFrequency(frequency)
+    override suspend fun updateNotificationFrequency(timesPerDay: Int) =
+        dataStore.updateNotificationFrequency(timesPerDay)
 
     override suspend fun updateWidgetSize(size: WidgetSize) =
         dataStore.updateWidgetSize(size)

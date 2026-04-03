@@ -7,7 +7,7 @@ data class UserPreferences(
     val notificationStartMinute: Int = 0,
     val notificationEndHour: Int = 22,
     val notificationEndMinute: Int = 0,
-    val notificationFrequency: NotificationFrequency = NotificationFrequency.DAILY,
+    val notificationFrequency: Int = 1, // times per day, range 1–10
     val widgetSize: WidgetSize = WidgetSize.MEDIUM,
     val widgetUpdateTimesPerDay: Int = 2
 )
