@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 3: Find the Quote Anime widget -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="400dp"
+    android:viewportWidth="240"
+    android:viewportHeight="400">
+
+    <!-- Phone body -->
+    <path
+        android:pathData="M47,8 L193,8 Q215,8 215,30 L215,370 Q215,392 193,392 L47,392 Q25,392 25,370 L25,30 Q25,8 47,8 Z"
+        android:fillColor="#181A2E"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2.5" />
+
+    <!-- Screen background -->
+    <path
+        android:pathData="M38,48 L202,48 L202,338 L38,338 Z"
+        android:fillColor="#0E0D20" />
+
+    <!-- Speaker pill -->
+    <path
+        android:pathData="M108,16 Q108,13 112,13 L128,13 Q132,13 132,16 L132,22 Q132,25 128,25 L112,25 Q108,25 108,22 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- Home indicator -->
+    <path
+        android:pathData="M103,358 L137,358 Q140,358 140,361 L140,365 Q140,368 137,368 L103,368 Q100,368 100,365 L100,361 Q100,358 103,358 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- Widget picker header bar -->
+    <path
+        android:pathData="M38,48 L202,48 L202,76 L38,76 Z"
+        android:fillColor="#181A2E" />
+
+    <!-- "Widgets" title line in header -->
+    <path
+        android:pathData="M80,56 L160,56 Q162,56 162,59 L162,64 Q162,67 160,67 L80,67 Q78,67 78,64 L78,59 Q78,56 80,56 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.6" />
+
+    <!-- Separator line under header -->
+    <path
+        android:pathData="M38,76 L202,76"
+        android:strokeColor="#2D2B5A"
+        android:strokeWidth="1" />
+
+    <!-- App label above first card (small "Q" label) -->
+    <path
+        android:pathData="M52,82 L95,82 Q96,82 96,84 L96,88 Q96,90 95,90 L52,90 Q51,90 51,88 L51,84 Q51,82 52,82 Z"
+        android:fillColor="#4A4270" />
+
+    <!-- Widget card 1 (non-selected, at top) -->
+    <path
+        android:pathData="M44,94 Q44,87 51,87 L118,87 Q125,87 125,94 L125,148 Q125,155 118,155 L51,155 Q44,155 44,148 Z"
+        android:fillColor="#15132A"
+        android:strokeColor="#2D2B5A"
+        android:strokeWidth="1" />
+
+    <!-- Inside widget card 1 - generic lines -->
+    <path
+        android:pathData="M54,104 L110,104 Q111,104 111,106 L111,109 Q111,111 110,111 L54,111 Q53,111 53,109 L53,106 Q53,104 54,104 Z"
+        android:fillColor="#3D3580"
+        android:fillAlpha="0.6" />
+    <path
+        android:pathData="M54,116 L98,116 Q99,116 99,118 L99,121 Q99,123 98,123 L54,123 Q53,123 53,121 L53,118 Q53,116 54,116 Z"
+        android:fillColor="#3D3580"
+        android:fillAlpha="0.4" />
+    <path
+        android:pathData="M54,128 L105,128 Q106,128 106,130 L106,133 Q106,135 105,135 L54,135 Q53,135 53,133 L53,130 Q53,128 54,128 Z"
+        android:fillColor="#3D3580"
+        android:fillAlpha="0.4" />
+
+    <!-- "Quote Anime" label above second (highlighted) card -->
+    <path
+        android:pathData="M52,163 L115,163 Q116,163 116,165 L116,169 Q116,171 115,171 L52,171 Q51,171 51,169 L51,165 Q51,163 52,163 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.7" />
+
+    <!-- Widget card 2 - QUOTE ANIME (highlighted, selected) -->
+    <path
+        android:pathData="M44,175 Q44,168 51,168 L189,168 Q196,168 196,175 L196,265 Q196,272 189,272 L51,272 Q44,272 44,265 Z"
+        android:fillColor="#1A1832"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2" />
+
+    <!-- Inside selected card - gradient-like dark area at top -->
+    <path
+        android:pathData="M44,175 Q44,168 51,168 L189,168 Q196,168 196,175 L196,205 L44,205 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.08" />
+
+    <!-- Quote mark decoration inside card -->
+    <path
+        android:pathData="M56,183 Q56,178 61,178 L71,178 Q76,178 76,183 L76,193 Q76,198 71,198 L61,198 Q56,198 56,193 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.5" />
+
+    <!-- " mark inside the decoration -->
+    <path
+        android:pathData="M61,184 Q61,182 63,182 L64,182 Q65,182 65,184 L65,189 Q65,191 63,191 L62,191 Q61,191 61,189 Z"
+        android:fillColor="#A78BFA" />
+    <path
+        android:pathData="M67,184 Q67,182 69,182 L70,182 Q71,182 71,184 L71,189 Q71,191 69,191 L68,191 Q67,191 67,189 Z"
+        android:fillColor="#A78BFA" />
+
+    <!-- Quote text lines inside card -->
+    <path
+        android:pathData="M84,185 L185,185 Q186,185 186,187 L186,190 Q186,192 185,192 L84,192 Q83,192 83,190 L83,187 Q83,185 84,185 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.7" />
+    <path
+        android:pathData="M56,208 L185,208 Q186,208 186,211 L186,215 Q186,218 185,218 L56,218 Q55,218 55,215 L55,211 Q55,208 56,208 Z"
+        android:fillColor="#9B8DB3"
+        android:fillAlpha="0.6" />
+    <path
+        android:pathData="M56,222 L170,222 Q171,222 171,225 L171,229 Q171,232 170,232 L56,232 Q55,232 55,229 L55,225 Q55,222 56,222 Z"
+        android:fillColor="#9B8DB3"
+        android:fillAlpha="0.6" />
+    <path
+        android:pathData="M56,236 L145,236 Q146,236 146,239 L146,243 Q146,246 145,246 L56,246 Q55,246 55,243 L55,239 Q55,236 56,236 Z"
+        android:fillColor="#9B8DB3"
+        android:fillAlpha="0.4" />
+
+    <!-- Author line -->
+    <path
+        android:pathData="M56,258 L120,258 Q121,258 121,260 L121,263 Q121,265 120,265 L56,265 Q55,265 55,263 L55,260 Q55,258 56,258 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.5" />
+
+    <!-- Finger pointing at selected card -->
+    <path
+        android:pathData="M182,290 Q182,274 194,274 Q206,274 206,290 L206,314 Q206,326 194,326 Q182,326 182,314 Z"
+        android:fillColor="#F0EAFF" />
+    <path
+        android:pathData="M186,282 Q186,278 194,278 Q202,278 202,282 L202,290 L186,290 Z"
+        android:fillColor="#D4C8F5" />
+
+    <!-- Downward arrow below finger (drag hint) -->
+    <path
+        android:pathData="M194,330 L190,324 L194,326 L198,324 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.7" />
+
+</vector>

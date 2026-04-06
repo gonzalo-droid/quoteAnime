@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./gradlew assembleDebug)",
       "Bash(wait)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(./gradlew :app:compileDebugKotlin)"
     ]
   }
 }

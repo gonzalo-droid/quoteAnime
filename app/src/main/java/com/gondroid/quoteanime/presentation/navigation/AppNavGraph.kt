@@ -11,6 +11,7 @@ import com.gondroid.quoteanime.presentation.catalog.CatalogScreen
 import com.gondroid.quoteanime.presentation.home.HomeScreen
 import com.gondroid.quoteanime.presentation.onboarding.OnboardingScreen
 import com.gondroid.quoteanime.presentation.settings.SettingsScreen
+import com.gondroid.quoteanime.presentation.settings.WidgetTutorialScreen
 import com.gondroid.quoteanime.presentation.splash.SplashScreen
 
 sealed class Screen(val route: String) {
@@ -23,6 +24,7 @@ sealed class Screen(val route: String) {
             if (quoteId != null) "home?$ARG_QUOTE_ID=$quoteId" else "home"
     }
     data object Settings : Screen("settings")
+    data object WidgetTutorial : Screen("widget_tutorial")
     data object Catalog : Screen("catalog") {
         const val ARG = "categoryId"
         val routeWithArg = "catalog?$ARG={$ARG}"
@@ -99,7 +101,14 @@ fun AppNavGraph(
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onNavigateBack = { navController.popBackStack() })
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToWidgetTutorial = { navController.navigate(Screen.WidgetTutorial.route) }
+            )
+        }
+
+        composable(Screen.WidgetTutorial.route) {
+            WidgetTutorialScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

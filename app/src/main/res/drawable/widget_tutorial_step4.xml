@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 4: Widget placed on home screen -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="400dp"
+    android:viewportWidth="240"
+    android:viewportHeight="400">
+
+    <!-- Phone body -->
+    <path
+        android:pathData="M47,8 L193,8 Q215,8 215,30 L215,370 Q215,392 193,392 L47,392 Q25,392 25,370 L25,30 Q25,8 47,8 Z"
+        android:fillColor="#181A2E"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2.5" />
+
+    <!-- Screen background -->
+    <path
+        android:pathData="M38,48 L202,48 L202,338 L38,338 Z"
+        android:fillColor="#0C0C1E" />
+
+    <!-- Speaker pill -->
+    <path
+        android:pathData="M108,16 Q108,13 112,13 L128,13 Q132,13 132,16 L132,22 Q132,25 128,25 L112,25 Q108,25 108,22 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- Home indicator -->
+    <path
+        android:pathData="M103,358 L137,358 Q140,358 140,361 L140,365 Q140,368 137,368 L103,368 Q100,368 100,365 L100,361 Q100,358 103,358 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- App icons row 1 (top area, smaller) -->
+    <path
+        android:pathData="M53,58 Q53,54 57,54 L71,54 Q75,54 75,58 L75,72 Q75,76 71,76 L57,76 Q53,76 53,72 Z"
+        android:fillColor="#4A3F8A" />
+    <path
+        android:pathData="M100,58 Q100,54 104,54 L118,54 Q122,54 122,58 L122,72 Q122,76 118,76 L104,76 Q100,76 100,72 Z"
+        android:fillColor="#3D3580" />
+    <path
+        android:pathData="M147,58 Q147,54 151,54 L165,54 Q169,54 169,58 L169,72 Q169,76 165,76 L151,76 Q147,76 147,72 Z"
+        android:fillColor="#5A3A8A" />
+
+    <!-- Widget card placed on home screen - subtle glow shadow -->
+    <path
+        android:pathData="M42,92 Q42,82 52,82 L188,82 Q198,82 198,92 L198,292 Q198,302 188,302 L52,302 Q42,302 42,292 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.08" />
+
+    <!-- Widget card main body -->
+    <path
+        android:pathData="M44,90 Q44,80 54,80 L186,80 Q196,80 196,90 L196,290 Q196,300 186,300 L54,300 Q44,300 44,290 Z"
+        android:fillColor="#1A1832"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="1.8" />
+
+    <!-- Widget inner gradient tint (top portion) -->
+    <path
+        android:pathData="M44,90 Q44,80 54,80 L186,80 Q196,80 196,90 L196,140 L44,140 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.07" />
+
+    <!-- Large decorative quote mark inside widget -->
+    <path
+        android:pathData="M58,100 Q58,93 65,93 L80,93 Q87,93 87,100 L87,117 Q87,124 80,124 L65,124 Q58,124 58,117 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.4" />
+
+    <!-- Quote " marks -->
+    <path
+        android:pathData="M65,101 Q65,98 68,98 L70,98 Q72,98 72,101 L72,108 Q72,111 70,111 L68,111 Q65,111 65,108 Z"
+        android:fillColor="#A78BFA" />
+    <path
+        android:pathData="M74,101 Q74,98 77,98 L79,98 Q81,98 81,101 L81,108 Q81,111 79,111 L77,111 Q74,111 74,108 Z"
+        android:fillColor="#A78BFA" />
+
+    <!-- Quote text lines in widget -->
+    <path
+        android:pathData="M56,132 L184,132 Q185,132 185,135 L185,140 Q185,143 184,143 L56,143 Q55,143 55,140 L55,135 Q55,132 56,132 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.85" />
+    <path
+        android:pathData="M56,150 L184,150 Q185,150 185,153 L185,158 Q185,161 184,161 L56,161 Q55,161 55,158 L55,153 Q55,150 56,150 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.75" />
+    <path
+        android:pathData="M56,168 L160,168 Q161,168 161,171 L161,176 Q161,179 160,179 L56,179 Q55,179 55,176 L55,171 Q55,168 56,168 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.65" />
+    <path
+        android:pathData="M56,186 L145,186 Q146,186 146,189 L146,194 Q146,197 145,197 L56,197 Q55,197 55,194 L55,189 Q55,186 56,186 Z"
+        android:fillColor="#F0EAFF"
+        android:fillAlpha="0.5" />
+
+    <!-- Divider inside widget -->
+    <path
+        android:pathData="M56,210 L184,210"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="0.7"
+        android:strokeAlpha="0.3" />
+
+    <!-- Author line -->
+    <path
+        android:pathData="M56,220 L130,220 Q131,220 131,223 L131,227 Q131,230 130,230 L56,230 Q55,230 55,227 L55,223 Q55,220 56,220 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.6" />
+
+    <!-- Refresh button inside widget -->
+    <path
+        android:pathData="M160,274 A 14,14,0,1,0,188,274 A 14,14,0,1,0,160,274 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.2"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.5" />
+
+    <!-- Refresh icon (circular arrow shape simplified) -->
+    <path
+        android:pathData="M168,274 A 6,6,0,0,1,180,274"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M178,270 L180,274 L176,274 Z"
+        android:fillColor="#A78BFA" />
+
+    <!-- SUCCESS checkmark circle (top-right of widget) -->
+    <path
+        android:pathData="M172,72 A 14,14,0,1,0,200,72 A 14,14,0,1,0,172,72 Z"
+        android:fillColor="#2ECC71" />
+
+    <!-- Checkmark inside circle -->
+    <path
+        android:pathData="M179,72 L184,78 L193,65"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+</vector>

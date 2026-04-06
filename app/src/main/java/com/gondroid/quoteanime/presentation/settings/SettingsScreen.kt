@@ -21,8 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import com.gondroid.quoteanime.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -71,10 +73,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToWidgetTutorial: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val versionName = remember {
+        runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
+        }.getOrDefault("—")
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -162,8 +170,16 @@ fun SettingsScreen(
                     SectionHeader("Widget")
                     WidgetSection(
                         widgetUpdateTimesPerDay = uiState.widgetUpdateTimesPerDay,
-                        onUpdateTimesChanged = viewModel::onWidgetUpdateTimesChanged
+                        onUpdateTimesChanged = viewModel::onWidgetUpdateTimesChanged,
+                        onNavigateToTutorial = onNavigateToWidgetTutorial
                     )
+                }
+
+                item { SectionDivider() }
+
+                item {
+                    SectionHeader("Versión")
+                    VersionSection(versionName = versionName)
                 }
 
                 item { SectionDivider() }
@@ -500,8 +516,36 @@ private fun amPmLabel(hour: Int): String = if (hour < 12) "AM" else "PM"
 @Composable
 private fun WidgetSection(
     widgetUpdateTimesPerDay: Int,
-    onUpdateTimesChanged: (Int) -> Unit
+    onUpdateTimesChanged: (Int) -> Unit,
+    onNavigateToTutorial: () -> Unit
 ) {
+    ListItem(
+        headlineContent = {
+            Text("Cómo agregar el widget", color = MaterialTheme.colorScheme.onBackground)
+        },
+        supportingContent = {
+            Text(
+                "Tutorial paso a paso para añadirlo a tu pantalla de inicio",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable(onClick = onNavigateToTutorial),
+        colors = listItemColors
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
     ListItem(
         headlineContent = {
             Text("Tamaño del widget", color = MaterialTheme.colorScheme.onBackground)
@@ -555,6 +599,25 @@ private fun WidgetSection(
                     )
                 }
             }
+        },
+        colors = listItemColors
+    )
+}
+
+// ── Version ───────────────────────────────────────────────────────────────────
+@Composable
+private fun VersionSection(versionName: String) {
+    ListItem(
+        headlineContent = {
+            Text("Versión de la app", color = MaterialTheme.colorScheme.onBackground)
+        },
+        trailingContent = {
+            Text(
+                text = versionName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
         },
         colors = listItemColors
     )

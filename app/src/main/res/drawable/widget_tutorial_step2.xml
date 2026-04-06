@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 2: Tap "Widgets" from the menu -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="400dp"
+    android:viewportWidth="240"
+    android:viewportHeight="400">
+
+    <!-- Phone body -->
+    <path
+        android:pathData="M47,8 L193,8 Q215,8 215,30 L215,370 Q215,392 193,392 L47,392 Q25,392 25,370 L25,30 Q25,8 47,8 Z"
+        android:fillColor="#181A2E"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2.5" />
+
+    <!-- Screen background -->
+    <path
+        android:pathData="M38,48 L202,48 L202,338 L38,338 Z"
+        android:fillColor="#0C0C1E" />
+
+    <!-- Speaker pill -->
+    <path
+        android:pathData="M108,16 Q108,13 112,13 L128,13 Q132,13 132,16 L132,22 Q132,25 128,25 L112,25 Q108,25 108,22 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- Home indicator -->
+    <path
+        android:pathData="M103,358 L137,358 Q140,358 140,361 L140,365 Q140,368 137,368 L103,368 Q100,368 100,365 L100,361 Q100,358 103,358 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- App icons row 1 (dimmed - home screen faded) -->
+    <path
+        android:pathData="M53,62 Q53,58 57,58 L71,58 Q75,58 75,62 L75,76 Q75,80 71,80 L57,80 Q53,80 53,76 Z"
+        android:fillColor="#4A3F8A"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M100,62 Q100,58 104,58 L118,58 Q122,58 122,62 L122,76 Q122,80 118,80 L104,80 Q100,80 100,76 Z"
+        android:fillColor="#3D3580"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M147,62 Q147,58 151,58 L165,58 Q169,58 169,62 L169,76 Q169,80 165,80 L151,80 Q147,80 147,76 Z"
+        android:fillColor="#5A3A8A"
+        android:fillAlpha="0.35" />
+
+    <!-- App icons row 2 (dimmed) -->
+    <path
+        android:pathData="M53,107 Q53,103 57,103 L71,103 Q75,103 75,107 L75,121 Q75,125 71,125 L57,125 Q53,125 53,121 Z"
+        android:fillColor="#3D3580"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M100,107 Q100,103 104,103 L118,103 Q122,103 122,107 L122,121 Q122,125 118,125 L104,125 Q100,125 100,121 Z"
+        android:fillColor="#5A3A8A"
+        android:fillAlpha="0.35" />
+    <path
+        android:pathData="M147,107 Q147,103 151,103 L165,103 Q169,103 169,107 L169,121 Q169,125 165,125 L151,125 Q147,125 147,121 Z"
+        android:fillColor="#4A3F8A"
+        android:fillAlpha="0.35" />
+
+    <!-- Dim overlay over home screen -->
+    <path
+        android:pathData="M38,48 L202,48 L202,338 L38,338 Z"
+        android:fillColor="#000000"
+        android:fillAlpha="0.45" />
+
+    <!-- Bottom sheet background -->
+    <path
+        android:pathData="M38,248 Q38,236 50,236 L190,236 Q202,236 202,248 L202,338 L38,338 Z"
+        android:fillColor="#1E1D35" />
+
+    <!-- Bottom sheet handle -->
+    <path
+        android:pathData="M110,243 L130,243 Q132,243 132,246 L130,249 L110,249 Q108,249 108,246 Z"
+        android:fillColor="#4A4270" />
+
+    <!-- Menu item 1: "Ajustar fondos" (normal) -->
+    <!-- Icon placeholder -->
+    <path
+        android:pathData="M50,258 Q50,255 53,255 L63,255 Q66,255 66,258 L66,268 Q66,271 63,271 L53,271 Q50,271 50,268 Z"
+        android:fillColor="#4A4270" />
+    <!-- Text line -->
+    <path
+        android:pathData="M72,259 L145,259 Q146,259 146,261 L146,264 Q146,266 145,266 L72,266 Q71,266 71,264 L71,261 Q71,259 72,259 Z"
+        android:fillColor="#4A4270" />
+
+    <!-- Divider -->
+    <path
+        android:pathData="M50,278 L190,278"
+        android:strokeColor="#2D2B5A"
+        android:strokeWidth="0.8" />
+
+    <!-- Menu item 2: "Widgets" (HIGHLIGHTED) -->
+    <!-- Highlight background -->
+    <path
+        android:pathData="M38,282 L202,282 L202,308 L38,308 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.15" />
+    <!-- Icon (grid of dots = widgets) -->
+    <path
+        android:pathData="M51,288 Q51,286 53,286 L57,286 Q59,286 59,288 L59,292 Q59,294 57,294 L53,294 Q51,294 51,292 Z"
+        android:fillColor="#A78BFA" />
+    <path
+        android:pathData="M61,288 Q61,286 63,286 L67,286 Q69,286 69,288 L69,292 Q69,294 67,294 L63,294 Q61,294 61,292 Z"
+        android:fillColor="#A78BFA" />
+    <path
+        android:pathData="M51,296 Q51,294 53,294 L57,294 Q59,294 59,296 L59,300 Q59,302 57,302 L53,302 Q51,302 51,300 Z"
+        android:fillColor="#A78BFA" />
+    <path
+        android:pathData="M61,296 Q61,294 63,294 L67,294 Q69,294 69,296 L69,300 Q69,302 67,302 L63,302 Q61,302 61,300 Z"
+        android:fillColor="#A78BFA" />
+    <!-- "Widgets" text line (purple, wider = selected) -->
+    <path
+        android:pathData="M76,289 L165,289 Q167,289 167,292 L167,296 Q167,299 165,299 L76,299 Q74,299 74,296 L74,292 Q74,289 76,289 Z"
+        android:fillColor="#A78BFA" />
+
+    <!-- Divider -->
+    <path
+        android:pathData="M50,314 L190,314"
+        android:strokeColor="#2D2B5A"
+        android:strokeWidth="0.8" />
+
+    <!-- Menu item 3: "Ajustes de pantalla" (normal) -->
+    <path
+        android:pathData="M50,320 Q50,317 53,317 L63,317 Q66,317 66,320 L66,330 Q66,333 63,333 L53,333 Q50,333 50,330 Z"
+        android:fillColor="#4A4270" />
+    <path
+        android:pathData="M72,321 L150,321 Q151,321 151,323 L151,326 Q151,328 150,328 L72,328 Q71,328 71,326 L71,323 Q71,321 72,321 Z"
+        android:fillColor="#4A4270" />
+
+    <!-- Finger pointing at "Widgets" item -->
+    <path
+        android:pathData="M182,288 Q182,272 194,272 Q206,272 206,288 L206,310 Q206,322 194,322 Q182,322 182,310 Z"
+        android:fillColor="#F0EAFF" />
+    <path
+        android:pathData="M186,280 Q186,276 194,276 Q202,276 202,280 L202,287 L186,287 Z"
+        android:fillColor="#D4C8F5" />
+
+</vector>

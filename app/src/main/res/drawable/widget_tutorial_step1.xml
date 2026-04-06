@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Step 1: Long-press the home screen -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="400dp"
+    android:viewportWidth="240"
+    android:viewportHeight="400">
+
+    <!-- Phone body -->
+    <path
+        android:pathData="M47,8 L193,8 Q215,8 215,30 L215,370 Q215,392 193,392 L47,392 Q25,392 25,370 L25,30 Q25,8 47,8 Z"
+        android:fillColor="#181A2E"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="2.5" />
+
+    <!-- Screen background -->
+    <path
+        android:pathData="M38,48 L202,48 L202,338 L38,338 Z"
+        android:fillColor="#0C0C1E" />
+
+    <!-- Speaker pill -->
+    <path
+        android:pathData="M108,16 Q108,13 112,13 L128,13 Q132,13 132,16 L132,22 Q132,25 128,25 L112,25 Q108,25 108,22 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- Home indicator -->
+    <path
+        android:pathData="M103,358 L137,358 Q140,358 140,361 L140,365 Q140,368 137,368 L103,368 Q100,368 100,365 L100,361 Q100,358 103,358 Z"
+        android:fillColor="#2D2B5A" />
+
+    <!-- App icons row 1 -->
+    <path
+        android:pathData="M53,62 Q53,58 57,58 L71,58 Q75,58 75,62 L75,76 Q75,80 71,80 L57,80 Q53,80 53,76 Z"
+        android:fillColor="#4A3F8A" />
+    <path
+        android:pathData="M100,62 Q100,58 104,58 L118,58 Q122,58 122,62 L122,76 Q122,80 118,80 L104,80 Q100,80 100,76 Z"
+        android:fillColor="#3D3580" />
+    <path
+        android:pathData="M147,62 Q147,58 151,58 L165,58 Q169,58 169,62 L169,76 Q169,80 165,80 L151,80 Q147,80 147,76 Z"
+        android:fillColor="#5A3A8A" />
+
+    <!-- App icons row 2 -->
+    <path
+        android:pathData="M53,107 Q53,103 57,103 L71,103 Q75,103 75,107 L75,121 Q75,125 71,125 L57,125 Q53,125 53,121 Z"
+        android:fillColor="#3D3580" />
+    <path
+        android:pathData="M100,107 Q100,103 104,103 L118,103 Q122,103 122,107 L122,121 Q122,125 118,125 L104,125 Q100,125 100,121 Z"
+        android:fillColor="#5A3A8A" />
+    <path
+        android:pathData="M147,107 Q147,103 151,103 L165,103 Q169,103 169,107 L169,121 Q169,125 165,125 L151,125 Q147,125 147,121 Z"
+        android:fillColor="#4A3F8A" />
+
+    <!-- App icons row 3 -->
+    <path
+        android:pathData="M53,152 Q53,148 57,148 L71,148 Q75,148 75,152 L75,166 Q75,170 71,170 L57,170 Q53,170 53,166 Z"
+        android:fillColor="#5A3A8A" />
+    <path
+        android:pathData="M100,152 Q100,148 104,148 L118,148 Q122,148 122,152 L122,166 Q122,170 118,170 L104,170 Q100,170 100,166 Z"
+        android:fillColor="#4A3F8A" />
+    <path
+        android:pathData="M147,152 Q147,148 151,148 L165,148 Q169,148 169,152 L169,166 Q169,170 165,170 L151,170 Q147,170 147,166 Z"
+        android:fillColor="#3D3580" />
+
+    <!-- Long press ripple - outer (most transparent) -->
+    <path
+        android:pathData="M83,238 A 37,37,0,1,0,157,238 A 37,37,0,1,0,83,238 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="1.2"
+        android:strokeAlpha="0.25" />
+
+    <!-- Long press ripple - middle -->
+    <path
+        android:pathData="M94,238 A 26,26,0,1,0,146,238 A 26,26,0,1,0,94,238 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#A78BFA"
+        android:strokeWidth="1.8"
+        android:strokeAlpha="0.5" />
+
+    <!-- Long press ripple - inner (solid fill) -->
+    <path
+        android:pathData="M106,238 A 14,14,0,1,0,134,238 A 14,14,0,1,0,106,238 Z"
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.85" />
+
+    <!-- Finger body -->
+    <path
+        android:pathData="M108,260 Q108,244 120,244 Q132,244 132,260 L132,286 Q132,298 120,298 Q108,298 108,286 Z"
+        android:fillColor="#F0EAFF" />
+
+    <!-- Fingernail highlight -->
+    <path
+        android:pathData="M113,252 Q113,248 120,248 Q127,248 127,252 L127,260 L113,260 Z"
+        android:fillColor="#D4C8F5" />
+
+</vector>
