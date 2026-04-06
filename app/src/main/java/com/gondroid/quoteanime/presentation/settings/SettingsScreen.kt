@@ -63,6 +63,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.activity.ComponentActivity
+import com.google.android.play.core.review.ReviewManagerFactory
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -173,6 +175,13 @@ fun SettingsScreen(
                         onUpdateTimesChanged = viewModel::onWidgetUpdateTimesChanged,
                         onNavigateToTutorial = onNavigateToWidgetTutorial
                     )
+                }
+
+                item { SectionDivider() }
+
+                item {
+                    SectionHeader("Calificación")
+                    RatingSection()
                 }
 
                 item { SectionDivider() }
@@ -596,6 +605,66 @@ private fun WidgetSection(
                     Text(
                         "8×/día", style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        colors = listItemColors
+    )
+}
+
+// ── Rating ────────────────────────────────────────────────────────────────────
+@Composable
+private fun RatingSection() {
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
+    val scope = rememberCoroutineScope()
+
+    ListItem(
+        headlineContent = {
+            Text("Calificar la app", color = MaterialTheme.colorScheme.onBackground)
+        },
+        supportingContent = {
+            Text(
+                "¿Te gusta Quote Anime? Déjanos una reseña en Google Play",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable {
+            if (activity != null) {
+                val manager = ReviewManagerFactory.create(context)
+                manager.requestReviewFlow().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        manager.launchReviewFlow(activity, task.result)
+                    } else {
+                        // Fallback: abrir Play Store directamente
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                            )
+                        }.onFailure {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                            )
+                        }
+                    }
+                }
+            } else {
+                runCatching {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                    )
+                }.onFailure {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
                     )
                 }
             }

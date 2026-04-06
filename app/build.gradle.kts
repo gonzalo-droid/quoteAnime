@@ -91,6 +91,9 @@ dependencies {
     // AdMob
     implementation(libs.google.admob)
 
+    // Play In-App Review
+    implementation(libs.play.review)
+
     // SplashScreen
     implementation(libs.core.splashscreen)
 
