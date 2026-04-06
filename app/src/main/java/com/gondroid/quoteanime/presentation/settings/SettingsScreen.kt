@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -21,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import com.gondroid.quoteanime.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -38,9 +38,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,13 +60,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.activity.ComponentActivity
-import com.google.android.play.core.review.ReviewManagerFactory
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.domain.model.Category
+import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.review.testing.FakeReviewManager
 import kotlinx.coroutines.launch
 
 @Composable
@@ -139,9 +137,11 @@ fun SettingsScreen(
                 contentAlignment = Alignment.Center
             ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
         } else {
-            LazyColumn(modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
 
                 /*item {
                     SectionHeader("Categorías")
@@ -346,8 +346,8 @@ private fun NotificationSection(
                 checked = uiState.notificationsEnabled,
                 onCheckedChange = onToggle,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor  = MaterialTheme.colorScheme.background,
-                    checkedTrackColor  = MaterialTheme.colorScheme.primary,
+                    checkedThumbColor = MaterialTheme.colorScheme.background,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
                     uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                     uncheckedBorderColor = MaterialTheme.colorScheme.outline
@@ -432,8 +432,16 @@ private fun NotificationSection(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("1×/día", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("10×/día", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "1×/día",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "10×/día",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             },
@@ -648,11 +656,17 @@ private fun RatingSection() {
                         // Fallback: abrir Play Store directamente
                         runCatching {
                             context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    "market://details?id=${context.packageName}".toUri()
+                                )
                             )
                         }.onFailure {
                             context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                                )
                             )
                         }
                     }
@@ -660,11 +674,17 @@ private fun RatingSection() {
             } else {
                 runCatching {
                     context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "market://details?id=${context.packageName}".toUri()
+                        )
                     )
                 }.onFailure {
                     context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                        )
                     )
                 }
             }
@@ -673,7 +693,6 @@ private fun RatingSection() {
     )
 }
 
-// ── Version ───────────────────────────────────────────────────────────────────
 @Composable
 private fun VersionSection(versionName: String) {
     ListItem(

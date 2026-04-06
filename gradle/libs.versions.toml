@@ -71,7 +71,10 @@ glance-material3 = { group = "androidx.glance", name = "glance-material3", versi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database-ktx" }
 google-admob = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "admob" }
-play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
+
+# Android Play
+play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
+play-review = { group = "com.google.android.play", name = "review", version.ref = "playReview" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 # Test
