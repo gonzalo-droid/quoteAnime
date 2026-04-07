@@ -97,6 +97,9 @@ dependencies {
     implementation(libs.play.review)
     implementation(libs.play.review.ktx)
 
+    // Play In-App Update
+    implementation(libs.play.update)
+
     // SplashScreen
     implementation(libs.core.splashscreen)
 

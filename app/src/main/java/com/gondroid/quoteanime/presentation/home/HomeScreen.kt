@@ -2,6 +2,10 @@ package com.gondroid.quoteanime.presentation.home
 
 import android.content.Intent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -83,6 +87,8 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val density = context.resources.displayMetrics.density
 
     HomeContent(
         uiState = uiState,
@@ -90,14 +96,13 @@ fun HomeScreen(
         onNavigateToSettings = onNavigateToSettings,
         onToggleFavorite = { viewModel.onToggleFavorite(it) },
         onScrollConsumed = { viewModel.onScrollToPageConsumed() },
-        onShare = { currentQuote ->
-            val shareText =
-                "\"${currentQuote.quote}\"\n— ${currentQuote.author}\n(${currentQuote.anime})"
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, shareText)
+        onShare = { quote ->
+            scope.launch {
+                val bitmap = withContext(Dispatchers.Default) {
+                    createShareBitmap(quote, density)
+                }
+                shareQuoteAsBitmap(context, bitmap)
             }
-            context.startActivity(Intent.createChooser(intent, null))
         }
     )
 }
