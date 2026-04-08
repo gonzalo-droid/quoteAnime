@@ -7,7 +7,14 @@
       "Bash(./gradlew :app:compileDebugKotlin)",
       "Bash(./gradlew :app:assembleDebug)",
       "Bash(./gradlew :app:kspDebugKotlin)",
-      "Bash(./gradlew :app:dependencies --configuration debugRuntimeClasspath)"
+      "Bash(./gradlew :app:dependencies --configuration debugRuntimeClasspath)",
+      "Bash(./gradlew :app:compileDebugUnitTestKotlin --quiet)",
+      "Bash(./gradlew :app:compileDebugUnitTestKotlin)",
+      "Bash(./gradlew :app:testDebugUnitTest)",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.gondroid.quoteanime.presentation.catalog.CatalogViewModelTest.categories are populated from GetCategoriesUseCase\" --info)",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.gondroid.quoteanime.presentation.catalog.CatalogViewModelTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --rerun-tasks)",
+      "Bash(xargs -I {} sh -c 'grep -o \"[0-9]* tests\" {} | head -3')"
     ]
   }
 }
