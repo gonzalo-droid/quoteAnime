@@ -59,15 +59,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Category
+import com.google.android.play.core.ktx.launchReview
+import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManagerFactory
-import com.google.android.play.core.review.testing.FakeReviewManager
 import kotlinx.coroutines.launch
 
 @Composable
@@ -157,7 +160,7 @@ fun SettingsScreen(
                 item { SectionDivider() }
 
                 item {
-                    SectionHeader("Notificaciones")
+                    SectionHeader(stringResource(R.string.notifications))
                     NotificationSection(
                         uiState = uiState,
                         onToggle = ::requestNotificationToggle,
@@ -169,7 +172,7 @@ fun SettingsScreen(
                 item { SectionDivider() }
 
                 item {
-                    SectionHeader("Widget")
+                    SectionHeader(stringResource(R.string.widget))
                     WidgetSection(
                         widgetUpdateTimesPerDay = uiState.widgetUpdateTimesPerDay,
                         onUpdateTimesChanged = viewModel::onWidgetUpdateTimesChanged,
@@ -180,25 +183,18 @@ fun SettingsScreen(
                 item { SectionDivider() }
 
                 item {
-                    SectionHeader("Calificación")
+                    SectionHeader(stringResource(R.string.rating))
                     RatingSection()
                 }
 
                 item { SectionDivider() }
 
                 item {
-                    SectionHeader("Versión")
+                    SectionHeader(stringResource(R.string.version))
                     VersionSection(versionName = versionName)
                 }
 
                 item { SectionDivider() }
-
-
-                /* Debug section
-                item {
-                    SectionHeader("Debug")
-                    TestNotificationButton(onClick = viewModel::onTestNotification)
-                }*/
 
                 item { Spacer(Modifier.height(32.dp)) }
             }
@@ -622,6 +618,24 @@ private fun WidgetSection(
 }
 
 // ── Rating ────────────────────────────────────────────────────────────────────
+private fun openPlayStore(context: android.content.Context) {
+    runCatching {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                "market://details?id=${context.packageName}".toUri()
+            )
+        )
+    }.onFailure {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+            )
+        )
+    }
+}
+
 @Composable
 private fun RatingSection() {
     val context = LocalContext.current
@@ -630,11 +644,14 @@ private fun RatingSection() {
 
     ListItem(
         headlineContent = {
-            Text("Calificar la app", color = MaterialTheme.colorScheme.onBackground)
+            Text(
+                stringResource(R.string.rating_app),
+                color = MaterialTheme.colorScheme.onBackground
+            )
         },
         supportingContent = {
             Text(
-                "¿Te gusta Quote Anime? Déjanos una reseña en Google Play",
+                stringResource(R.string.subtitle_rating_section),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -648,45 +665,17 @@ private fun RatingSection() {
         },
         modifier = Modifier.clickable {
             if (activity != null) {
-                val manager = ReviewManagerFactory.create(context)
-                manager.requestReviewFlow().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        manager.launchReviewFlow(activity, task.result)
-                    } else {
-                        // Fallback: abrir Play Store directamente
-                        runCatching {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    "market://details?id=${context.packageName}".toUri()
-                                )
-                            )
-                        }.onFailure {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
-                                )
-                            )
-                        }
+                scope.launch {
+                    runCatching {
+                        val manager = ReviewManagerFactory.create(context)
+                        val reviewInfo = manager.requestReview()
+                        manager.launchReview(activity, reviewInfo)
+                    }.onFailure {
+                        openPlayStore(context)
                     }
                 }
             } else {
-                runCatching {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "market://details?id=${context.packageName}".toUri()
-                        )
-                    )
-                }.onFailure {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
-                        )
-                    )
-                }
+                openPlayStore(context)
             }
         },
         colors = listItemColors
