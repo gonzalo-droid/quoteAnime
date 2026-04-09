@@ -103,6 +103,9 @@ dependencies {
     // SplashScreen
     implementation(libs.core.splashscreen)
 
+    // Coil (image loading)
+    implementation(libs.coil.compose)
+
     // Test
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

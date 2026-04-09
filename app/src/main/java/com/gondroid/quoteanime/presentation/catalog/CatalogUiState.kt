@@ -1,14 +1,12 @@
 package com.gondroid.quoteanime.presentation.catalog
 
-import com.gondroid.quoteanime.domain.model.Category
 import com.gondroid.quoteanime.domain.model.Quote
 
 data class CatalogUiState(
-    val categories: List<Category> = emptyList(),
-    val selectedCategoryId: String? = null, // null = pestaña Favoritos
+    val selectedFilter: CatalogFilter? = null,   // null = Selector view
+    val selectedQuote: Quote? = null,            // non-null = Detail view
     val quotes: List<Quote> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = false
 ) {
     val isEmpty: Boolean get() = !isLoading && quotes.isEmpty()
-    val isFavoritesTab: Boolean get() = selectedCategoryId == null
 }

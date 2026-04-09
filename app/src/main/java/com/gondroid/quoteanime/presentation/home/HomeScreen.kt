@@ -46,8 +46,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -119,7 +123,6 @@ private fun HomeContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-        //.background(BgDark)
     ) {
         when {
             uiState.isLoading -> {
@@ -211,16 +214,53 @@ private fun QuoteContent(
     page: Int,
     pageOffset: Float
 ) {
+    val context = LocalContext.current
     val gradient = pageGradients[page % pageGradients.size]
+    val hasImage = !quote.imageUrl.isNullOrBlank()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(gradient))
             .graphicsLayer {
                 alpha = 1f - (pageOffset * 0.4f).coerceIn(0f, 0.4f)
             }
     ) {
+        // ── Background: image from Cloudinary or gradient fallback ────────────
+        if (hasImage) {
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(quote.imageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(R.drawable.onboarding_02),
+                fallback = painterResource(R.drawable.onboarding_02)
+            )
+            // Dark overlay for text legibility over the photo
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Black.copy(alpha = 0.25f),
+                                Color.Black.copy(alpha = 0.55f),
+                                Color.Black.copy(alpha = 0.80f)
+                            )
+                        )
+                    )
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.verticalGradient(gradient))
+            )
+        }
+
+        // ── Quote text ────────────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
