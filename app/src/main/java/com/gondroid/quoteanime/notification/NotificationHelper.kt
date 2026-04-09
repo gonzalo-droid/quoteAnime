@@ -59,9 +59,9 @@ class NotificationHelper @Inject constructor(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(quote.author)
-            .setContentText(quote.quote)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(quote.quote))
+            .setContentTitle(quote.author.orEmpty())
+            .setContentText(quote.quote.orEmpty())
+            .setStyle(NotificationCompat.BigTextStyle().bigText(quote.quote.orEmpty()))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

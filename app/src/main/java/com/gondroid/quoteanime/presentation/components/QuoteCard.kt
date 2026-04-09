@@ -70,7 +70,7 @@ fun QuoteCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "\u201C${quote.quote}\u201D",
+                    text = "\u201C${quote.quote.orEmpty()}\u201D",
                     style = MaterialTheme.typography.bodyMedium,
                     fontFamily = FontFamily.Serif,
                     fontStyle = FontStyle.Italic,
@@ -79,7 +79,7 @@ fun QuoteCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                if (quote.author.isNotBlank()) {
+                if (!quote.author.isNullOrBlank()) {
                     Text(
                         text = "— ${quote.author}",
                         style = MaterialTheme.typography.labelMedium,
@@ -88,7 +88,7 @@ fun QuoteCard(
                     )
                 }
 
-                if (quote.anime.isNotBlank()) {
+                if (!quote.anime.isNullOrBlank()) {
                     Text(
                         text = quote.anime.uppercase(),
                         fontSize = 9.sp,

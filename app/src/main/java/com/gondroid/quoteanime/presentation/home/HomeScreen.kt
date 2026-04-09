@@ -246,7 +246,7 @@ private fun QuoteContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = quote.quote,
+                text = quote.quote.orEmpty(),
                 fontSize = 22.sp,
                 lineHeight = 34.sp,
                 fontFamily = FontFamily.Serif,
@@ -267,7 +267,7 @@ private fun QuoteContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "— ${quote.author}",
+                text = "— ${quote.author.orEmpty()}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary.copy(alpha = 0.75f),
@@ -277,7 +277,7 @@ private fun QuoteContent(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = quote.anime.uppercase(),
+                text = quote.anime?.uppercase().orEmpty(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 2.sp,

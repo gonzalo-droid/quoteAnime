@@ -37,10 +37,10 @@ class UpdateQuoteWidgetWorker @AssistedInject constructor(
                 updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
                     prefs.toMutablePreferences().apply {
                         if (quote != null) {
-                            this[QuoteWidgetState.QUOTE_TEXT]   = quote.quote
-                            this[QuoteWidgetState.QUOTE_AUTHOR] = quote.author
+                            this[QuoteWidgetState.QUOTE_TEXT]   = quote.quote.orEmpty()
+                            this[QuoteWidgetState.QUOTE_AUTHOR] = quote.author.orEmpty()
                             this[QuoteWidgetState.QUOTE_ID]     = quote.id
-                            this[QuoteWidgetState.QUOTE_ANIME]  = quote.anime
+                            this[QuoteWidgetState.QUOTE_ANIME]  = quote.anime.orEmpty()
                             this[QuoteWidgetState.IS_LOADING]   = false
                             this[QuoteWidgetState.HAS_ERROR]    = false
                         } else {

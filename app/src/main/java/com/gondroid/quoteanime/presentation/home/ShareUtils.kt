@@ -52,7 +52,7 @@ fun createShareBitmap(quote: Quote, density: Float): Bitmap {
         textAlign = Paint.Align.CENTER
     }
     val maxTextWidth = w - hPad * 2
-    val lines = wrapText(quote.quote, textPaint, maxTextWidth)
+    val lines = wrapText(quote.quote.orEmpty(), textPaint, maxTextWidth)
     val lineHeight = 27 * density
     var y = 128 * density
     lines.forEach { line ->
@@ -75,7 +75,7 @@ fun createShareBitmap(quote: Quote, density: Float): Bitmap {
         textSize = 13 * density
         textAlign = Paint.Align.CENTER
     }
-    canvas.drawText("— ${quote.author}", cx, y, authorPaint)
+    canvas.drawText("— ${quote.author.orEmpty()}", cx, y, authorPaint)
     y += 18 * density
 
     // ── Anime name ─────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ fun createShareBitmap(quote: Quote, density: Float): Bitmap {
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         textAlign = Paint.Align.CENTER
     }
-    canvas.drawText(quote.anime.uppercase(), cx, y, animePaint)
+    canvas.drawText(quote.anime?.uppercase().orEmpty(), cx, y, animePaint)
 
     // ── Watermark ──────────────────────────────────────────────────────────
     val wmPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {

@@ -22,11 +22,17 @@ class QuoteRemoteDataSource @Inject constructor(
     fun getCategories(): Flow<List<CategoryDto>> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val animeSet = mutableSetOf<String>()
+                val categorySet = mutableSetOf<String>()
                 for (child in snapshot.children) {
-                    child.toQuoteDto()?.anime?.let { animeSet.add(it) }
+                    val dto = child.toQuoteDto() ?: continue
+                    // New schema: categories array; old schema: anime field
+                    if (!dto.categories.isNullOrEmpty()) {
+                        categorySet.addAll(dto.categories)
+                    } else {
+                        dto.anime?.let { categorySet.add(it) }
+                    }
                 }
-                val categories = animeSet.sorted().map { CategoryDto(id = it, name = it) }
+                val categories = categorySet.sorted().map { CategoryDto(id = it, name = it) }
                 trySend(categories)
             }
 
@@ -58,7 +64,10 @@ class QuoteRemoteDataSource @Inject constructor(
             override fun onDataChange(snapshot: DataSnapshot) {
                 val quotes = snapshot.children
                     .mapNotNull { it.toQuoteDto() }
-                    .filter { it.anime == categoryId }
+                    .filter { dto ->
+                        if (!dto.categories.isNullOrEmpty()) categoryId in dto.categories
+                        else dto.anime == categoryId
+                    }
                 trySend(quotes)
             }
 
@@ -74,7 +83,10 @@ class QuoteRemoteDataSource @Inject constructor(
         val snapshot = quotesRef.get().await()
         val allQuotes = snapshot.children.mapNotNull { it.toQuoteDto() }
         val filtered = if (categoryIds.isEmpty()) allQuotes
-                       else allQuotes.filter { it.anime in categoryIds }
+                       else allQuotes.filter { dto ->
+                           if (!dto.categories.isNullOrEmpty()) dto.categories.any { it in categoryIds }
+                           else dto.anime in categoryIds
+                       }
         return filtered.randomOrNull()
     }
 }
