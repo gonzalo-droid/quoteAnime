@@ -1,11 +1,6 @@
 package com.gondroid.quoteanime.presentation.home
 
-import android.content.Intent
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -14,15 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,55 +25,36 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.presentation.components.BannerAd
+import com.gondroid.quoteanime.presentation.components.QuoteDetailContent
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.HeartRed
-import com.gondroid.quoteanime.ui.theme.OutlineColor
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
-import com.gondroid.quoteanime.ui.theme.TextPrimary
 import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.launch
 
 private val HeartColor = HeartRed
-private val DividerColor = OutlineColor
-
-private val pageGradients = listOf(
-    listOf(Color(0xFF0C0C1E), Color(0xFF1A0E2E)),
-    listOf(Color(0xFF0A1020), Color(0xFF0E1E3A)),
-    listOf(Color(0xFF12080E), Color(0xFF260A20)),
-    listOf(Color(0xFF080C14), Color(0xFF0C1A2C)),
-    listOf(Color(0xFF100818), Color(0xFF1E0C30)),
-)
 
 @Composable
 fun HomeScreen(
@@ -92,7 +65,6 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val density = context.resources.displayMetrics.density
 
     HomeContent(
         uiState = uiState,
@@ -102,9 +74,7 @@ fun HomeScreen(
         onScrollConsumed = { viewModel.onScrollToPageConsumed() },
         onShare = { quote ->
             scope.launch {
-                val bitmap = withContext(Dispatchers.Default) {
-                    createShareBitmap(quote, density)
-                }
+                val bitmap = createShareBitmap(quote, context)
                 shareQuoteAsBitmap(context, bitmap)
             }
         }
@@ -166,7 +136,6 @@ private fun HomeContent(
 
                     QuoteContent(
                         quote = quote,
-                        page = page,
                         pageOffset = pageOffset
                     )
                 }
@@ -211,121 +180,16 @@ private fun HomeContent(
 @Composable
 private fun QuoteContent(
     quote: Quote,
-    page: Int,
     pageOffset: Float
 ) {
-    val context = LocalContext.current
-    val gradient = pageGradients[page % pageGradients.size]
-    val hasImage = !quote.imageUrl.isNullOrBlank()
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                alpha = 1f - (pageOffset * 0.4f).coerceIn(0f, 0.4f)
-            }
-    ) {
-        // ── Background: image from Cloudinary or gradient fallback ────────────
-        if (hasImage) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(quote.imageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                error = painterResource(R.drawable.onboarding_02),
-                fallback = painterResource(R.drawable.onboarding_02)
-            )
-            // Dark overlay for text legibility over the photo
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Black.copy(alpha = 0.25f),
-                                Color.Black.copy(alpha = 0.55f),
-                                Color.Black.copy(alpha = 0.80f)
-                            )
-                        )
-                    )
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Brush.verticalGradient(gradient))
-            )
+    QuoteDetailContent(
+        quote = quote,
+        modifier = Modifier.graphicsLayer {
+            alpha = 1f - (pageOffset * 0.4f).coerceIn(0f, 0.4f)
         }
-
-        // ── Quote text ────────────────────────────────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 36.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Comilla decorativa
-            Text(
-                text = "\u201C",
-                fontSize = 96.sp,
-                color = AccentPurple.copy(alpha = 0.18f),
-                fontFamily = FontFamily.Serif,
-                lineHeight = 60.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(start = 4.dp),
-                textAlign = TextAlign.Start
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = quote.quote.orEmpty(),
-                fontSize = 22.sp,
-                lineHeight = 34.sp,
-                fontFamily = FontFamily.Serif,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Normal,
-                color = TextPrimary,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(36.dp))
-
-            HorizontalDivider(
-                modifier = Modifier.width(48.dp),
-                color = DividerColor,
-                thickness = 1.dp
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "— ${quote.author.orEmpty()}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextPrimary.copy(alpha = 0.75f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = quote.anime?.uppercase().orEmpty(),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 2.sp,
-                color = AccentPurple.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+        // onBack = null → no back button in pager
+        // actions = empty default → bottom actions rendered outside the pager
+    )
 }
 
 @Composable

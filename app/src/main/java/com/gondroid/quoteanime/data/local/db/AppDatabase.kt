@@ -8,7 +8,7 @@ import com.gondroid.quoteanime.data.local.db.entity.FavoriteQuoteEntity
 
 @Database(
     entities = [FavoriteQuoteEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(StringListConverter::class)

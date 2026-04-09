@@ -9,7 +9,7 @@ data class QuoteDto(
     val author: String?,
     val anime: String?,
     val categories: List<String>?,
-    val imageUrl: String?
+    val animeSlug: String?
 )
 
 fun DataSnapshot.toQuoteDto(): QuoteDto? {
@@ -25,16 +25,17 @@ fun DataSnapshot.toQuoteDto(): QuoteDto? {
         author = child("author").getValue(String::class.java),
         anime = child("anime").getValue(String::class.java),
         categories = categories,
-        imageUrl = child("imageUrl").getValue(String::class.java)
+        animeSlug = child("animeSlug").getValue(String::class.java)
     )
 }
 
-fun QuoteDto.toDomain(isFavorite: Boolean = false): Quote = Quote(
+fun QuoteDto.toDomain(isFavorite: Boolean = false, imageUrl: String? = null): Quote = Quote(
     id = id,
     quote = quote,
     author = author,
     anime = anime,
     categories = categories ?: emptyList(),
+    animeSlug = animeSlug,
     imageUrl = imageUrl,
     isFavorite = isFavorite
 )

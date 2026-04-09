@@ -40,15 +40,17 @@ class QuoteRepositoryImplTest {
     // Fake in-memory state flows to simulate real-time updates
     private val favoriteIdsFlow = MutableStateFlow<List<String>>(emptyList())
 
-    private val quoteDtoNaruto1 = QuoteDto(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", categories = null, imageUrl = null)
-    private val quoteDtoNaruto2 = QuoteDto(id = "2", quote = "I never give up.", author = "Naruto", anime = "Naruto", categories = null, imageUrl = null)
-    private val quoteDtoOnePiece = QuoteDto(id = "10", quote = "I will be King!", author = "Luffy", anime = "One Piece", categories = null, imageUrl = null)
+    private val quoteDtoNaruto1 = QuoteDto(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", categories = null, animeSlug = null)
+    private val quoteDtoNaruto2 = QuoteDto(id = "2", quote = "I never give up.", author = "Naruto", anime = "Naruto", categories = null, animeSlug = null)
+    private val quoteDtoOnePiece = QuoteDto(id = "10", quote = "I will be King!", author = "Luffy", anime = "One Piece", categories = null, animeSlug = null)
 
     @Before
     fun setup() {
         remoteDataSource = mockk()
         favoriteQuoteDao = mockk()
         every { favoriteQuoteDao.getFavoriteIds() } returns favoriteIdsFlow
+        // getAnimeImages() is called internally for every quote-returning method
+        io.mockk.coEvery { remoteDataSource.getAnimeImages() } returns emptyMap()
         repository = QuoteRepositoryImpl(remoteDataSource, favoriteQuoteDao)
     }
 

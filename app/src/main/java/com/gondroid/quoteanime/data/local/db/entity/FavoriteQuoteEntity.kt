@@ -11,16 +11,17 @@ data class FavoriteQuoteEntity(
     val author: String?,
     val anime: String?,
     val categories: List<String> = emptyList(),
-    val imageUrl: String? = null,
+    val animeSlug: String? = null,
     val savedAt: Long = System.currentTimeMillis()
 )
 
-fun FavoriteQuoteEntity.toDomain(): Quote = Quote(
+fun FavoriteQuoteEntity.toDomain(imageUrl: String? = null): Quote = Quote(
     id = id,
     quote = quote,
     author = author,
     anime = anime,
     categories = categories,
+    animeSlug = animeSlug,
     imageUrl = imageUrl,
     isFavorite = true
 )
@@ -31,5 +32,5 @@ fun Quote.toFavoriteEntity(): FavoriteQuoteEntity = FavoriteQuoteEntity(
     author = author,
     anime = anime,
     categories = categories,
-    imageUrl = imageUrl
+    animeSlug = animeSlug
 )

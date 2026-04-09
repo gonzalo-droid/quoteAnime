@@ -5,6 +5,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.3] - 2026-04-09
+
+### Added
+- **Imágenes por anime**: cada frase ahora muestra una imagen de fondo correspondiente al anime, seleccionada de forma aleatoria entre las disponibles para ese título
+- **Catálogo mejorado**: nueva pantalla hub con accesos a Favoritos, Todas y 10 categorías por emoción; detalle de frase en pantalla completa con imagen de fondo
+- **Compartir mejorado**: la imagen generada al compartir usa la imagen del anime como fondo, con más espacio entre quote y autor, y firma visual con logo + nombre de la app
+
+### Changed
+- Overlay de oscurecimiento más pronunciado sobre las imágenes de fondo (pantallas y compartir) para mayor legibilidad del texto
+- Padding horizontal del texto en la imagen de compartir aumentado para una presentación más centrada y aireada
+- Componente de detalle de frase (`QuoteDetailContent`) extraído como componente reutilizable entre HomeScreen y CatalogScreen
+
+### Technical
+- `imageUrl` reemplazado por `animeSlug` en el modelo `Quote`, DTO y entidad Room; resolución de imagen al vuelo desde el nodo `/imagenes/{slug}` de Firebase RTDB
+- Cache de imágenes por sesión en `QuoteRepositoryImpl` con selección aleatoria estable (mismo slug → misma imagen durante la sesión)
+- Tests de `CatalogViewModelTest` reescritos para reflejar la nueva arquitectura hub (Selector → Lista → Detalle)
+- Room DB bumped a versión 4
+
+---
+
 ## [1.1.2] - 2026-04-08
 
 ### Added

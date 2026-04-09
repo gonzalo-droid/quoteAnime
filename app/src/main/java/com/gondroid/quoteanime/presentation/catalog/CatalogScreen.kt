@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,12 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -35,13 +31,11 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.outlined.Share
@@ -49,7 +43,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,37 +53,29 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.presentation.components.DetailActionButton
 import com.gondroid.quoteanime.presentation.components.QuoteCard
+import com.gondroid.quoteanime.presentation.components.QuoteDetailContent
 import com.gondroid.quoteanime.presentation.home.createShareBitmap
 import com.gondroid.quoteanime.presentation.home.shareQuoteAsBitmap
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.HeartRed
-import com.gondroid.quoteanime.ui.theme.TextSecondary
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 // ── Emotion catalog definitions ───────────────────────────────────────────────
 
@@ -124,7 +109,6 @@ fun CatalogScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val density = context.resources.displayMetrics.density
 
     // Internal back navigation (Detail → List → Selector)
     BackHandler(enabled = uiState.selectedQuote != null) { viewModel.onBackFromDetail() }
@@ -134,14 +118,50 @@ fun CatalogScreen(
 
     when {
         uiState.selectedQuote != null -> {
+            val quote = uiState.selectedQuote!!
+            val heartScale by animateFloatAsState(
+                targetValue = if (quote.isFavorite) 1.25f else 1f,
+                animationSpec = spring(dampingRatio = 0.4f, stiffness = 500f),
+                label = "heartScale"
+            )
+            val heartTint by animateColorAsState(
+                targetValue = if (quote.isFavorite) HeartRed else Color.White.copy(alpha = 0.75f),
+                animationSpec = tween(durationMillis = 200),
+                label = "heartTint"
+            )
             QuoteDetailContent(
-                quote = uiState.selectedQuote!!,
+                quote = quote,
                 onBack = { viewModel.onBackFromDetail() },
-                onToggleFavorite = { viewModel.onToggleFavorite(it) },
-                onShare = { quote ->
-                    scope.launch {
-                        val bitmap = withContext(Dispatchers.Default) { createShareBitmap(quote, density) }
-                        shareQuoteAsBitmap(context, bitmap)
+                actions = {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(bottom = 36.dp),
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        DetailActionButton(onClick = { viewModel.onToggleFavorite(quote) }) {
+                            Icon(
+                                imageVector = if (quote.isFavorite) Icons.Default.Favorite
+                                              else Icons.Default.FavoriteBorder,
+                                contentDescription = if (quote.isFavorite) "Quitar favorito" else "Añadir favorito",
+                                tint = heartTint,
+                                modifier = Modifier.size(24.dp).scale(heartScale)
+                            )
+                        }
+                        DetailActionButton(onClick = {
+                            scope.launch {
+                                val bitmap = createShareBitmap(quote, context)
+                                shareQuoteAsBitmap(context, bitmap)
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Share,
+                                contentDescription = "Compartir",
+                                tint = Color.White.copy(alpha = 0.85f),
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
             )
@@ -427,181 +447,169 @@ private fun CatalogListContent(
     }
 }
 
-// ── 3. Full-screen quote detail ───────────────────────────────────────────────
+// ── Previews ──────────────────────────────────────────────────────────────────
 
+// Datos de muestra reutilizables en todos los previews
+private val sampleQuote = Quote(
+    id = "1",
+    quote = "El que no arriesga no gana. Yo siempre seré el Rey de los Piratas.",
+    author = "Monkey D. Luffy",
+    anime = "One Piece",
+    categories = listOf("motivación", "orgullo"),
+    imageUrl = null,
+    isFavorite = false
+)
+
+private val sampleQuotes = listOf(
+    sampleQuote,
+    Quote(
+        id = "2",
+        quote = "No mires atrás. Si lo haces ya has perdido.",
+        author = "Levi Ackerman",
+        anime = "Attack on Titan",
+        categories = listOf("lucha"),
+        isFavorite = true
+    ),
+    Quote(
+        id = "3",
+        quote = "La oscuridad no puede expulsar a la oscuridad. Solo la luz puede hacer eso.",
+        author = "Naruto Uzumaki",
+        anime = "Naruto",
+        categories = listOf("esperanza"),
+        isFavorite = false
+    )
+)
+
+// ── Vista 1: Selector (hub) ───────────────────────────────────────────────────
+
+@Preview(name = "Selector — hub de exploración", showBackground = true)
 @Composable
-private fun QuoteDetailContent(
-    quote: Quote,
-    onBack: () -> Unit,
-    onToggleFavorite: (Quote) -> Unit,
-    onShare: (Quote) -> Unit
-) {
-    val context = LocalContext.current
-
-    val heartScale by animateFloatAsState(
-        targetValue = if (quote.isFavorite) 1.25f else 1f,
-        animationSpec = spring(dampingRatio = 0.4f, stiffness = 500f),
-        label = "heartScale"
-    )
-    val heartTint by animateColorAsState(
-        targetValue = if (quote.isFavorite) HeartRed else Color.White.copy(alpha = 0.75f),
-        animationSpec = tween(durationMillis = 200),
-        label = "heartTint"
-    )
-
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // ── Background image (Cloudinary or fallback drawable) ────────────────
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(
-                    quote.imageUrl.takeIf { !it.isNullOrBlank() }
-                        ?: R.drawable.onboarding_02
-                )
-                .crossfade(true)
-                .build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-            error = painterResource(R.drawable.onboarding_02),
-            fallback = painterResource(R.drawable.onboarding_02)
+private fun PreviewCatalogSelector() {
+    QuoteAnimeTheme {
+        CatalogSelectorContent(
+            onNavigateBack = {},
+            onFilterSelected = {}
         )
-
-        // ── Dark overlay ──────────────────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.Black.copy(alpha = 0.30f),
-                            Color.Black.copy(alpha = 0.60f),
-                            Color.Black.copy(alpha = 0.85f)
-                        )
-                    )
-                )
-        )
-
-        // ── Back button ───────────────────────────────────────────────────────
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .statusBarsPadding()
-                .padding(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Volver",
-                tint = Color.White
-            )
-        }
-
-        // ── Quote content ─────────────────────────────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 36.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Decorative opening quote mark
-            Text(
-                text = "\u201C",
-                fontSize = 96.sp,
-                color = Color.White.copy(alpha = 0.20f),
-                fontFamily = FontFamily.Serif,
-                lineHeight = 60.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(start = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = quote.quote.orEmpty(),
-                fontSize = 22.sp,
-                lineHeight = 34.sp,
-                fontFamily = FontFamily.Serif,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Normal,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            HorizontalDivider(
-                modifier = Modifier.width(48.dp),
-                color = Color.White.copy(alpha = 0.35f),
-                thickness = 1.dp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "— ${quote.author.orEmpty()}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.80f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = quote.anime?.uppercase().orEmpty(),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 2.sp,
-                color = AccentPurple.copy(alpha = 0.90f),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        // ── Bottom action buttons ─────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 36.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            DetailActionButton(onClick = { onToggleFavorite(quote) }) {
-                Icon(
-                    imageVector = if (quote.isFavorite) Icons.Default.Favorite
-                                  else Icons.Default.FavoriteBorder,
-                    contentDescription = if (quote.isFavorite) "Quitar favorito" else "Añadir favorito",
-                    tint = heartTint,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .scale(heartScale)
-                )
-            }
-            DetailActionButton(onClick = { onShare(quote) }) {
-                Icon(
-                    imageVector = Icons.Outlined.Share,
-                    contentDescription = "Compartir",
-                    tint = Color.White.copy(alpha = 0.85f),
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
     }
 }
 
+// ── Vista 2: Lista de quotes ──────────────────────────────────────────────────
+
+@Preview(name = "Lista — con frases", showBackground = true)
 @Composable
-private fun DetailActionButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(52.dp)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.15f)),
-        contentAlignment = Alignment.Center
-    ) {
-        IconButton(onClick = onClick) { content() }
+private fun PreviewCatalogListWithQuotes() {
+    QuoteAnimeTheme {
+        CatalogListContent(
+            filterLabel = "Motivación",
+            quotes = sampleQuotes,
+            isLoading = false,
+            isEmpty = false,
+            onBack = {},
+            onQuoteSelected = {},
+            onToggleFavorite = {}
+        )
+    }
+}
+
+@Preview(name = "Lista — cargando", showBackground = true)
+@Composable
+private fun PreviewCatalogListLoading() {
+    QuoteAnimeTheme {
+        CatalogListContent(
+            filterLabel = "Amor",
+            quotes = emptyList(),
+            isLoading = true,
+            isEmpty = false,
+            onBack = {},
+            onQuoteSelected = {},
+            onToggleFavorite = {}
+        )
+    }
+}
+
+@Preview(name = "Lista — sin resultados", showBackground = true)
+@Composable
+private fun PreviewCatalogListEmpty() {
+    QuoteAnimeTheme {
+        CatalogListContent(
+            filterLabel = "Soledad",
+            quotes = emptyList(),
+            isLoading = false,
+            isEmpty = true,
+            onBack = {},
+            onQuoteSelected = {},
+            onToggleFavorite = {}
+        )
+    }
+}
+
+@Preview(name = "Lista — Favoritos", showBackground = true)
+@Composable
+private fun PreviewCatalogListFavorites() {
+    QuoteAnimeTheme {
+        CatalogListContent(
+            filterLabel = "Favoritos",
+            quotes = sampleQuotes.filter { it.isFavorite },
+            isLoading = false,
+            isEmpty = false,
+            onBack = {},
+            onQuoteSelected = {},
+            onToggleFavorite = {}
+        )
+    }
+}
+
+// ── Vista 3: Detalle full-screen ──────────────────────────────────────────────
+
+@Preview(name = "Detail — sin favorito", showSystemUi = true)
+@Composable
+private fun PreviewQuoteDetail() {
+    QuoteAnimeTheme {
+        QuoteDetailContent(
+            quote = sampleQuote,
+            onBack = {}
+        )
+    }
+}
+
+@Preview(name = "Detail — con favorito activo", showSystemUi = true)
+@Composable
+private fun PreviewQuoteDetailFavorite() {
+    QuoteAnimeTheme {
+        QuoteDetailContent(
+            quote = sampleQuote.copy(isFavorite = true),
+            onBack = {}
+        )
+    }
+}
+
+// ── Componentes individuales ──────────────────────────────────────────────────
+
+@Preview(name = "Card — Favoritos", showBackground = true, widthDp = 180, heightDp = 120)
+@Composable
+private fun PreviewPrimaryFilterCardFavorites() {
+    QuoteAnimeTheme {
+        PrimaryFilterCard(
+            label = "Favoritos",
+            icon = Icons.Default.Favorite,
+            color = AccentPurple,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "Card — Emoción Amor", showBackground = true, widthDp = 180, heightDp = 110)
+@Composable
+private fun PreviewEmotionCardAmor() {
+    QuoteAnimeTheme {
+        EmotionCard(
+            emotion = EmotionOption(
+                categoryId = "amor",
+                label = "Amor",
+                icon = Icons.Default.Favorite,
+                color = Color(0xFFE91E63)
+            ),
+            onClick = {}
+        )
     }
 }

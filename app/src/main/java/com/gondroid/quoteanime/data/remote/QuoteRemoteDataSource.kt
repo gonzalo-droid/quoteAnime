@@ -18,6 +18,20 @@ class QuoteRemoteDataSource @Inject constructor(
     private val database: FirebaseDatabase
 ) {
     private val quotesRef = database.getReference("quotes")
+    private val imagenesRef = database.getReference("imagenes")
+
+    /**
+     * One-shot fetch of the /imagenes node.
+     * Returns a map of animeSlug → list of image URLs.
+     */
+    suspend fun getAnimeImages(): Map<String, List<String>> {
+        val snapshot = imagenesRef.get().await()
+        return snapshot.children.associate { slugSnapshot ->
+            val slug = slugSnapshot.key ?: ""
+            val urls = slugSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+            slug to urls
+        }
+    }
 
     fun getCategories(): Flow<List<CategoryDto>> = callbackFlow {
         val listener = object : ValueEventListener {
