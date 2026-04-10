@@ -5,7 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.3] - 2026-04-09
+## [1.1.5] - 2026-04-09
 
 ### Added
 - **Imágenes por anime**: cada frase ahora muestra una imagen de fondo correspondiente al anime, seleccionada de forma aleatoria entre las disponibles para ese título
@@ -25,7 +25,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.2] - 2026-04-08
+## [1.1.4] - 2026-04-08
 
 ### Added
 - **Compartir como imagen**: las frases ahora se pueden compartir como imagen con diseño personalizado (gradiente oscuro, tipografía serif, nombre del anime y marca de agua)
