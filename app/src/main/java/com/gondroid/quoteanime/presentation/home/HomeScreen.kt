@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.home
 
+import android.app.Activity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -29,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -45,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
-import com.gondroid.quoteanime.presentation.components.BannerAd
+import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.components.QuoteDetailContent
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.HeartRed
@@ -53,6 +55,9 @@ import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
+
+// BannerAd comentado temporalmente — reemplazado por interstitial en el flujo de compartir
+// import com.gondroid.quoteanime.presentation.components.BannerAd
 
 private val HeartColor = HeartRed
 
@@ -64,7 +69,12 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = context as? Activity
     val scope = rememberCoroutineScope()
+    val adManager = viewModel.shareInterstitialManager
+
+    // Pre-cargar el interstitial en cuanto se abre HomeScreen
+    LaunchedEffect(Unit) { adManager.preload(context) }
 
     HomeContent(
         uiState = uiState,
@@ -73,10 +83,15 @@ fun HomeScreen(
         onToggleFavorite = { viewModel.onToggleFavorite(it) },
         onScrollConsumed = { viewModel.onScrollToPageConsumed() },
         onShare = { quote ->
-            scope.launch {
-                val bitmap = createShareBitmap(quote, context)
-                shareQuoteAsBitmap(context, bitmap)
+            val doShare = {
+                scope.launch {
+                    val bitmap = createShareBitmap(quote, context)
+                    shareQuoteAsBitmap(context, bitmap)
+                }
+                Unit
             }
+            if (activity != null) adManager.onShareRequested(activity, doShare)
+            else doShare()
         }
     )
 }
@@ -90,10 +105,7 @@ private fun HomeContent(
     onScrollConsumed: () -> Unit,
     onShare: (quote: Quote) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
             uiState.isLoading -> {
                 CircularProgressIndicator(
@@ -116,7 +128,7 @@ private fun HomeContent(
                 val currentQuote = uiState.quotes[pagerState.currentPage]
 
                 // Scroll to widget quote when launched from widget tap
-                androidx.compose.runtime.LaunchedEffect(uiState.scrollToPage) {
+                LaunchedEffect(uiState.scrollToPage) {
                     val page = uiState.scrollToPage
                     if (page != null && page in uiState.quotes.indices) {
                         pagerState.animateScrollToPage(page)
@@ -155,7 +167,6 @@ private fun HomeContent(
                     )
                 }
 
-
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -167,9 +178,10 @@ private fun HomeContent(
                         onToggleFavorite = { onToggleFavorite(currentQuote) },
                         onShare = { onShare(currentQuote) },
                         onNavigateToCatalog = { onNavigateToCatalog(null) },
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = 24.dp)
                     )
-                    BannerAd(modifier = Modifier.fillMaxWidth())
+                    // BannerAd comentado — reemplazado por interstitial en flujo de compartir
+                    // BannerAd(modifier = Modifier.fillMaxWidth())
                 }
             }
         }
@@ -220,13 +232,10 @@ private fun BottomActions(
             Icon(
                 imageVector = if (quote.isFavorite) Icons.Default.Favorite
                 else Icons.Default.FavoriteBorder,
-                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite) else stringResource(
-                    R.string.add_favorite
-                ),
+                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite)
+                else stringResource(R.string.add_favorite),
                 tint = heartTint,
-                modifier = Modifier
-                    .size(24.dp)
-                    .scale(heartScale)
+                modifier = Modifier.size(24.dp).scale(heartScale)
             )
         }
 
@@ -262,9 +271,7 @@ private fun ActionButton(
             .background(Color.White.copy(alpha = 0.06f)),
         contentAlignment = Alignment.Center
     ) {
-        IconButton(onClick = onClick) {
-            content()
-        }
+        IconButton(onClick = onClick) { content() }
     }
 }
 
@@ -276,12 +283,7 @@ fun PreviewHomeContent() {
             uiState = HomeUiState(
                 isLoading = false,
                 quotes = listOf(
-                    Quote(
-                        id = "1",
-                        quote = "Quote 1",
-                        author = "Author 1",
-                        anime = "Anime 1",
-                    )
+                    Quote(id = "1", quote = "Quote 1", author = "Author 1", anime = "Anime 1")
                 )
             ),
             onNavigateToCatalog = {},

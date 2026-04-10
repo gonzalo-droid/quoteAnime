@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
+import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAllQuotes: GetAllQuotesUseCase,
-    private val toggleFavorite: ToggleFavoriteUseCase
+    private val toggleFavorite: ToggleFavoriteUseCase,
+    val shareInterstitialManager: ShareInterstitialManager
 ) : ViewModel() {
 
     // Populated when launched from the widget (navigation arg "quoteId")

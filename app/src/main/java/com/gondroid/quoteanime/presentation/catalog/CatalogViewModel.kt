@@ -8,6 +8,7 @@ import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetFavoriteQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetQuotesByCategoryUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
+import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +32,8 @@ class CatalogViewModel @Inject constructor(
     private val getAllQuotes: GetAllQuotesUseCase,
     private val getQuotesByCategory: GetQuotesByCategoryUseCase,
     private val getFavoriteQuotes: GetFavoriteQuotesUseCase,
-    private val toggleFavorite: ToggleFavoriteUseCase
+    private val toggleFavorite: ToggleFavoriteUseCase,
+    val shareInterstitialManager: ShareInterstitialManager
 ) : ViewModel() {
 
     // If launched from Home with a categoryId, jump straight to list

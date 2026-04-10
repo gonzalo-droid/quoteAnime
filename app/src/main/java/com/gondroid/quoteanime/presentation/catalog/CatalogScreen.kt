@@ -108,7 +108,12 @@ fun CatalogScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = context as? android.app.Activity
     val scope = rememberCoroutineScope()
+    val adManager = viewModel.shareInterstitialManager
+
+    // Pre-cargar el interstitial al entrar al catálogo
+    androidx.compose.runtime.LaunchedEffect(Unit) { adManager.preload(context) }
 
     // Internal back navigation (Detail → List → Selector)
     BackHandler(enabled = uiState.selectedQuote != null) { viewModel.onBackFromDetail() }
@@ -150,10 +155,15 @@ fun CatalogScreen(
                             )
                         }
                         DetailActionButton(onClick = {
-                            scope.launch {
-                                val bitmap = createShareBitmap(quote, context)
-                                shareQuoteAsBitmap(context, bitmap)
+                            val doShare = {
+                                scope.launch {
+                                    val bitmap = createShareBitmap(quote, context)
+                                    shareQuoteAsBitmap(context, bitmap)
+                                }
+                                Unit
                             }
+                            if (activity != null) adManager.onShareRequested(activity, doShare)
+                            else doShare()
                         }) {
                             Icon(
                                 imageVector = Icons.Outlined.Share,
