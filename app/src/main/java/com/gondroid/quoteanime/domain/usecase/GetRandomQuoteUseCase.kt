@@ -6,6 +6,6 @@ import javax.inject.Inject
 class GetRandomQuoteUseCase @Inject constructor(
     private val repository: QuoteRepository
 ) {
-    suspend operator fun invoke(categoryIds: Set<String>) =
-        repository.getRandomQuote(categoryIds)
+    suspend operator fun invoke(categoryIds: Set<String>, excludeId: String? = null) =
+        repository.getRandomQuote(categoryIds, excludeId)
 }

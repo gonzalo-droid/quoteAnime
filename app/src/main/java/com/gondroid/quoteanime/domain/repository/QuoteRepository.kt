@@ -10,7 +10,7 @@ interface QuoteRepository {
     fun getQuotesByCategory(categoryId: String): Flow<List<Quote>>
     fun getFavorites(): Flow<List<Quote>>
     fun isFavorite(quoteId: String): Flow<Boolean>
-    suspend fun getRandomQuote(categoryIds: Set<String>): Quote?
+    suspend fun getRandomQuote(categoryIds: Set<String>, excludeId: String? = null): Quote?
     suspend fun addFavorite(quote: Quote)
     suspend fun removeFavorite(quoteId: String)
 }

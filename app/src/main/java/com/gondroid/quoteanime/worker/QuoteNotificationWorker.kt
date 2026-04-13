@@ -10,6 +10,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.gondroid.quoteanime.domain.usecase.GetRandomQuoteUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
+import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -22,6 +23,7 @@ class QuoteNotificationWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val getRandomQuote: GetRandomQuoteUseCase,
     private val getUserPreferences: GetUserPreferencesUseCase,
+    private val updateUserPreferences: UpdateUserPreferencesUseCase,
     private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
@@ -45,10 +47,13 @@ class QuoteNotificationWorker @AssistedInject constructor(
                 if (!granted) return Result.failure()
             }
 
-            val quote = getRandomQuote(preferences.selectedCategoryIds)
-                ?: return Result.retry()
+            val quote = getRandomQuote(
+                preferences.selectedCategoryIds,
+                excludeId = preferences.lastNotificationQuoteId.ifEmpty { null }
+            ) ?: return Result.retry()
 
             notificationHelper.showQuoteNotification(quote)
+            updateUserPreferences.setLastNotificationQuoteId(quote.id)
             Result.success()
         }.getOrElse {
             if (runAttemptCount < 3) Result.retry() else Result.failure()

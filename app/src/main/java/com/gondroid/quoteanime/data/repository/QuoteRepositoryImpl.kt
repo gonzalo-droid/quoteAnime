@@ -75,8 +75,8 @@ class QuoteRepositoryImpl @Inject constructor(
     override fun isFavorite(quoteId: String): Flow<Boolean> =
         favoriteQuoteDao.isFavorite(quoteId)
 
-    override suspend fun getRandomQuote(categoryIds: Set<String>): Quote? {
-        val dto = remoteDataSource.getRandomQuote(categoryIds) ?: return null
+    override suspend fun getRandomQuote(categoryIds: Set<String>, excludeId: String?): Quote? {
+        val dto = remoteDataSource.getRandomQuote(categoryIds, excludeId) ?: return null
         return dto.toDomain(imageUrl = resolveImageUrl(dto.animeSlug))
     }
 

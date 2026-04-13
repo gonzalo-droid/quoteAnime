@@ -17,16 +17,17 @@ class UserPreferencesDataStore @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
     private object Keys {
-        val SELECTED_CATEGORY_IDS       = stringSetPreferencesKey("selected_category_ids")
-        val NOTIFICATIONS_ENABLED       = booleanPreferencesKey("notifications_enabled")
-        val NOTIFICATION_START_HOUR     = intPreferencesKey("notification_start_hour")
-        val NOTIFICATION_START_MINUTE   = intPreferencesKey("notification_start_minute")
-        val NOTIFICATION_END_HOUR       = intPreferencesKey("notification_end_hour")
-        val NOTIFICATION_END_MINUTE     = intPreferencesKey("notification_end_minute")
-        val NOTIFICATION_FREQUENCY      = intPreferencesKey("notification_frequency")
-        val WIDGET_SIZE                 = stringPreferencesKey("widget_size")
-        val WIDGET_UPDATE_TIMES_PER_DAY = intPreferencesKey("widget_update_times_per_day")
-        val ONBOARDING_COMPLETED        = booleanPreferencesKey("onboarding_completed")
+        val SELECTED_CATEGORY_IDS           = stringSetPreferencesKey("selected_category_ids")
+        val NOTIFICATIONS_ENABLED           = booleanPreferencesKey("notifications_enabled")
+        val NOTIFICATION_START_HOUR         = intPreferencesKey("notification_start_hour")
+        val NOTIFICATION_START_MINUTE       = intPreferencesKey("notification_start_minute")
+        val NOTIFICATION_END_HOUR           = intPreferencesKey("notification_end_hour")
+        val NOTIFICATION_END_MINUTE         = intPreferencesKey("notification_end_minute")
+        val NOTIFICATION_FREQUENCY          = intPreferencesKey("notification_frequency")
+        val LAST_NOTIFICATION_QUOTE_ID      = stringPreferencesKey("last_notification_quote_id")
+        val WIDGET_SIZE                     = stringPreferencesKey("widget_size")
+        val WIDGET_UPDATE_TIMES_PER_DAY     = intPreferencesKey("widget_update_times_per_day")
+        val ONBOARDING_COMPLETED            = booleanPreferencesKey("onboarding_completed")
     }
 
     val userPreferences: Flow<UserPreferences> = dataStore.data.map { prefs ->
@@ -37,7 +38,8 @@ class UserPreferencesDataStore @Inject constructor(
             notificationStartMinute = prefs[Keys.NOTIFICATION_START_MINUTE] ?: 0,
             notificationEndHour     = prefs[Keys.NOTIFICATION_END_HOUR] ?: 22,
             notificationEndMinute   = prefs[Keys.NOTIFICATION_END_MINUTE] ?: 0,
-            notificationFrequency   = (prefs[Keys.NOTIFICATION_FREQUENCY] ?: 1).coerceIn(1, 10),
+            notificationFrequency       = (prefs[Keys.NOTIFICATION_FREQUENCY] ?: 1).coerceIn(1, 10),
+            lastNotificationQuoteId     = prefs[Keys.LAST_NOTIFICATION_QUOTE_ID] ?: "",
             widgetSize              = prefs[Keys.WIDGET_SIZE]
                 ?.let { runCatching { WidgetSize.valueOf(it) }.getOrNull() }
                 ?: WidgetSize.MEDIUM,
@@ -67,6 +69,10 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun updateNotificationFrequency(timesPerDay: Int) {
         dataStore.edit { it[Keys.NOTIFICATION_FREQUENCY] = timesPerDay.coerceIn(1, 10) }
+    }
+
+    suspend fun updateLastNotificationQuoteId(quoteId: String) {
+        dataStore.edit { it[Keys.LAST_NOTIFICATION_QUOTE_ID] = quoteId }
     }
 
     suspend fun updateWidgetSize(size: WidgetSize) {

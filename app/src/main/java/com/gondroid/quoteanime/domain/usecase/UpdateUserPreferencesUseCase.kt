@@ -21,6 +21,9 @@ class UpdateUserPreferencesUseCase @Inject constructor(
     suspend fun setFrequency(timesPerDay: Int) =
         repository.updateNotificationFrequency(timesPerDay)
 
+    suspend fun setLastNotificationQuoteId(quoteId: String) =
+        repository.updateLastNotificationQuoteId(quoteId)
+
     suspend fun setWidgetSize(size: WidgetSize) =
         repository.updateWidgetSize(size)
 

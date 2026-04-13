@@ -93,7 +93,7 @@ class QuoteRemoteDataSource @Inject constructor(
         awaitClose { quotesRef.removeEventListener(listener) }
     }
 
-    suspend fun getRandomQuote(categoryIds: Set<String>): QuoteDto? {
+    suspend fun getRandomQuote(categoryIds: Set<String>, excludeId: String? = null): QuoteDto? {
         val snapshot = quotesRef.get().await()
         val allQuotes = snapshot.children.mapNotNull { it.toQuoteDto() }
         val filtered = if (categoryIds.isEmpty()) allQuotes
@@ -101,6 +101,10 @@ class QuoteRemoteDataSource @Inject constructor(
                            if (!dto.categories.isNullOrEmpty()) dto.categories.any { it in categoryIds }
                            else dto.anime in categoryIds
                        }
-        return filtered.randomOrNull()
+        val candidates = if (!excludeId.isNullOrEmpty() && filtered.size > 1)
+            filtered.filter { it.id != excludeId }
+        else
+            filtered
+        return candidates.randomOrNull()
     }
 }

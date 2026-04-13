@@ -13,6 +13,7 @@ interface UserPreferencesRepository {
         endHour: Int, endMinute: Int
     )
     suspend fun updateNotificationFrequency(timesPerDay: Int)
+    suspend fun updateLastNotificationQuoteId(quoteId: String)
     suspend fun updateWidgetSize(size: WidgetSize)
     suspend fun updateWidgetUpdateTimesPerDay(times: Int)
     fun isOnboardingCompleted(): Flow<Boolean>

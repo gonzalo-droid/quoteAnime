@@ -27,6 +27,9 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateNotificationFrequency(timesPerDay: Int) =
         dataStore.updateNotificationFrequency(timesPerDay)
 
+    override suspend fun updateLastNotificationQuoteId(quoteId: String) =
+        dataStore.updateLastNotificationQuoteId(quoteId)
+
     override suspend fun updateWidgetSize(size: WidgetSize) =
         dataStore.updateWidgetSize(size)
 
