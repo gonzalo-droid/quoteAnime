@@ -19,7 +19,15 @@
       "Bash(./gradlew compileDebugKotlin)",
       "Bash(xxd)",
       "Bash(python3 *)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/lora/static/Lora-Regular.ttf\" -o lora_regular.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/lora/static/Lora-Italic.ttf\" -o lora_italic.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/lora/static/Lora-Bold.ttf\" -o lora_bold.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/lora/static/Lora-BoldItalic.ttf\" -o lora_bold_italic.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Regular.ttf\" -o playfair_display_regular.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Italic.ttf\" -o playfair_display_italic.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-SemiBold.ttf\" -o playfair_display_semibold.ttf)",
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Bold.ttf\" -o playfair_display_bold.ttf)"
     ]
   }
 }
