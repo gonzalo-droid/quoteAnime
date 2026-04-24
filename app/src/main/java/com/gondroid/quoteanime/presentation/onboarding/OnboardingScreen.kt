@@ -49,6 +49,8 @@ import com.gondroid.quoteanime.ui.theme.AccentPurpleDim
 import com.gondroid.quoteanime.ui.theme.TextPrimary
 import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
+import androidx.compose.ui.tooling.preview.Preview
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 private data class OnboardingPage(
     val quote: String,
@@ -249,4 +251,38 @@ private fun Dot(isSelected: Boolean) {
             .clip(CircleShape)
             .background(if (isSelected) AccentPurple else AccentPurpleDim.copy(alpha = 0.4f))
     )
+}
+
+// ── Previews ──────────────────────────────────────────────────────────────────
+
+@Preview(name = "Onboarding — página 1", showSystemUi = true)
+@Composable
+private fun PreviewOnboardingPage1() {
+    QuoteAnimeTheme {
+        OnboardingPage(page = pages[0])
+    }
+}
+
+@Preview(name = "Onboarding — página 2", showSystemUi = true)
+@Composable
+private fun PreviewOnboardingPage2() {
+    QuoteAnimeTheme {
+        OnboardingPage(page = pages[1])
+    }
+}
+
+@Preview(name = "Dots — primera seleccionada", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun PreviewDotsFirst() {
+    QuoteAnimeTheme {
+        DotsIndicator(total = 3, current = 0)
+    }
+}
+
+@Preview(name = "Dots — segunda seleccionada", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun PreviewDotsMiddle() {
+    QuoteAnimeTheme {
+        DotsIndicator(total = 3, current = 1)
+    }
 }

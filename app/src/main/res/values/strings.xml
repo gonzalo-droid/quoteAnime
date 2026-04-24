@@ -14,6 +14,19 @@
     <string name="rating">Calificación</string>
     <string name="widget">Widget</string>
     <string name="notifications">Notificaciones</string>
-    <string name="rating_app">Calificar la app</string>
-    <string name="subtitle_rating_section">¿Te gusta Frases Anime? Déjanos una reseña en Google Play</string>
+    <string name="rating_app">Dejános una reseña</string>
+    <string name="subtitle_rating_section">Déjanos una reseña en Google Play</string>
+    <string name="share_app">Compartir la app</string>
+    <string name="share_app_subtitle">Invita a tus amigos a descubrir Frases Anime</string>
+    <string name="share_app_message">¡Descubre QuoteAnime! Las mejores frases de tus animes favoritos 🌟 Descárgala gratis:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
+    <string name="terms_and_conditions">Términos y condiciones</string>
+    <string name="politics_privacy">Política de privacidad</string>
+
+    <string name="follow_us">Síguenos</string>
+    <string name="social_facebook">Facebook</string>
+    <string name="social_facebook_handle">@FrasesAnime</string>
+    <string name="social_instagram">Instagram</string>
+    <string name="social_instagram_handle">@quoteanime</string>
+    <string name="social_tiktok">TikTok</string>
+    <string name="social_tiktok_handle">@quoteanime</string>
 </resources>

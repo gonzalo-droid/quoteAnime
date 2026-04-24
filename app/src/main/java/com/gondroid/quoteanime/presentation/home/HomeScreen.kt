@@ -294,3 +294,50 @@ fun PreviewHomeContent() {
         )
     }
 }
+
+@Preview(name = "Home — cargando")
+@Composable
+private fun PreviewHomeLoading() {
+    QuoteAnimeTheme {
+        HomeContent(
+            uiState = HomeUiState(isLoading = true),
+            onNavigateToCatalog = {},
+            onNavigateToSettings = {},
+            onToggleFavorite = {},
+            onScrollConsumed = {},
+            onShare = {}
+        )
+    }
+}
+
+@Preview(name = "Home — con frases", showSystemUi = true)
+@Composable
+private fun PreviewHomeWithQuotes() {
+    QuoteAnimeTheme {
+        HomeContent(
+            uiState = HomeUiState(
+                isLoading = false,
+                quotes = listOf(
+                    Quote(
+                        id = "1",
+                        quote = "No me rindo. Nunca me rendiré. Ese es mi camino ninja.",
+                        author = "Naruto Uzumaki",
+                        anime = "Naruto",
+                        isFavorite = true
+                    ),
+                    Quote(
+                        id = "2",
+                        quote = "El poder de la amistad es el más fuerte que existe.",
+                        author = "Monkey D. Luffy",
+                        anime = "One Piece"
+                    )
+                )
+            ),
+            onNavigateToCatalog = {},
+            onNavigateToSettings = {},
+            onToggleFavorite = {},
+            onScrollConsumed = {},
+            onShare = {}
+        )
+    }
+}

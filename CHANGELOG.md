@@ -5,6 +5,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased] - 2026-04-23
+
+### Added
+- **Tipografía Google Fonts**: fuentes Lora (frase) y Playfair Display (autor) descargadas async; fallback a Georgia / Didot del sistema. Definidas en `ui/theme/FontFamilies.kt` con certificados GMS en `res/values/font_certs.xml`
+- **Compartir la app**: nuevo ítem en SettingsScreen con `Intent.ACTION_SEND` y mensaje personalizable (`R.string.share_app_message`)
+- **Sección "Síguenos"**: 3 ítems en SettingsScreen (Facebook, Instagram, TikTok) con íconos vectoriales brand-colored y `openUrl()` compartido; URLs pendientes de actualizar con handles reales
+- **Términos y condiciones**: nuevo ítem en `VersionSection` de SettingsScreen; comparte URL con la política de privacidad (`https://gondroid.dev/privacy-policy`)
+- **Previews `@Preview`**: cobertura completa añadida en `QuoteCard`, `QuoteDetailContent`, `HomeScreen`, `SettingsScreen`, `OnboardingScreen` y `WidgetTutorialScreen`
+
+### Changed
+- Comillas tipográficas decorativas (`"` / `"`) eliminadas de `QuoteCard`, `QuoteDetailContent` y `QuoteWidget` (Small, Medium y Large); también eliminado el `Text` decorativo de apertura en el widget Large
+- Fuentes del texto de frases y autores actualizadas de Georgia/Didot del sistema a las variantes Google Fonts (con mismos fallbacks)
+
+### Technical
+- Dependencia nueva: `androidx.compose.ui:ui-text-google-fonts` (gestionada por BOM de Compose)
+- Iconos vectoriales nuevos en `res/drawable/`: `ic_facebook.xml`, `ic_instagram.xml`, `ic_tiktok.xml`
+- Strings nuevos en `res/values/strings.xml`: `share_app_message`, `terms_and_conditions`, `politics_privacy`
+
+---
+
 ## [1.1.4] - 2026-04-10
 
 ### Added

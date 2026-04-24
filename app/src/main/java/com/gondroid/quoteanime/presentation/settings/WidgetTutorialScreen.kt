@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
 import kotlinx.coroutines.launch
+import androidx.compose.ui.tooling.preview.Preview
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 private data class TutorialStep(
     @param:DrawableRes val imageRes: Int,
@@ -250,5 +252,15 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+// ── Previews ──────────────────────────────────────────────────────────────────
+
+@Preview(name = "Widget Tutorial — paso 1", showSystemUi = true)
+@Composable
+private fun PreviewWidgetTutorial() {
+    QuoteAnimeTheme {
+        WidgetTutorialScreen(onNavigateBack = {})
     }
 }

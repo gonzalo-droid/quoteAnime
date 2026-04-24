@@ -28,6 +28,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
+import com.gondroid.quoteanime.ui.theme.Didot
+import com.gondroid.quoteanime.ui.theme.Georgia
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -116,27 +120,11 @@ fun QuoteDetailContent(
                 .padding(horizontal = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Decorative opening quote mark
-            Text(
-                text = "\u201C",
-                fontSize = 96.sp,
-                color = Color.White.copy(alpha = 0.20f),
-                fontFamily = FontFamily.Serif,
-                lineHeight = 60.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(start = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = quote.quote.orEmpty(),
                 fontSize = 22.sp,
                 lineHeight = 34.sp,
-                fontFamily = FontFamily.Serif,
+                fontFamily = Georgia,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Normal,
                 color = Color.White,
@@ -156,6 +144,7 @@ fun QuoteDetailContent(
             Text(
                 text = "— ${quote.author.orEmpty()}",
                 fontSize = 14.sp,
+                fontFamily = Didot,
                 fontWeight = FontWeight.Medium,
                 color = Color.White.copy(alpha = 0.80f),
                 textAlign = TextAlign.Center
@@ -195,5 +184,41 @@ fun DetailActionButton(onClick: () -> Unit, content: @Composable () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         IconButton(onClick = onClick) { content() }
+    }
+}
+
+// ── Previews ──────────────────────────────────────────────────────────────────
+
+@Preview(name = "Detail — completa", showSystemUi = true)
+@Composable
+private fun PreviewQuoteDetailFull() {
+    QuoteAnimeTheme {
+        QuoteDetailContent(
+            quote = Quote(
+                id = "1",
+                quote = "El poder no es nada si no tienes la voluntad de usarlo para proteger lo que amas.",
+                author = "Roy Mustang",
+                anime = "Fullmetal Alchemist: Brotherhood",
+                isFavorite = false
+            ),
+            onBack = {}
+        )
+    }
+}
+
+@Preview(name = "Detail — favorita", showSystemUi = true)
+@Composable
+private fun PreviewQuoteDetailFavorite() {
+    QuoteAnimeTheme {
+        QuoteDetailContent(
+            quote = Quote(
+                id = "2",
+                quote = "La gente muere cuando la matan.",
+                author = "Shirō Emiya",
+                anime = "Fate/stay night",
+                isFavorite = true
+            ),
+            onBack = {}
+        )
     }
 }

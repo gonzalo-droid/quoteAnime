@@ -151,7 +151,7 @@ class QuoteWidget : GlanceAppWidget() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "\u201C$text\u201D",
+                text = text,
                 style = TextStyle(
                     color     = ColorTextPrimary,
                     fontSize  = 12.sp,
@@ -171,7 +171,7 @@ class QuoteWidget : GlanceAppWidget() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "\u201C$text\u201D",
+                text = text,
                 style = TextStyle(
                     color     = ColorTextPrimary,
                     fontSize  = 14.sp,
@@ -201,12 +201,6 @@ class QuoteWidget : GlanceAppWidget() {
             modifier = GlanceModifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text  = "\u201C",
-                style = TextStyle(color = ColorAccent, fontSize = 36.sp),
-                modifier = GlanceModifier.fillMaxWidth()
-            )
-            Spacer(GlanceModifier.height(2.dp))
             Text(
                 text = text,
                 style = TextStyle(

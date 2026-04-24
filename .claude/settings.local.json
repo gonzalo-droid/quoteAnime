@@ -16,7 +16,10 @@
       "Bash(./gradlew :app:testDebugUnitTest --rerun-tasks)",
       "Bash(xargs -I {} sh -c 'grep -o \"[0-9]* tests\" {} | head -3')",
       "Bash(./gradlew test:*)",
-      "Bash(./gradlew compileDebugKotlin)"
+      "Bash(./gradlew compileDebugKotlin)",
+      "Bash(xxd)",
+      "Bash(python3 *)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

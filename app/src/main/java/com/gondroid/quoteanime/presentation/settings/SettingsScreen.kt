@@ -25,6 +25,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -72,6 +75,12 @@ import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
+import androidx.compose.ui.tooling.preview.Preview
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
+
+private const val PRIVACY_POLICY_URL = "https://quote-anime-web.vercel.app/privacy-policy"
+private const val TERM_AND_CONDITIONS_URL = "https://quote-anime-web.vercel.app/terms-and-conditions"
+
 
 @Composable
 fun SettingsScreen(
@@ -190,8 +199,15 @@ fun SettingsScreen(
                 item { SectionDivider() }
 
                 item {
+                    SectionHeader(stringResource(R.string.follow_us))
+                    SocialSection()
+                }
+
+                item { SectionDivider() }
+
+                item {
                     SectionHeader(stringResource(R.string.version))
-                    VersionSection(versionName = versionName)
+                    InformationSection(versionName = versionName)
                 }
 
                 item { SectionDivider() }
@@ -229,7 +245,7 @@ private fun SettingsTopBar(onNavigateBack: () -> Unit) {
     TopAppBar(
         title = {
             Text(
-                "Personalización",
+                "Ajustes",
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -617,7 +633,7 @@ private fun WidgetSection(
     )
 }
 
-// ── Rating ────────────────────────────────────────────────────────────────────
+
 private fun openPlayStore(context: android.content.Context) {
     runCatching {
         context.startActivity(
@@ -680,22 +696,127 @@ private fun RatingSection() {
         },
         colors = listItemColors
     )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
+    ListItem(
+        headlineContent = {
+            Text(
+                stringResource(R.string.share_app),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        supportingContent = {
+            Text(
+                stringResource(R.string.share_app_subtitle),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.Filled.Share,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable { shareApp(context) },
+        colors = listItemColors
+    )
+}
+
+private fun shareApp(context: android.content.Context) {
+    val message = context.getString(R.string.share_app_message)
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, message)
+        type = "text/plain"
+    }
+    context.startActivity(Intent.createChooser(intent, null))
+}
+
+private fun openUrl(context: android.content.Context, url: String) {
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+}
+
+// ── Social ───────────────────────────────────────────────────────────────────
+@Composable
+private fun SocialSection() {
+    val context = LocalContext.current
+
+    SocialItem(
+        iconRes = R.drawable.ic_instagram,
+        name = stringResource(R.string.social_instagram),
+        handle = stringResource(R.string.social_instagram_handle),
+        iconTint = Color(0xFFE1306C),
+        onClick = { openUrl(context, "https://www.instagram.com/animequoteapp/") }
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
+    SocialItem(
+        iconRes = R.drawable.ic_facebook,
+        name = stringResource(R.string.social_facebook),
+        handle = stringResource(R.string.social_facebook_handle),
+        iconTint = Color(0xFF1877F2),
+        onClick = { openUrl(context, "https://www.facebook.com/share/1Ay18mtNZh/?mibextid=wwXIfr") }
+    )
+
+    /*
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
+    SocialItem(
+        iconRes = R.drawable.ic_tiktok,
+        name = stringResource(R.string.social_tiktok),
+        handle = stringResource(R.string.social_tiktok_handle),
+        iconTint = Color.White,
+        onClick = { openUrl(context, "https://www.tiktok.com/@frasesanime") }
+    )*/
 }
 
 @Composable
-private fun VersionSection(versionName: String) {
+private fun SocialItem(
+    iconRes: Int,
+    name: String,
+    handle: String,
+    iconTint: Color,
+    onClick: () -> Unit
+) {
     ListItem(
-        headlineContent = {
-            Text("Versión de la app", color = MaterialTheme.colorScheme.onBackground)
-        },
-        trailingContent = {
-            Text(
-                text = versionName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+        leadingContent = {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = name,
+                tint = iconTint
             )
         },
+        headlineContent = {
+            Text(name, color = MaterialTheme.colorScheme.onBackground)
+        },
+        supportingContent = {
+            Text(
+                handle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable(onClick = onClick),
         colors = listItemColors
     )
 }
@@ -731,4 +852,189 @@ private fun TimePickerDialog(
             TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
+}
+
+
+@Composable
+private fun InformationSection(versionName: String) {
+    val context = LocalContext.current
+
+    ListItem(
+        headlineContent = {
+            Text(
+                stringResource(R.string.politics_privacy),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable { openUrl(context, PRIVACY_POLICY_URL) },
+        colors = listItemColors
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
+    ListItem(
+        headlineContent = {
+            Text(
+                stringResource(R.string.terms_and_conditions),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.clickable { openUrl(context, TERM_AND_CONDITIONS_URL) },
+        colors = listItemColors
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+
+    ListItem(
+        headlineContent = {
+            Text("Versión", color = MaterialTheme.colorScheme.onBackground)
+        },
+        trailingContent = {
+            Text(
+                text = versionName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        colors = listItemColors
+    )
+}
+
+// ── Previews ──────────────────────────────────────────────────────────────────
+
+@Preview(name = "Settings — notificaciones OFF", showSystemUi = true)
+@Composable
+private fun PreviewSettingsOff() {
+    QuoteAnimeTheme {
+        val uiState = SettingsUiState(isLoading = false, notificationsEnabled = false)
+        Scaffold(
+            topBar = { SettingsTopBar(onNavigateBack = {}) },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { padding ->
+            androidx.compose.foundation.lazy.LazyColumn(
+                modifier = androidx.compose.ui.Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Notificaciones")
+                    NotificationSection(uiState = uiState, onToggle = {}, onTimeRangeChanged = { _, _, _, _ -> }, onFrequencyChanged = {})
+                }
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Apóyanos")
+                    RatingSection()
+                }
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Síguenos")
+                    SocialSection()
+                }
+                item { SectionDivider() }
+                item { InformationSection(versionName = "1.2.0") }
+            }
+        }
+    }
+}
+
+@Preview(name = "Settings — notificaciones ON", showSystemUi = true)
+@Composable
+private fun PreviewSettingsOn() {
+    QuoteAnimeTheme {
+        val uiState = SettingsUiState(
+            isLoading = false,
+            notificationsEnabled = true,
+            notificationStartHour = 8,
+            notificationStartMinute = 0,
+            notificationEndHour = 22,
+            notificationEndMinute = 0,
+            notificationFrequency = 3
+        )
+        Scaffold(
+            topBar = { SettingsTopBar(onNavigateBack = {}) },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { padding ->
+            androidx.compose.foundation.lazy.LazyColumn(
+                modifier = androidx.compose.ui.Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Notificaciones")
+                    NotificationSection(uiState = uiState, onToggle = {}, onTimeRangeChanged = { _, _, _, _ -> }, onFrequencyChanged = {})
+                }
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Calificación")
+                    RatingSection()
+                }
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Síguenos")
+                    SocialSection()
+                }
+                item { SectionDivider() }
+                item {
+                    SectionHeader("Información")
+                    InformationSection(versionName = "1.2.0")
+                }
+            }
+        }
+    }
+}
+
+@Preview(name = "Rating + Share", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun PreviewRatingSection() {
+    QuoteAnimeTheme {
+        androidx.compose.foundation.layout.Column {
+            SectionHeader("Calificación")
+            RatingSection()
+        }
+    }
+}
+
+@Preview(name = "Síguenos", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun PreviewSocialSection() {
+    QuoteAnimeTheme {
+        androidx.compose.foundation.layout.Column {
+            SectionHeader("Síguenos")
+            SocialSection()
+        }
+    }
+}
+
+@Preview(name = "Información", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun PreviewInformationSection() {
+    QuoteAnimeTheme {
+        androidx.compose.foundation.layout.Column {
+            SectionHeader("Información")
+            InformationSection(versionName = "1.0.4")
+        }
+    }
 }
