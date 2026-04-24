@@ -5,7 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] - 2026-04-23
+## [1.1.5] - 2026-04-23
 
 ### Added
 - **Tipografía Google Fonts**: fuentes Lora (frase) y Playfair Display (autor) descargadas async; fallback a Georgia / Didot del sistema. Definidas en `ui/theme/FontFamilies.kt` con certificados GMS en `res/values/font_certs.xml`
