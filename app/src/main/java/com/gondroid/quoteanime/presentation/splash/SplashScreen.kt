@@ -3,12 +3,14 @@ package com.gondroid.quoteanime.presentation.splash
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +24,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.gondroid.quoteanime.ui.theme.TextPrimary
@@ -91,12 +96,11 @@ private fun SplashContent() {
                 .scale(scale)
         ) {
             // Comilla decorativa
-            Text(
-                text = "\u201C",
-                fontSize = 72.sp,
-                color = AccentPurple.copy(alpha = 0.25f),
-                fontFamily = FontFamily.Serif,
-                lineHeight = 40.sp
+            Image(
+                painter = painterResource(id = R.drawable.logo_quoteanime_white),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.width(100.dp)
             )
 
             Spacer(Modifier.height(8.dp))

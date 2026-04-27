@@ -27,7 +27,12 @@
       "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Regular.ttf\" -o playfair_display_regular.ttf)",
       "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Italic.ttf\" -o playfair_display_italic.ttf)",
       "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-SemiBold.ttf\" -o playfair_display_semibold.ttf)",
-      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Bold.ttf\" -o playfair_display_bold.ttf)"
+      "Bash(curl -sL \"https://github.com/google/fonts/raw/main/ofl/playfairdisplay/static/PlayfairDisplay-Bold.ttf\" -o playfair_display_bold.ttf)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(./gradlew assembleDebug *)",
+      "Bash(./gradlew :app:compileReleaseUnitTestKotlin)",
+      "Bash(./gradlew :app:testDebugUnitTest --stacktrace)"
     ]
   }
 }
