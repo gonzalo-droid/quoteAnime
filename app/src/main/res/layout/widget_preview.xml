@@ -37,7 +37,8 @@
             android:text="ONE PIECE"
             android:textColor="#A78BFA"
             android:textSize="9sp"
-            android:letterSpacing="0.12" />
+            android:letterSpacing="0.12"
+            android:textAllCaps="true" />
 
     </LinearLayout>
 
