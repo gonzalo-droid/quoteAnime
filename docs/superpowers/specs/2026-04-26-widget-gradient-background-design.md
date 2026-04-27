@@ -1,7 +1,7 @@
 # Widget — Gradiente de fondo mejorado
 
 **Fecha**: 2026-04-26
-**Alcance**: Solo `app/src/main/res/drawable/widget_bg.xml`
+**Alcance**: `widget_bg.xml` + `widget_preview.xml`
 
 ## Objetivo
 
@@ -61,17 +61,30 @@ Reemplazar el gradiente plano actual del widget por uno atmosférico y profundo 
 | Gradiente vertical 270° | Imita la dirección del overlay del Home (oscurece más abajo donde va el texto) |
 | Acento diagonal 45° | Añade sensación de profundidad / luz lateral, como las fotos reales de anime |
 
+## Solución 2: `widget_preview.xml` — Preview fiel al widget real
+
+El preview actual usa `?android:attr/colorBackground` (fondo del sistema) y `TextView` sin estilo — no se parece al widget real. Se reescribe para usar el mismo fondo y colores.
+
+Cambios clave:
+- `android:background="@drawable/widget_bg"` — mismo gradiente que el widget real
+- `android:padding="16dp"` sobre un `FrameLayout` raíz con `clipToOutline` para respetar las esquinas redondeadas del drawable
+- `TextView` frase: `textColor="#F0EAFF"`, `textStyle="italic"`, `textSize="14sp"`
+- `TextView` autor: `textColor="#9B8DB3"`, `textSize="11sp"`, prefijo `— `
+- `TextView` anime: `textColor="#A78BFA"`, `textSize="9sp"`, `textAllCaps="true"`, `letterSpacing="0.12"`
+- Texto de ejemplo en español con quote, autor y anime representativos
+
 ## Archivos afectados
 
 | Archivo | Cambio |
 |---------|--------|
-| `app/src/main/res/drawable/widget_bg.xml` | Reemplazar contenido por `layer-list` de 3 capas |
+| `app/src/main/res/drawable/widget_bg.xml` | Reemplazar por `layer-list` de 3 capas |
+| `app/src/main/res/layout/widget_preview.xml` | Reescribir para que use `widget_bg` y los mismos colores/tipografía del widget real |
 
-`QuoteWidget.kt` no cambia — ya referencia `R.drawable.widget_bg`.
+`QuoteWidget.kt` y `quote_widget_info.xml` no cambian.
 
 ## Lo que NO cambia
 
 - Lógica del worker
 - Estado del widget
 - Tamaños responsivos (Small / Medium / Large)
-- Colores del texto
+- Colores del texto en `QuoteWidget.kt`
