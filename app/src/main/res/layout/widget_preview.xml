@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout estático usado como preview en el selector de widgets (API 31+) -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Preview estático del selector de widgets (API 31+). Debe verse igual al widget real. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?android:attr/colorBackground"
-    android:gravity="center">
+    android:background="@drawable/widget_bg"
+    android:clipToOutline="true">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="&quot;La constancia es la virtud por la que todas las demás virtudes dan su fruto.&quot;"
-        android:textSize="14sp"
-        android:textStyle="italic" />
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="— Sócrates"
-        android:textSize="12sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Soy el capitán de mi propio destino."
+            android:textColor="#F0EAFF"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:lineSpacingMultiplier="1.3" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="— Monkey D. Luffy"
+            android:textColor="#9B8DB3"
+            android:textSize="11sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ONE PIECE"
+            android:textColor="#A78BFA"
+            android:textSize="9sp"
+            android:letterSpacing="0.12" />
+
+    </LinearLayout>
+
+</FrameLayout>
