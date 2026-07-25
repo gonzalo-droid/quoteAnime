@@ -1,7 +1,9 @@
 package com.gondroid.quoteanime.di
 
+import com.gondroid.quoteanime.data.repository.HabitRepositoryImpl
 import com.gondroid.quoteanime.data.repository.QuoteRepositoryImpl
 import com.gondroid.quoteanime.data.repository.UserPreferencesRepositoryImpl
+import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.repository.QuoteRepository
 import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
 import dagger.Binds
@@ -21,4 +23,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHabitRepository(impl: HabitRepositoryImpl): HabitRepository
 }
