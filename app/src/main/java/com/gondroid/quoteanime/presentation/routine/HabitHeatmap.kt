@@ -56,7 +56,7 @@ fun HabitHeatmap(
                 .fillMaxWidth()
                 .height(heightDp)
                 .testTag("habit_heatmap")
-                .pointerInput(gridStart, today, startDate, endDate) {
+                .pointerInput(gridStart, today, startDate, endDate, cellPx, gapPx) {
                     detectTapGestures { offset ->
                         val cell = HeatmapGrid.cellAt(offset.x, offset.y, cellPx, gapPx, weeks)
                             ?: return@detectTapGestures
