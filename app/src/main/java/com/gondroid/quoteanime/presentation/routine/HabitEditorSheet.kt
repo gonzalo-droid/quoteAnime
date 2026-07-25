@@ -19,6 +19,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -130,6 +131,41 @@ fun HabitEditorSheet(
                                     shape = CircleShape
                                 )
                         ) {}
+                    }
+                }
+            }
+
+            Text(stringResource(R.string.habit_editor_icon))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                HabitIcons.ALL_KEYS.forEach { key ->
+                    Column(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable { viewModel.onIconSelected(key) }
+                            .testTag("icon_$key"),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = HabitIcons.iconFor(key),
+                            contentDescription = null,
+                            tint = if (state.iconKey == key) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = if (state.iconKey == key) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                    shape = CircleShape
+                                )
+                                .padding(4.dp)
+                        )
                     }
                 }
             }

@@ -60,6 +60,7 @@
     <string name="habit_editor_name">Nombre del hábito</string>
     <string name="habit_editor_templates">Sugerencias</string>
     <string name="habit_editor_color">Color</string>
+    <string name="habit_editor_icon">Icono</string>
     <string name="habit_editor_start_date">Fecha de inicio</string>
     <string name="habit_editor_end_date">Fecha de fin</string>
     <string name="habit_editor_has_end_date">Ponerle fecha de fin</string>

@@ -85,6 +85,8 @@ class HabitEditorViewModel @Inject constructor(
 
     fun onColorSelected(colorIndex: Int) = _uiState.update { it.copy(colorIndex = colorIndex) }
 
+    fun onIconSelected(iconKey: String) = _uiState.update { it.copy(iconKey = iconKey) }
+
     fun onStartDateChanged(date: LocalDate) =
         _uiState.update { it.copy(startDate = date, error = null) }
 
