@@ -32,7 +32,9 @@
       "Bash(git commit *)",
       "Bash(./gradlew assembleDebug *)",
       "Bash(./gradlew :app:compileReleaseUnitTestKotlin)",
-      "Bash(./gradlew :app:testDebugUnitTest --stacktrace)"
+      "Bash(./gradlew :app:testDebugUnitTest --stacktrace)",
+      "Bash(grep -v \"AndroidStudioProjects/quoteAnime$\")",
+      "WebSearch"
     ]
   }
 }
