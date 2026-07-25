@@ -28,12 +28,13 @@ object HeatmapGrid {
      * Resolves a tap position to a cell, or null when it lands on a gap or
      * outside the grid.
      */
-    fun cellAt(x: Float, y: Float, cellSizePx: Float, gapPx: Float): Cell? {
+    fun cellAt(x: Float, y: Float, cellSizePx: Float, gapPx: Float, columns: Int): Cell? {
         if (x < 0f || y < 0f) return null
         val stride = cellSizePx + gapPx
         val column = (x / stride).toInt()
         val row = (y / stride).toInt()
         if (row >= ROWS) return null
+        if (column >= columns) return null
         val offsetInColumn = x - column * stride
         val offsetInRow = y - row * stride
         if (offsetInColumn > cellSizePx || offsetInRow > cellSizePx) return null

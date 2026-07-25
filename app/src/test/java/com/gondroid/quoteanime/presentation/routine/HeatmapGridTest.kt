@@ -47,7 +47,7 @@ class HeatmapGridTest {
     @Test
     fun `given a tap in the middle of a cell, when resolved, then the cell is returned`() {
         // cell 14px + 3px gap: the cell at column 2 row 1 spans x 34..48, y 17..31
-        val cell = HeatmapGrid.cellAt(x = 40f, y = 20f, cellSizePx = 14f, gapPx = 3f)
+        val cell = HeatmapGrid.cellAt(x = 40f, y = 20f, cellSizePx = 14f, gapPx = 3f, columns = weeks)
 
         assertEquals(HeatmapGrid.Cell(column = 2, row = 1), cell)
     }
@@ -55,11 +55,17 @@ class HeatmapGridTest {
     @Test
     fun `given a tap inside the gap, when resolved, then no cell is returned`() {
         // x = 15f falls in the 14..17 gap after the first column
-        assertNull(HeatmapGrid.cellAt(x = 15f, y = 5f, cellSizePx = 14f, gapPx = 3f))
+        assertNull(HeatmapGrid.cellAt(x = 15f, y = 5f, cellSizePx = 14f, gapPx = 3f, columns = weeks))
     }
 
     @Test
     fun `given a negative coordinate, when resolved, then no cell is returned`() {
-        assertNull(HeatmapGrid.cellAt(x = -1f, y = 5f, cellSizePx = 14f, gapPx = 3f))
+        assertNull(HeatmapGrid.cellAt(x = -1f, y = 5f, cellSizePx = 14f, gapPx = 3f, columns = weeks))
+    }
+
+    @Test
+    fun `given a tap past the last column, when resolved, then no cell is returned`() {
+        // 17-column grid: x = 294f resolves to column 17, which does not exist
+        assertNull(HeatmapGrid.cellAt(x = 294f, y = 5f, cellSizePx = 14f, gapPx = 3f, columns = weeks))
     }
 }
