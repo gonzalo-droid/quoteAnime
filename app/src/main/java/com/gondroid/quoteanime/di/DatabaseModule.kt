@@ -3,7 +3,10 @@ package com.gondroid.quoteanime.di
 import android.content.Context
 import androidx.room.Room
 import com.gondroid.quoteanime.data.local.db.AppDatabase
+import com.gondroid.quoteanime.data.local.db.MIGRATION_4_5
 import com.gondroid.quoteanime.data.local.db.dao.FavoriteQuoteDao
+import com.gondroid.quoteanime.data.local.db.dao.HabitCompletionDao
+import com.gondroid.quoteanime.data.local.db.dao.HabitDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,9 +25,17 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "quote_anime_db"
-        ).fallbackToDestructiveMigration().build()
+        )
+            .addMigrations(MIGRATION_4_5)
+            .build()
     }
 
     @Provides
     fun provideFavoriteQuoteDao(db: AppDatabase): FavoriteQuoteDao = db.favoriteQuoteDao()
+
+    @Provides
+    fun provideHabitDao(db: AppDatabase): HabitDao = db.habitDao()
+
+    @Provides
+    fun provideHabitCompletionDao(db: AppDatabase): HabitCompletionDao = db.habitCompletionDao()
 }
