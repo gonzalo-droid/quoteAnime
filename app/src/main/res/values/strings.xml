@@ -29,4 +29,29 @@
     <string name="social_instagram_handle">@quoteanime</string>
     <string name="social_tiktok">TikTok</string>
     <string name="social_tiktok_handle">@quoteanime</string>
+
+    <string name="routine_title">Mi rutina</string>
+    <string name="routine_streak_days">%1$d días seguidos</string>
+    <string name="routine_progress_today">%1$d de %2$d hoy</string>
+    <string name="routine_empty_title">Empieza tu rutina</string>
+    <string name="routine_empty_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas.</string>
+    <string name="routine_add_habit">Añadir hábito</string>
+    <string name="routine_limit_reached">Has alcanzado el máximo de %1$d hábitos activos.</string>
+    <string name="routine_current_streak">Racha: %1$d</string>
+    <string name="routine_best_streak">Récord: %1$d</string>
+    <string name="routine_completion_rate">Cumplimiento: %1$d%%</string>
+    <string name="routine_mark_today">Marcar hoy</string>
+    <string name="routine_unmark_today">Desmarcar hoy</string>
+    <string name="routine_archive">Archivar</string>
+    <string name="routine_edit">Editar</string>
+    <string name="routine_message_future_day">No puedes marcar un día futuro.</string>
+    <string name="routine_message_outside_range">Ese día está fuera del periodo del hábito.</string>
+    <string name="template_train">Entrenar</string>
+    <string name="template_read">Leer</string>
+    <string name="template_meditate">Meditar</string>
+    <string name="template_water">Beber agua</string>
+    <string name="template_sleep_early">Dormir temprano</string>
+    <string name="template_study">Estudiar</string>
+    <string name="template_write">Escribir</string>
+    <string name="template_walk">Caminar</string>
 </resources>
