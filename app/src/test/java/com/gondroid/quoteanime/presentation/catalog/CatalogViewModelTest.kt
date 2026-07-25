@@ -7,6 +7,7 @@ import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetFavoriteQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetQuotesByCategoryUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
+import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.navigation.Screen
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coJustRun
@@ -59,6 +60,7 @@ class CatalogViewModelTest {
     private lateinit var getQuotesByCategory: GetQuotesByCategoryUseCase
     private lateinit var getFavoriteQuotes: GetFavoriteQuotesUseCase
     private lateinit var toggleFavorite: ToggleFavoriteUseCase
+    private lateinit var shareInterstitialManager: ShareInterstitialManager
 
     private val narutoQuotes = listOf(
         Quote(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", isFavorite = false),
@@ -80,6 +82,7 @@ class CatalogViewModelTest {
         getQuotesByCategory = mockk()
         getFavoriteQuotes = mockk()
         toggleFavorite = mockk()
+        shareInterstitialManager = mockk(relaxed = true)
 
         every { getAllQuotes() } returns flowOf(emptyList())
         every { getQuotesByCategory(any()) } returns flowOf(emptyList())
@@ -91,7 +94,8 @@ class CatalogViewModelTest {
             if (initialCategoryId != null) mapOf(Screen.Catalog.ARG to initialCategoryId) else emptyMap()
         )
         return CatalogViewModel(
-            savedStateHandle, getAllQuotes, getQuotesByCategory, getFavoriteQuotes, toggleFavorite
+            savedStateHandle, getAllQuotes, getQuotesByCategory, getFavoriteQuotes, toggleFavorite,
+            shareInterstitialManager
         )
     }
 
