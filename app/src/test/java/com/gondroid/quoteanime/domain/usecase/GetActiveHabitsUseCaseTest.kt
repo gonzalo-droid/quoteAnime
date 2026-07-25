@@ -80,6 +80,22 @@ class GetActiveHabitsUseCaseTest {
     }
 
     @Test
+    fun `given a consecutive run entirely outside the visible window, when collected, then the streak still reflects it while completions stay empty`() = runTest {
+        val runEnd = today.minusWeeks(18)
+        val oldRun = (0..4).map { runEnd.minusDays(it.toLong()) }
+        every { repository.getActiveHabits() } returns flowOf(listOf(habit))
+        every { repository.getCompletions("h1") } returns flowOf(oldRun)
+
+        useCase(today).test {
+            val item = awaitItem().single()
+            assertEquals(5, item.streak.best)
+            assertEquals(0, item.streak.current)
+            assertEquals(emptySet<LocalDate>(), item.completions)
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun `given ten active days and five completions, when collected, then completion rate is one half`() = runTest {
         // startDate is 9 days ago, so the active window is 10 days including today
         every { repository.getActiveHabits() } returns flowOf(listOf(habit))
