@@ -13,6 +13,9 @@
     <string name="version">Versión</string>
     <string name="rating">Calificación</string>
     <string name="widget">Widget</string>
+    <string name="nav_quotes">Frases</string>
+    <string name="nav_routine">Mi rutina</string>
+    <string name="nav_catalog">Catálogo</string>
     <string name="notifications">Notificaciones</string>
     <string name="rating_app">Dejános una reseña</string>
     <string name="subtitle_rating_section">Déjanos una reseña en Google Play</string>
