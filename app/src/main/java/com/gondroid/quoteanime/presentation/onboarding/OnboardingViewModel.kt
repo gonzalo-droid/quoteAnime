@@ -2,7 +2,9 @@ package com.gondroid.quoteanime.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
 import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
 import com.gondroid.quoteanime.domain.usecase.SetOnboardingCompletedUseCase
@@ -21,6 +23,7 @@ class OnboardingViewModel @Inject constructor(
     private val setOnboardingCompleted: SetOnboardingCompletedUseCase,
     private val getHabitTemplates: GetHabitTemplatesUseCase,
     private val createHabit: CreateHabitUseCase,
+    private val analytics: RoutineAnalytics,
     private val clock: Clock
 ) : ViewModel() {
 
@@ -51,7 +54,7 @@ class OnboardingViewModel @Inject constructor(
         val state = _uiState.value
         val template = state.templates.find { it.id == state.selectedTemplateId } ?: return
         viewModelScope.launch {
-            createHabit(
+            val result = createHabit(
                 title = template.title,
                 iconKey = template.iconKey,
                 colorIndex = 0,
@@ -61,6 +64,17 @@ class OnboardingViewModel @Inject constructor(
                 reminderDays = emptySet(),
                 templateId = template.id
             )
+            when (result) {
+                is CreateHabitResult.Success -> analytics.trackHabitCreated(
+                    templateId = template.id,
+                    isCustom = false,
+                    hasReminder = false,
+                    hasEndDate = false
+                )
+                is CreateHabitResult.LimitReached -> Unit
+                CreateHabitResult.BlankTitle -> Unit
+                CreateHabitResult.InvalidDateRange -> Unit
+            }
             finishOnboarding(onFinished)
         }
     }
