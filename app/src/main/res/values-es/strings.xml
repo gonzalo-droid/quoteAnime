@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">QuoteAnime</string>
+    <string name="app_name_label">Frases Anime</string>
+    <string name="notification_channel_name">Frases motivacionales</string>
+    <string name="notification_channel_description">Recibe una frase motivacional según tu horario elegido</string>
+    <string name="widget_description">Muestra una frase motivacional en tu pantalla de inicio</string>
+    <string name="widget_refresh">Actualizar frase</string>
+    <string name="widget_loading">Cargando frase…</string>
+    <string name="widget_error">No se pudo cargar la frase. Toca para reintentar.</string>
+    <string name="remove_favorite">Quitar favorito</string>
+    <string name="add_favorite">Añadir favorito</string>
+    <string name="action_shared">Compartir</string>
+    <string name="version">Versión</string>
+    <string name="rating">Calificación</string>
+    <string name="widget">Widget</string>
+    <string name="nav_quotes">Frases</string>
+    <string name="nav_routine">Mi rutina</string>
+    <string name="nav_catalog">Catálogo</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="rating_app">Dejános una reseña</string>
+    <string name="subtitle_rating_section">Déjanos una reseña en Google Play</string>
+    <string name="share_app">Compartir la app</string>
+    <string name="share_app_subtitle">Invita a tus amigos a descubrir Frases Anime</string>
+    <string name="share_app_message">¡Descubre QuoteAnime! Las mejores frases de tus animes favoritos 🌟 Descárgala gratis:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
+    <string name="terms_and_conditions">Términos y condiciones</string>
+    <string name="politics_privacy">Política de privacidad</string>
+
+    <string name="follow_us">Síguenos</string>
+    <string name="social_facebook">Facebook</string>
+    <string name="social_facebook_handle">@FrasesAnime</string>
+    <string name="social_instagram">Instagram</string>
+    <string name="social_instagram_handle">@quoteanime</string>
+    <string name="social_tiktok">TikTok</string>
+    <string name="social_tiktok_handle">@quoteanime</string>
+
+    <string name="routine_title">Mi rutina</string>
+    <string name="routine_streak_days">%1$d días seguidos</string>
+    <string name="routine_progress_today">%1$d de %2$d hoy</string>
+    <string name="routine_empty_title">Empieza tu rutina</string>
+    <string name="routine_empty_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas.</string>
+    <string name="routine_add_habit">Añadir hábito</string>
+    <string name="routine_limit_reached">Has alcanzado el máximo de %1$d hábitos activos.</string>
+    <string name="routine_current_streak">Racha: %1$d</string>
+    <string name="routine_best_streak">Récord: %1$d</string>
+    <string name="routine_completion_rate">Cumplimiento: %1$d%%</string>
+    <string name="routine_mark_today">Marcar hoy</string>
+    <string name="routine_unmark_today">Desmarcar hoy</string>
+    <string name="routine_archive">Archivar</string>
+    <string name="routine_edit">Editar</string>
+    <string name="routine_message_future_day">No puedes marcar un día futuro.</string>
+    <string name="routine_message_outside_range">Ese día está fuera del periodo del hábito.</string>
+    <string name="template_train">Entrenar</string>
+    <string name="template_read">Leer</string>
+    <string name="template_meditate">Meditar</string>
+    <string name="template_water">Beber agua</string>
+    <string name="template_sleep_early">Dormir temprano</string>
+    <string name="template_study">Estudiar</string>
+    <string name="template_write">Escribir</string>
+    <string name="template_walk">Caminar</string>
+
+    <string name="habit_editor_new_title">Nuevo hábito</string>
+    <string name="habit_editor_edit_title">Editar hábito</string>
+    <string name="habit_editor_name">Nombre del hábito</string>
+    <string name="habit_editor_templates">Sugerencias</string>
+    <string name="habit_editor_color">Color</string>
+    <string name="habit_editor_icon">Icono</string>
+    <string name="habit_editor_start_date">Fecha de inicio</string>
+    <string name="habit_editor_end_date">Fecha de fin</string>
+    <string name="habit_editor_has_end_date">Ponerle fecha de fin</string>
+    <string name="habit_editor_reminder">Recordatorio</string>
+    <string name="habit_editor_reminder_time">Hora</string>
+    <string name="habit_editor_reminder_days">Días</string>
+    <string name="habit_editor_save">Guardar</string>
+    <string name="habit_editor_cancel">Cancelar</string>
+    <string name="habit_editor_error_blank">Ponle un nombre al hábito.</string>
+    <string name="habit_editor_error_dates">La fecha de fin debe ser posterior a la de inicio.</string>
+    <string name="habit_editor_error_limit">Ya tienes %1$d hábitos activos. Archiva uno para crear otro.</string>
+
+    <string name="habit_channel_name">Recordatorios de hábitos</string>
+    <string name="habit_channel_description">Avisos para cumplir los hábitos de tu rutina</string>
+    <string name="habit_notification_action_done">Hecho</string>
+
+    <string name="routine_intro_title">Nuevo: Mi rutina</string>
+    <string name="routine_intro_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>
+    <string name="routine_intro_action">Empezar</string>
+    <string name="routine_intro_dismiss">Ahora no</string>
+    <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>
+    <string name="onboarding_habit_skip">Saltar</string>
+</resources>

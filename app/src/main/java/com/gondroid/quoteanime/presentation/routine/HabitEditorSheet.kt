@@ -91,10 +91,13 @@ fun HabitEditorSheet(
             Text(stringResource(R.string.habit_editor_templates))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.templates.forEach { template ->
+                    // Resolve once per template so both the chip label and the click
+                    // handler use the same legible text (not the raw resource key).
+                    val resolvedTitle = resolveTemplateTitle(template.title)
                     FilterChip(
                         selected = state.templateId == template.id,
-                        onClick = { viewModel.onTemplateSelected(template) },
-                        label = { Text(template.title) }
+                        onClick = { viewModel.onTemplateSelected(template, resolvedTitle) },
+                        label = { Text(resolvedTitle) }
                     )
                 }
             }

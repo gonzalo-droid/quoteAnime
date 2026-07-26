@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.presentation.routine.resolveTemplateTitle
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.AccentPurpleDim
 import com.gondroid.quoteanime.ui.theme.TextPrimary
@@ -123,7 +122,7 @@ fun OnboardingScreen(
                     templates = uiState.templates,
                     selectedTemplateId = uiState.selectedTemplateId,
                     onTemplateSelected = viewModel::onTemplateSelected,
-                    onCreate = { viewModel.onCreateHabit(onFinished) },
+                    onCreate = { resolvedTitle -> viewModel.onCreateHabit(resolvedTitle, onFinished) },
                     onSkip = ::finish
                 )
             }
@@ -254,9 +253,14 @@ private fun HabitOnboardingPage(
     templates: List<HabitTemplate>,
     selectedTemplateId: String?,
     onTemplateSelected: (HabitTemplate) -> Unit,
-    onCreate: () -> Unit,
+    onCreate: (String) -> Unit,
     onSkip: () -> Unit
 ) {
+    // Resolve the selected template's display text here (composable scope) so the
+    // persisted habit title is legible text, not the raw "template_xxx" key.
+    val selectedTemplate = templates.find { it.id == selectedTemplateId }
+    val resolvedSelectedTitle = selectedTemplate?.let { resolveTemplateTitle(it.title) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -282,8 +286,8 @@ private fun HabitOnboardingPage(
             }
         }
         Button(
-            onClick = onCreate,
-            enabled = selectedTemplateId != null,
+            onClick = { resolvedSelectedTitle?.let(onCreate) },
+            enabled = resolvedSelectedTitle != null,
             modifier = Modifier
                 .padding(top = 32.dp)
                 .testTag("onboarding_create_habit")
@@ -294,16 +298,6 @@ private fun HabitOnboardingPage(
             Text(stringResource(R.string.onboarding_habit_skip))
         }
     }
-}
-
-/** Template titles are stored as strings.xml key placeholders; resolve them here for display. */
-@Composable
-private fun resolveTemplateTitle(titleKey: String): String {
-    val context = LocalContext.current
-    val resId = remember(titleKey) {
-        context.resources.getIdentifier(titleKey, "string", context.packageName)
-    }
-    return if (resId != 0) stringResource(resId) else titleKey
 }
 
 @Composable

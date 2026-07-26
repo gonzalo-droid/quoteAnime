@@ -78,9 +78,14 @@ class HabitEditorViewModel @Inject constructor(
     fun onTitleChanged(title: String) =
         _uiState.update { it.copy(title = title, error = null) }
 
-    fun onTemplateSelected(template: HabitTemplate) = _uiState.update {
+    /**
+     * [resolvedTitle] is the already-localized display text for [template] (resolved in
+     * composable scope by the caller) so the habit persists with legible text instead of
+     * the raw "template_xxx" string-resource key.
+     */
+    fun onTemplateSelected(template: HabitTemplate, resolvedTitle: String) = _uiState.update {
         it.copy(
-            title = template.title,
+            title = resolvedTitle,
             iconKey = template.iconKey,
             templateId = template.id,
             error = null

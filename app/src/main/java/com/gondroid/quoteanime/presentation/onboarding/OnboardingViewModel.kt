@@ -50,12 +50,17 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch { finishOnboarding(onDone) }
     }
 
-    fun onCreateHabit(onFinished: () -> Unit) {
+    /**
+     * [resolvedTitle] is the already-localized display text for the selected template
+     * (resolved in composable scope by the caller) so the habit persists with legible
+     * text instead of the raw "template_xxx" string-resource key.
+     */
+    fun onCreateHabit(resolvedTitle: String, onFinished: () -> Unit) {
         val state = _uiState.value
         val template = state.templates.find { it.id == state.selectedTemplateId } ?: return
         viewModelScope.launch {
             val result = createHabit(
-                title = template.title,
+                title = resolvedTitle,
                 iconKey = template.iconKey,
                 colorIndex = 0,
                 startDate = LocalDate.now(clock),
