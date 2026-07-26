@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.gondroid.quoteanime.R
 
 /** Icons are stored as stable keys so the domain never depends on Compose. */
 object HabitIcons {
@@ -30,9 +31,34 @@ object HabitIcons {
         "directions_walk" to Icons.Filled.DirectionsWalk
     )
 
+    /** Human-readable description for each icon key, used as a screen-reader label. */
+    private val DESCRIPTION_RES_BY_KEY: Map<String, Int> = mapOf(
+        "dumbbell" to R.string.icon_dumbbell,
+        "book" to R.string.icon_book,
+        "self_improvement" to R.string.icon_self_improvement,
+        "water_drop" to R.string.icon_water_drop,
+        "bedtime" to R.string.icon_bedtime,
+        "school" to R.string.icon_school,
+        "edit_note" to R.string.icon_edit_note,
+        "directions_walk" to R.string.icon_directions_walk
+    )
+
     val ALL_KEYS: List<String> = BY_KEY.keys.toList()
 
     fun iconFor(key: String): ImageVector = BY_KEY[key] ?: Icons.Filled.CheckCircle
+
+    /** Resolves the string-resource id for an icon key's accessibility description, if mapped. */
+    fun descriptionResFor(key: String): Int? = DESCRIPTION_RES_BY_KEY[key]
+}
+
+/**
+ * Resolves a human-readable accessibility description for an icon key. Falls back to the
+ * raw key for any future icon that doesn't yet have a mapped string resource.
+ */
+@Composable
+fun describeIcon(key: String): String {
+    val resId = HabitIcons.descriptionResFor(key)
+    return if (resId != null) stringResource(resId) else key
 }
 
 /**

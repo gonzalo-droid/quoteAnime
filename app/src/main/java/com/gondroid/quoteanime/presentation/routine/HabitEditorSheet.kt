@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -150,10 +152,12 @@ fun HabitEditorSheet(
             Text(stringResource(R.string.habit_editor_color))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 HabitPalette.COLORS.forEachIndexed { index, color ->
+                    val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
                     Column(
                         modifier = Modifier
                             .size(48.dp)
                             .clickable { viewModel.onColorSelected(index) }
+                            .semantics { contentDescription = colorDescription }
                             .testTag("color_$index"),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -185,7 +189,7 @@ fun HabitEditorSheet(
                     ) {
                         Icon(
                             imageVector = HabitIcons.iconFor(key),
-                            contentDescription = null,
+                            contentDescription = describeIcon(key),
                             tint = if (state.iconKey == key) {
                                 MaterialTheme.colorScheme.primary
                             } else {

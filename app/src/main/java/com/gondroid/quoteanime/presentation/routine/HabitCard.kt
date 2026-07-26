@@ -93,7 +93,10 @@ fun HabitCard(
                     onClick = { menuExpanded = true },
                     modifier = Modifier.size(48.dp)
                 ) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = null)
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.habit_card_more_options)
+                    )
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(

@@ -49,6 +49,9 @@
     <string name="routine_edit">Editar</string>
     <string name="routine_message_future_day">No puedes marcar un día futuro.</string>
     <string name="routine_message_outside_range">Ese día está fuera del periodo del hábito.</string>
+    <string name="routine_heatmap_description">Calendario de cumplimiento del hábito</string>
+    <string name="routine_heatmap_cell_completed">%1$s, completado</string>
+    <string name="routine_heatmap_cell_not_completed">%1$s, no completado</string>
     <string name="template_train">Entrenar</string>
     <string name="template_read">Leer</string>
     <string name="template_meditate">Meditar</string>
@@ -63,6 +66,7 @@
     <string name="habit_editor_name">Nombre del hábito</string>
     <string name="habit_editor_templates">Sugerencias</string>
     <string name="habit_editor_color">Color</string>
+    <string name="habit_editor_color_option">Color %1$d</string>
     <string name="habit_editor_icon">Icono</string>
     <string name="habit_editor_start_date">Fecha de inicio</string>
     <string name="habit_editor_end_date">Fecha de fin</string>
@@ -79,6 +83,16 @@
     <string name="habit_channel_name">Recordatorios de hábitos</string>
     <string name="habit_channel_description">Avisos para cumplir los hábitos de tu rutina</string>
     <string name="habit_notification_action_done">Hecho</string>
+
+    <string name="habit_card_more_options">Más opciones</string>
+    <string name="icon_dumbbell">Entrenar</string>
+    <string name="icon_book">Leer</string>
+    <string name="icon_self_improvement">Meditar</string>
+    <string name="icon_water_drop">Beber agua</string>
+    <string name="icon_bedtime">Dormir temprano</string>
+    <string name="icon_school">Estudiar</string>
+    <string name="icon_edit_note">Escribir</string>
+    <string name="icon_directions_walk">Caminar</string>
 
     <string name="routine_intro_title">Nuevo: Mi rutina</string>
     <string name="routine_intro_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>

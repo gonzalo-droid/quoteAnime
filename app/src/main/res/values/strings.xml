@@ -49,6 +49,9 @@
     <string name="routine_edit">Edit</string>
     <string name="routine_message_future_day">You cannot mark a future day.</string>
     <string name="routine_message_outside_range">That day is outside the habit period.</string>
+    <string name="routine_heatmap_description">Habit completion calendar</string>
+    <string name="routine_heatmap_cell_completed">%1$s, completed</string>
+    <string name="routine_heatmap_cell_not_completed">%1$s, not completed</string>
     <string name="template_train">Work out</string>
     <string name="template_read">Read</string>
     <string name="template_meditate">Meditate</string>
@@ -63,6 +66,7 @@
     <string name="habit_editor_name">Habit name</string>
     <string name="habit_editor_templates">Suggestions</string>
     <string name="habit_editor_color">Color</string>
+    <string name="habit_editor_color_option">Color %1$d</string>
     <string name="habit_editor_icon">Icon</string>
     <string name="habit_editor_start_date">Start date</string>
     <string name="habit_editor_end_date">End date</string>
@@ -79,6 +83,16 @@
     <string name="habit_channel_name">Habit reminders</string>
     <string name="habit_channel_description">Nudges to keep the habits in your routine</string>
     <string name="habit_notification_action_done">Done</string>
+
+    <string name="habit_card_more_options">More options</string>
+    <string name="icon_dumbbell">Work out</string>
+    <string name="icon_book">Read</string>
+    <string name="icon_self_improvement">Meditate</string>
+    <string name="icon_water_drop">Drink water</string>
+    <string name="icon_bedtime">Sleep early</string>
+    <string name="icon_school">Study</string>
+    <string name="icon_edit_note">Write</string>
+    <string name="icon_directions_walk">Walk</string>
 
     <string name="routine_intro_title">New: My routine</string>
     <string name="routine_intro_body">Pick up to 3 habits and fill in every day you keep them. Your streak is waiting.</string>
