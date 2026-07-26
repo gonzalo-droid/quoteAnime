@@ -7,6 +7,8 @@ import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
+import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
+import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
@@ -27,6 +29,8 @@ class RoutineViewModel @Inject constructor(
     private val getGlobalStreak: GetGlobalStreakUseCase,
     private val toggleHabitCompletion: ToggleHabitCompletionUseCase,
     private val archiveHabit: ArchiveHabitUseCase,
+    private val isRoutineIntroSeen: IsRoutineIntroSeenUseCase,
+    private val setRoutineIntroSeen: SetRoutineIntroSeenUseCase,
     private val reminderScheduler: HabitReminderScheduler,
     private val premiumGate: PremiumGate,
     private val analytics: RoutineAnalytics,
@@ -42,6 +46,7 @@ class RoutineViewModel @Inject constructor(
     init {
         analytics.trackTabOpened()
         observeRoutine()
+        observeIntro()
     }
 
     private fun observeRoutine() {
@@ -96,5 +101,20 @@ class RoutineViewModel @Inject constructor(
     /** Consumed by the UI after showing the snackbar. */
     fun onMessageShown() {
         _uiState.update { it.copy(message = null) }
+    }
+
+    private fun observeIntro() {
+        viewModelScope.launch {
+            isRoutineIntroSeen().collect { seen ->
+                _uiState.update { it.copy(showIntro = !seen) }
+            }
+        }
+    }
+
+    fun onIntroDismissed() {
+        viewModelScope.launch {
+            setRoutineIntroSeen()
+            _uiState.update { it.copy(showIntro = false) }
+        }
     }
 }

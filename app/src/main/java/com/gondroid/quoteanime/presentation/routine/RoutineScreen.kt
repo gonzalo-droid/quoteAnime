@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,7 +57,8 @@ fun RoutineScreen(
         onArchiveHabit = viewModel::onArchiveHabit,
         onAddHabit = onAddHabit,
         onEditHabit = onEditHabit,
-        onMessageShown = viewModel::onMessageShown
+        onMessageShown = viewModel::onMessageShown,
+        onIntroDismissed = viewModel::onIntroDismissed
     )
 }
 
@@ -68,7 +71,8 @@ fun RoutineContent(
     onArchiveHabit: (String) -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (String) -> Unit,
-    onMessageShown: () -> Unit
+    onMessageShown: () -> Unit,
+    onIntroDismissed: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val futureMessage = stringResource(R.string.routine_message_future_day)
@@ -141,6 +145,27 @@ fun RoutineContent(
                 }
             }
         }
+    }
+
+    if (state.showIntro) {
+        AlertDialog(
+            onDismissRequest = onIntroDismissed,
+            title = { Text(stringResource(R.string.routine_intro_title)) },
+            text = { Text(stringResource(R.string.routine_intro_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onIntroDismissed(); onAddHabit() },
+                    modifier = Modifier.testTag("intro_start")
+                ) {
+                    Text(stringResource(R.string.routine_intro_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onIntroDismissed) {
+                    Text(stringResource(R.string.routine_intro_dismiss))
+                }
+            }
+        )
     }
 }
 
@@ -223,7 +248,8 @@ private fun RoutineContentPreview() {
             onArchiveHabit = {},
             onAddHabit = {},
             onEditHabit = {},
-            onMessageShown = {}
+            onMessageShown = {},
+            onIntroDismissed = {}
         )
     }
 }

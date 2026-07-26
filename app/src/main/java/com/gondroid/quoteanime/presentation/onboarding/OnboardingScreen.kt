@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +25,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +39,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +51,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.AccentPurpleDim
 import com.gondroid.quoteanime.ui.theme.TextPrimary
@@ -93,9 +103,11 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pageCount = pages.size + 1
+    val pagerState = rememberPagerState(pageCount = { pageCount })
     val scope = rememberCoroutineScope()
-    val isLastPage = pagerState.currentPage == pages.lastIndex
+    val isHabitPage = pagerState.currentPage == pages.size
 
     fun finish() = viewModel.onOnboardingFinished(onFinished)
 
@@ -104,11 +116,21 @@ fun OnboardingScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            OnboardingPage(page = pages[page])
+            if (page < pages.size) {
+                OnboardingPage(page = pages[page])
+            } else {
+                HabitOnboardingPage(
+                    templates = uiState.templates,
+                    selectedTemplateId = uiState.selectedTemplateId,
+                    onTemplateSelected = viewModel::onTemplateSelected,
+                    onCreate = { viewModel.onCreateHabit(onFinished) },
+                    onSkip = ::finish
+                )
+            }
         }
 
         // Skip button
-        if (!isLastPage) {
+        if (!isHabitPage) {
             TextButton(
                 onClick = ::finish,
                 modifier = Modifier
@@ -125,40 +147,41 @@ fun OnboardingScreen(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(horizontal = 32.dp, vertical = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            DotsIndicator(
-                total = pages.size,
-                current = pagerState.currentPage
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    if (isLastPage) finish()
-                    else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                },
+        if (!isHabitPage) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentPurple,
-                    contentColor = Color(0xFF0C0C1E)
-                )
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 32.dp, vertical = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = if (isLastPage) "Comenzar" else "Siguiente",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.5.sp
+                DotsIndicator(
+                    total = pageCount,
+                    current = pagerState.currentPage
                 )
+
+                Spacer(Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentPurple,
+                        contentColor = Color(0xFF0C0C1E)
+                    )
+                ) {
+                    Text(
+                        text = "Siguiente",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
             }
         }
     }
@@ -223,6 +246,64 @@ private fun OnboardingPage(page: OnboardingPage) {
             Spacer(Modifier.weight(1.5f))
         }
     }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HabitOnboardingPage(
+    templates: List<HabitTemplate>,
+    selectedTemplateId: String?,
+    onTemplateSelected: (HabitTemplate) -> Unit,
+    onCreate: () -> Unit,
+    onSkip: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_habit_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(top = 24.dp)
+        ) {
+            templates.forEach { template ->
+                FilterChip(
+                    selected = selectedTemplateId == template.id,
+                    onClick = { onTemplateSelected(template) },
+                    label = { Text(resolveTemplateTitle(template.title)) }
+                )
+            }
+        }
+        Button(
+            onClick = onCreate,
+            enabled = selectedTemplateId != null,
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .testTag("onboarding_create_habit")
+        ) {
+            Text(stringResource(R.string.routine_add_habit))
+        }
+        TextButton(onClick = onSkip, modifier = Modifier.padding(top = 8.dp)) {
+            Text(stringResource(R.string.onboarding_habit_skip))
+        }
+    }
+}
+
+/** Template titles are stored as strings.xml key placeholders; resolve them here for display. */
+@Composable
+private fun resolveTemplateTitle(titleKey: String): String {
+    val context = LocalContext.current
+    val resId = remember(titleKey) {
+        context.resources.getIdentifier(titleKey, "string", context.packageName)
+    }
+    return if (resId != 0) stringResource(resId) else titleKey
 }
 
 @Composable

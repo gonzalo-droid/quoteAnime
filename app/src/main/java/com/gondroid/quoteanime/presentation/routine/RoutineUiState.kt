@@ -14,7 +14,8 @@ data class RoutineUiState(
     val globalStreak: StreakState = StreakState(),
     val isLoading: Boolean = true,
     val maxHabits: Int = 0,
-    val message: RoutineMessage? = null
+    val message: RoutineMessage? = null,
+    val showIntro: Boolean = false
 ) {
     val completedToday: Int get() = habits.count { it.streak.completedToday }
     val totalHabits: Int get() = habits.size

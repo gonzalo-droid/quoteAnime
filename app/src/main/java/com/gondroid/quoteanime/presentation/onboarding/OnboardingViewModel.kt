@@ -2,20 +2,71 @@ package com.gondroid.quoteanime.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
+import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
 import com.gondroid.quoteanime.domain.usecase.SetOnboardingCompletedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Clock
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val setOnboardingCompleted: SetOnboardingCompletedUseCase
+    private val setOnboardingCompleted: SetOnboardingCompletedUseCase,
+    private val getHabitTemplates: GetHabitTemplatesUseCase,
+    private val createHabit: CreateHabitUseCase,
+    private val clock: Clock
 ) : ViewModel() {
 
-    fun onOnboardingFinished(onDone: () -> Unit) {
+    private val _uiState = MutableStateFlow(OnboardingUiState())
+    val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
+
+    init {
+        loadTemplates()
+    }
+
+    private fun loadTemplates() {
         viewModelScope.launch {
-            setOnboardingCompleted()
-            onDone()
+            getHabitTemplates().collect { templates ->
+                _uiState.update { it.copy(templates = templates) }
+            }
         }
+    }
+
+    fun onTemplateSelected(template: HabitTemplate) {
+        _uiState.update { it.copy(selectedTemplateId = template.id) }
+    }
+
+    fun onOnboardingFinished(onDone: () -> Unit) {
+        viewModelScope.launch { finishOnboarding(onDone) }
+    }
+
+    fun onCreateHabit(onFinished: () -> Unit) {
+        val state = _uiState.value
+        val template = state.templates.find { it.id == state.selectedTemplateId } ?: return
+        viewModelScope.launch {
+            createHabit(
+                title = template.title,
+                iconKey = template.iconKey,
+                colorIndex = 0,
+                startDate = LocalDate.now(clock),
+                endDate = null,
+                reminderTime = null,
+                reminderDays = emptySet(),
+                templateId = template.id
+            )
+            finishOnboarding(onFinished)
+        }
+    }
+
+    private suspend fun finishOnboarding(onDone: () -> Unit) {
+        setOnboardingCompleted()
+        onDone()
     }
 }

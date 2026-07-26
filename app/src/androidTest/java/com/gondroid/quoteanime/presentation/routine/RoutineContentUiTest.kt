@@ -59,7 +59,8 @@ class RoutineContentUiTest {
                     onArchiveHabit = {},
                     onAddHabit = onAddHabit,
                     onEditHabit = {},
-                    onMessageShown = {}
+                    onMessageShown = {},
+                    onIntroDismissed = {}
                 )
             }
         }

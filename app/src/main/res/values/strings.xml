@@ -79,4 +79,11 @@
     <string name="habit_channel_name">Recordatorios de hábitos</string>
     <string name="habit_channel_description">Avisos para cumplir los hábitos de tu rutina</string>
     <string name="habit_notification_action_done">Hecho</string>
+
+    <string name="routine_intro_title">Nuevo: Mi rutina</string>
+    <string name="routine_intro_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>
+    <string name="routine_intro_action">Empezar</string>
+    <string name="routine_intro_dismiss">Ahora no</string>
+    <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>
+    <string name="onboarding_habit_skip">Saltar</string>
 </resources>

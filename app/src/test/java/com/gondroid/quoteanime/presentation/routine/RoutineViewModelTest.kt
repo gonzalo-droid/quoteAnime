@@ -9,6 +9,8 @@ import com.gondroid.quoteanime.domain.model.StreakState
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
+import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
+import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
@@ -50,6 +52,8 @@ class RoutineViewModelTest {
     private lateinit var getGlobalStreak: GetGlobalStreakUseCase
     private lateinit var toggleCompletion: ToggleHabitCompletionUseCase
     private lateinit var archiveHabit: ArchiveHabitUseCase
+    private lateinit var isRoutineIntroSeen: IsRoutineIntroSeenUseCase
+    private lateinit var setRoutineIntroSeen: SetRoutineIntroSeenUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
     private lateinit var analytics: RoutineAnalytics
     private val premiumGate = PremiumGate()
@@ -80,6 +84,8 @@ class RoutineViewModelTest {
         getGlobalStreak = getGlobalStreak,
         toggleHabitCompletion = toggleCompletion,
         archiveHabit = archiveHabit,
+        isRoutineIntroSeen = isRoutineIntroSeen,
+        setRoutineIntroSeen = setRoutineIntroSeen,
         reminderScheduler = reminderScheduler,
         premiumGate = premiumGate,
         analytics = analytics,
@@ -92,9 +98,12 @@ class RoutineViewModelTest {
         getGlobalStreak = mockk()
         toggleCompletion = mockk()
         archiveHabit = mockk()
+        isRoutineIntroSeen = mockk()
+        setRoutineIntroSeen = mockk(relaxed = true)
         reminderScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
+        every { isRoutineIntroSeen() } returns flowOf(true)
     }
 
     @Test
