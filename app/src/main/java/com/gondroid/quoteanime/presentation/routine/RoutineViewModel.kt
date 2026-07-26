@@ -8,6 +8,7 @@ import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ class RoutineViewModel @Inject constructor(
     private val getGlobalStreak: GetGlobalStreakUseCase,
     private val toggleHabitCompletion: ToggleHabitCompletionUseCase,
     private val archiveHabit: ArchiveHabitUseCase,
+    private val reminderScheduler: HabitReminderScheduler,
     private val premiumGate: PremiumGate,
     /** Injected so tests can pin "today" instead of depending on the device clock. */
     private val clock: Clock
@@ -73,7 +75,10 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun onArchiveHabit(habitId: String) {
-        viewModelScope.launch { archiveHabit(habitId) }
+        viewModelScope.launch {
+            archiveHabit(habitId)
+            reminderScheduler.cancel(habitId)
+        }
     }
 
     /** Consumed by the UI after showing the snackbar. */

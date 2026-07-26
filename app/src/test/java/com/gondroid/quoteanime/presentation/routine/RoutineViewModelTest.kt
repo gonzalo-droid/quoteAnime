@@ -10,6 +10,7 @@ import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,7 +36,7 @@ import java.time.ZoneOffset
  *  - canAddHabit turns false once the limit is reached
  *  - Toggling a day delegates to the use case
  *  - A rejected toggle surfaces a message
- *  - Archiving delegates to the use case
+ *  - Archiving delegates to the use case and cancels the habit's reminder
  */
 class RoutineViewModelTest {
 
@@ -48,6 +49,7 @@ class RoutineViewModelTest {
     private lateinit var getGlobalStreak: GetGlobalStreakUseCase
     private lateinit var toggleCompletion: ToggleHabitCompletionUseCase
     private lateinit var archiveHabit: ArchiveHabitUseCase
+    private lateinit var reminderScheduler: HabitReminderScheduler
     private val premiumGate = PremiumGate()
 
     private fun habit(id: String) = Habit(
@@ -76,6 +78,7 @@ class RoutineViewModelTest {
         getGlobalStreak = getGlobalStreak,
         toggleHabitCompletion = toggleCompletion,
         archiveHabit = archiveHabit,
+        reminderScheduler = reminderScheduler,
         premiumGate = premiumGate,
         clock = fixedClock
     )
@@ -86,6 +89,7 @@ class RoutineViewModelTest {
         getGlobalStreak = mockk()
         toggleCompletion = mockk()
         archiveHabit = mockk()
+        reminderScheduler = mockk(relaxed = true)
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
     }
 
@@ -151,7 +155,7 @@ class RoutineViewModelTest {
     }
 
     @Test
-    fun `given a habit id, when archived, then the use case is invoked`() = runTest {
+    fun `given a habit id, when archived, then the use case is invoked and the reminder is cancelled`() = runTest {
         every { getActiveHabits(today) } returns flowOf(emptyList())
         coEvery { archiveHabit("h1") } returns Unit
 
@@ -160,5 +164,6 @@ class RoutineViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { archiveHabit("h1") }
+        coVerify(exactly = 1) { reminderScheduler.cancel("h1") }
     }
 }

@@ -25,10 +25,15 @@ class NotificationHelper @Inject constructor(
     companion object {
         const val CHANNEL_ID = "quote_notifications"
         const val NOTIFICATION_ID = 1001
+
+        const val HABIT_CHANNEL_ID = "habit_reminders"
+        const val EXTRA_HABIT_ID = "habit_id"
+        const val EXTRA_NOTIFICATION_ID = "notification_id"
     }
 
     init {
         createNotificationChannel()
+        createHabitChannel()
     }
 
     private fun createNotificationChannel() {
@@ -43,6 +48,20 @@ class NotificationHelper @Inject constructor(
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    /** Separate channel so users can mute habit reminders without losing quotes. */
+    private fun createHabitChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val channel = NotificationChannel(
+            HABIT_CHANNEL_ID,
+            context.getString(R.string.habit_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.habit_channel_description)
+        }
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -68,5 +87,48 @@ class NotificationHelper @Inject constructor(
             .build()
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * The "Done" action targets [HabitReminderReceiver] (a BroadcastReceiver), not an
+     * activity, so marking the habit complete never opens the app.
+     */
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    fun showHabitReminder(habitId: String, habitTitle: String, quoteText: String) {
+        val notificationId = habitId.hashCode()
+
+        val doneIntent = Intent(context, HabitReminderReceiver::class.java).apply {
+            putExtra(EXTRA_HABIT_ID, habitId)
+            putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+        }
+        val donePendingIntent = PendingIntent.getBroadcast(
+            context,
+            notificationId,
+            doneIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val contentIntent = PendingIntent.getActivity(
+            context,
+            notificationId + 1,
+            Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, HABIT_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(habitTitle)
+            .setContentText(quoteText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(quoteText))
+            .setContentIntent(contentIntent)
+            .setAutoCancel(true)
+            .addAction(
+                0,
+                context.getString(R.string.habit_notification_action_done),
+                donePendingIntent
+            )
+            .build()
+
+        NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 }

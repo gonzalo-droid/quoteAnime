@@ -10,6 +10,7 @@ import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitResult
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitUseCase
+import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,7 @@ class HabitEditorViewModel @Inject constructor(
     private val createHabit: CreateHabitUseCase,
     private val updateHabit: UpdateHabitUseCase,
     private val repository: HabitRepository,
+    private val reminderScheduler: HabitReminderScheduler,
     private val clock: Clock
 ) : ViewModel() {
 
@@ -125,7 +127,10 @@ class HabitEditorViewModel @Inject constructor(
             templateId = state.templateId
         )
         when (result) {
-            is CreateHabitResult.Success -> _uiState.update { it.copy(isSaved = true) }
+            is CreateHabitResult.Success -> {
+                reminderScheduler.schedule(result.habit)
+                _uiState.update { it.copy(isSaved = true) }
+            }
             is CreateHabitResult.LimitReached ->
                 _uiState.update { it.copy(error = HabitEditorError.LimitReached(result.max)) }
             CreateHabitResult.BlankTitle ->
@@ -148,7 +153,10 @@ class HabitEditorViewModel @Inject constructor(
             templateId = state.templateId
         )
         when (updateHabit(edited)) {
-            is UpdateHabitResult.Success -> _uiState.update { it.copy(isSaved = true) }
+            is UpdateHabitResult.Success -> {
+                reminderScheduler.schedule(edited)
+                _uiState.update { it.copy(isSaved = true) }
+            }
             UpdateHabitResult.BlankTitle ->
                 _uiState.update { it.copy(error = HabitEditorError.BlankTitle) }
             UpdateHabitResult.InvalidDateRange ->

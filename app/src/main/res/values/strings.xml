@@ -75,4 +75,8 @@
     <string name="habit_editor_error_blank">Ponle un nombre al hábito.</string>
     <string name="habit_editor_error_dates">La fecha de fin debe ser posterior a la de inicio.</string>
     <string name="habit_editor_error_limit">Ya tienes %1$d hábitos activos. Archiva uno para crear otro.</string>
+
+    <string name="habit_channel_name">Recordatorios de hábitos</string>
+    <string name="habit_channel_description">Avisos para cumplir los hábitos de tu rutina</string>
+    <string name="habit_notification_action_done">Hecho</string>
 </resources>

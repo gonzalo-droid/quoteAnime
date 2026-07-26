@@ -9,6 +9,7 @@ import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitResult
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitUseCase
+import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -33,9 +34,9 @@ import java.time.ZoneOffset
  * Scenarios covered:
  *  - Templates are loaded into the state
  *  - Selecting a template fills title and icon
- *  - Saving a new habit calls CreateHabitUseCase
+ *  - Saving a new habit calls CreateHabitUseCase and schedules its reminder
  *  - Reaching the limit surfaces an error and does not close the sheet
- *  - Editing an existing habit loads it and calls UpdateHabitUseCase
+ *  - Editing an existing habit loads it, calls UpdateHabitUseCase and reschedules the reminder
  *  - Turning the reminder off clears time and days
  */
 class HabitEditorViewModelTest {
@@ -47,6 +48,7 @@ class HabitEditorViewModelTest {
     private lateinit var createHabit: CreateHabitUseCase
     private lateinit var updateHabit: UpdateHabitUseCase
     private lateinit var repository: HabitRepository
+    private lateinit var reminderScheduler: HabitReminderScheduler
 
     private val today = LocalDate.parse("2026-07-25")
 
@@ -61,6 +63,7 @@ class HabitEditorViewModelTest {
         createHabit = createHabit,
         updateHabit = updateHabit,
         repository = repository,
+        reminderScheduler = reminderScheduler,
         clock = fixedClock
     )
 
@@ -70,6 +73,7 @@ class HabitEditorViewModelTest {
         createHabit = mockk()
         updateHabit = mockk()
         repository = mockk()
+        reminderScheduler = mockk(relaxed = true)
         every { getTemplates() } returns flowOf(DefaultHabitTemplates.ALL)
     }
 
@@ -95,11 +99,10 @@ class HabitEditorViewModelTest {
     }
 
     @Test
-    fun `given a new habit, when saved, then it is created`() = runTest {
+    fun `given a new habit, when saved, then it is created and its reminder scheduled`() = runTest {
+        val created = Habit("h1", "Leer", "book", 0, today)
         coEvery { createHabit(any(), any(), any(), any(), any(), any(), any(), any()) } returns
-            CreateHabitResult.Success(
-                Habit("h1", "Leer", "book", 0, today)
-            )
+            CreateHabitResult.Success(created)
         val viewModel = buildViewModel()
         advanceUntilIdle()
         viewModel.onTitleChanged("Leer")
@@ -108,6 +111,7 @@ class HabitEditorViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { createHabit(any(), any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { reminderScheduler.schedule(created) }
         assertTrue(viewModel.uiState.value.isSaved)
     }
 
@@ -148,6 +152,7 @@ class HabitEditorViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { updateHabit(any()) }
+        coVerify(exactly = 1) { reminderScheduler.schedule(any()) }
     }
 
     @Test
