@@ -1,6 +1,7 @@
 package com.gondroid.quoteanime.presentation.routine
 
 import app.cash.turbine.test
+import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
@@ -50,6 +51,7 @@ class RoutineViewModelTest {
     private lateinit var toggleCompletion: ToggleHabitCompletionUseCase
     private lateinit var archiveHabit: ArchiveHabitUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
+    private lateinit var analytics: RoutineAnalytics
     private val premiumGate = PremiumGate()
 
     private fun habit(id: String) = Habit(
@@ -80,6 +82,7 @@ class RoutineViewModelTest {
         archiveHabit = archiveHabit,
         reminderScheduler = reminderScheduler,
         premiumGate = premiumGate,
+        analytics = analytics,
         clock = fixedClock
     )
 
@@ -90,6 +93,7 @@ class RoutineViewModelTest {
         toggleCompletion = mockk()
         archiveHabit = mockk()
         reminderScheduler = mockk(relaxed = true)
+        analytics = mockk(relaxed = true)
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
     }
 

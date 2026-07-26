@@ -102,6 +102,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // AdMob
     implementation(libs.google.admob)

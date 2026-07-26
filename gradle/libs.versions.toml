@@ -81,6 +81,7 @@ glance-material3 = { group = "androidx.glance", name = "glance-material3", versi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 google-admob = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "admob" }
 
 # Android Play

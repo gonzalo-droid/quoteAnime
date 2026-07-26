@@ -3,6 +3,7 @@ package com.gondroid.quoteanime.presentation.routine
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
@@ -31,6 +32,7 @@ class HabitEditorViewModel @Inject constructor(
     private val updateHabit: UpdateHabitUseCase,
     private val repository: HabitRepository,
     private val reminderScheduler: HabitReminderScheduler,
+    private val analytics: RoutineAnalytics,
     private val clock: Clock
 ) : ViewModel() {
 
@@ -129,6 +131,12 @@ class HabitEditorViewModel @Inject constructor(
         when (result) {
             is CreateHabitResult.Success -> {
                 reminderScheduler.schedule(result.habit)
+                analytics.trackHabitCreated(
+                    templateId = state.templateId,
+                    isCustom = state.templateId == null,
+                    hasReminder = state.reminderEnabled,
+                    hasEndDate = state.endDate != null
+                )
                 _uiState.update { it.copy(isSaved = true) }
             }
             is CreateHabitResult.LimitReached ->

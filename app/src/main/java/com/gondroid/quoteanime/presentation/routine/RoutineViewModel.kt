@@ -2,6 +2,7 @@ package com.gondroid.quoteanime.presentation.routine
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
@@ -28,6 +29,7 @@ class RoutineViewModel @Inject constructor(
     private val archiveHabit: ArchiveHabitUseCase,
     private val reminderScheduler: HabitReminderScheduler,
     private val premiumGate: PremiumGate,
+    private val analytics: RoutineAnalytics,
     /** Injected so tests can pin "today" instead of depending on the device clock. */
     private val clock: Clock
 ) : ViewModel() {
@@ -38,6 +40,7 @@ class RoutineViewModel @Inject constructor(
     private fun today(): LocalDate = LocalDate.now(clock)
 
     init {
+        analytics.trackTabOpened()
         observeRoutine()
     }
 
@@ -63,8 +66,17 @@ class RoutineViewModel @Inject constructor(
 
     fun onToggleDay(habitId: String, date: LocalDate) {
         viewModelScope.launch {
-            when (toggleHabitCompletion(habitId, date, today())) {
-                is ToggleCompletionResult.Success -> Unit
+            val result = toggleHabitCompletion(habitId, date, today())
+            when (result) {
+                is ToggleCompletionResult.Success -> {
+                    if (result.completed) {
+                        analytics.trackHabitCompleted(
+                            habitId = habitId,
+                            isRetroactive = date != today(),
+                            source = RoutineAnalytics.SOURCE_APP
+                        )
+                    }
+                }
                 ToggleCompletionResult.FutureDate ->
                     _uiState.update { it.copy(message = RoutineMessage.FutureDayNotAllowed) }
                 ToggleCompletionResult.OutsideHabitRange ->
