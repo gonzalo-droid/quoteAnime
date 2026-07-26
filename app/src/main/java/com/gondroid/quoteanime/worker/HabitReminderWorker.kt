@@ -36,7 +36,9 @@ class HabitReminderWorker @AssistedInject constructor(
         if (habit.isArchived || habit.reminderTime == null) return Result.success()
 
         val today = LocalDate.now()
-        val shouldNotify = habit.isActiveOn(today) && !repository.isCompleted(habitId, today)
+        val shouldNotify = habit.isActiveOn(today) &&
+            today.dayOfWeek in habit.reminderDays &&
+            !repository.isCompleted(habitId, today)
 
         // Mirrors QuoteNotificationWorker's runtime check — API 33+ requires the grant.
         val hasNotificationPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||

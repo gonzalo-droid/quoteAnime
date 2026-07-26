@@ -4,7 +4,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.domain.repository.HabitRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ import javax.inject.Inject
 class HabitReminderReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var toggleHabitCompletion: ToggleHabitCompletionUseCase
+    lateinit var habitRepository: HabitRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         val habitId = intent.getStringExtra(NotificationHelper.EXTRA_HABIT_ID) ?: return
@@ -30,7 +30,11 @@ class HabitReminderReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val today = LocalDate.now()
-                toggleHabitCompletion(habitId, today, today)
+                // Idempotent "mark done", not a toggle: the habit may already be
+                // completed if the user marked it from the app before tapping this action.
+                if (!habitRepository.isCompleted(habitId, today)) {
+                    habitRepository.setCompletion(habitId, today, true)
+                }
                 context.getSystemService(NotificationManager::class.java)?.cancel(notificationId)
             } finally {
                 pendingResult.finish()
