@@ -29,6 +29,7 @@ class NotificationHelper @Inject constructor(
         const val HABIT_CHANNEL_ID = "habit_reminders"
         const val EXTRA_HABIT_ID = "habit_id"
         const val EXTRA_NOTIFICATION_ID = "notification_id"
+        const val EXTRA_OPEN_ROUTINE = "open_routine"
     }
 
     init {
@@ -111,7 +112,9 @@ class NotificationHelper @Inject constructor(
         val contentIntent = PendingIntent.getActivity(
             context,
             notificationId + 1,
-            Intent(context, MainActivity::class.java),
+            Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_OPEN_ROUTINE, true)
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

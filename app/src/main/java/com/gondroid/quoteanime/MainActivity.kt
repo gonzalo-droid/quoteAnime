@@ -18,7 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.navigation.compose.rememberNavController
+import com.gondroid.quoteanime.notification.NotificationHelper
 import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
+import com.gondroid.quoteanime.presentation.navigation.Screen
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -58,20 +60,28 @@ class MainActivity : ComponentActivity() {
         appUpdateManager.registerListener(installStateListener)
 
         val initialQuoteId = intent.getStringExtra("widget_quote_id")
+        val openRoutine = intent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)
 
         setContent {
             QuoteAnimeTheme {
                 val navController = rememberNavController()
                 var pendingQuoteId by remember { mutableStateOf(initialQuoteId) }
+                var pendingOpenRoutine by remember { mutableStateOf(openRoutine) }
 
-                // Handle widget tap when app is already in foreground (onNewIntent)
+                // Handle widget tap / habit reminder tap when app is already in foreground (onNewIntent)
                 DisposableEffect(Unit) {
                     val listener = Consumer<Intent> { newIntent ->
-                        newIntent.getStringExtra("widget_quote_id")?.let { quoteId ->
+                        val newQuoteId = newIntent.getStringExtra("widget_quote_id")
+                        if (newQuoteId != null) {
                             navController.navigate(
-                                com.gondroid.quoteanime.presentation.navigation.Screen
-                                    .Home.createRoute(quoteId)
+                                Screen.Home.createRoute(newQuoteId)
                             ) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                            }
+                        } else if (newIntent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)) {
+                            navController.navigate(Screen.Routine.route) {
                                 popUpTo(navController.graph.startDestinationId) {
                                     inclusive = true
                                 }
@@ -84,7 +94,8 @@ class MainActivity : ComponentActivity() {
 
                 AppNavGraph(
                     navController = navController,
-                    startQuoteId = pendingQuoteId
+                    startQuoteId = pendingQuoteId,
+                    openRoutine = pendingOpenRoutine
                 )
 
                 // Dialog shown when a flexible update has been fully downloaded

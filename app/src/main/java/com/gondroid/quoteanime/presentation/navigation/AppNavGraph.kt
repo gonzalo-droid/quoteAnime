@@ -6,12 +6,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gondroid.quoteanime.presentation.catalog.CatalogScreen
@@ -52,11 +52,16 @@ sealed class Screen(val route: String) {
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
-    startQuoteId: String? = null
+    startQuoteId: String? = null,
+    openRoutine: Boolean = false
 ) {
-    // If app was opened via widget tap, skip splash/onboarding and go directly to Home
-    val start = if (startQuoteId != null) Screen.Home.createRoute(startQuoteId)
-                else Screen.Splash.route
+    // If app was opened via widget tap or habit reminder tap, skip splash/onboarding
+    // and go directly to the relevant destination.
+    val start = when {
+        startQuoteId != null -> Screen.Home.createRoute(startQuoteId)
+        openRoutine -> Screen.Routine.route
+        else -> Screen.Splash.route
+    }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -71,7 +76,7 @@ fun AppNavGraph(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            popUpTo(Screen.Home.route) {
                                 saveState = true
                             }
                             launchSingleTop = true
@@ -166,7 +171,7 @@ fun AppNavGraph(
                 )
             }
 
-            composable(
+            dialog(
                 route = Screen.HabitEditor.routeWithArg,
                 arguments = listOf(
                     navArgument(Screen.HabitEditor.ARG) {
