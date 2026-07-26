@@ -114,6 +114,7 @@ class NotificationHelper @Inject constructor(
             notificationId + 1,
             Intent(context, MainActivity::class.java).apply {
                 putExtra(EXTRA_OPEN_ROUTINE, true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

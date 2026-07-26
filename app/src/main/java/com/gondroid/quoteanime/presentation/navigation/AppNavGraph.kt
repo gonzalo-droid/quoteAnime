@@ -63,6 +63,12 @@ fun AppNavGraph(
         else -> Screen.Splash.route
     }
 
+    // The tab that acts as the "base" of the back stack for bottom-nav popUpTo purposes:
+    // Home in the normal boot and widget-deep-link cases, Routine when entering via a
+    // habit reminder notification — whichever one is genuinely reachable at the bottom
+    // of the stack, so popUpTo can actually find and collapse to it.
+    val tabRootRoute = if (openRoutine && startQuoteId == null) Screen.Routine.route else Screen.Home.route
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     // Bottom bar only makes sense on the 3 tab destinations, not on splash/onboarding/settings/etc.
@@ -76,7 +82,7 @@ fun AppNavGraph(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            popUpTo(Screen.Home.route) {
+                            popUpTo(tabRootRoute) {
                                 saveState = true
                             }
                             launchSingleTop = true
