@@ -79,6 +79,11 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
+    /** Resolves "today" fresh at the moment of the tap, unlike the cached RoutineUiState.today
+     *  used for display — this is what prevents the mark-today action from silently writing
+     *  to a stale day if the screen survives a midnight rollover. */
+    fun onToggleToday(habitId: String) = onToggleDay(habitId, today())
+
     fun onToggleDay(habitId: String, date: LocalDate) {
         viewModelScope.launch {
             val previousStreak = _uiState.value.habits
@@ -121,7 +126,7 @@ class RoutineViewModel @Inject constructor(
         val dates = habitRepository.getCompletions(habitId).first()
         val newStreak = calculateStreak(dates, today())
         when {
-            newStreak.current in STREAK_MILESTONES && newStreak.current != previousStreak ->
+            newStreak.current in STREAK_MILESTONES && newStreak.current > previousStreak ->
                 analytics.trackStreakMilestone(newStreak.current)
             previousStreak > 0 && newStreak.current == 0 ->
                 analytics.trackStreakBroken(previousStreak)

@@ -165,6 +165,21 @@ class RoutineViewModelTest {
     }
 
     @Test
+    fun `given onToggleToday, when invoked, then it resolves today live from the clock instead of a cached value`() = runTest {
+        every { getActiveHabits(today) } returns flowOf(emptyList())
+        coEvery { toggleCompletion("h1", today, today) } returns ToggleCompletionResult.Success(true)
+
+        val viewModel = buildViewModel()
+        viewModel.onToggleToday("h1")
+        advanceUntilIdle()
+
+        // Must resolve to the ViewModel's live today() (from the fixed clock), not some other
+        // stale/cached date — this is what protects the "mark today" button from writing to
+        // the wrong day if RoutineUiState.today ever goes stale across a midnight rollover.
+        coVerify(exactly = 1) { toggleCompletion("h1", today, today) }
+    }
+
+    @Test
     fun `given a future day, when toggled, then a message is exposed`() = runTest {
         every { getActiveHabits(today) } returns flowOf(emptyList())
         val future = today.plusDays(1)
@@ -235,6 +250,27 @@ class RoutineViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.trackStreakMilestone(7) }
+    }
+
+    @Test
+    fun `given a streak decreasing through a milestone number, when toggled, then no milestone event is sent`() = runTest {
+        // previousStreak = 8 (today was completed); unmarking today drops it to 7, which is
+        // itself a milestone number — but a DECREASE through 7 must not fire the "reached 7"
+        // celebration event.
+        val eightDayStreak = StreakState(current = 8, best = 8, lastCompletedDate = today, completedToday = true)
+        every { getActiveHabits(today) } returns flowOf(
+            listOf(progress("h1", completedToday = true).copy(streak = eightDayStreak))
+        )
+        every { habitRepository.getCompletions("h1") } returns
+            flowOf((1..7L).map { today.minusDays(it) }) // today's completion removed, 7 days remain
+        coEvery { toggleCompletion("h1", today, today) } returns ToggleCompletionResult.Success(false)
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle() // let observeRoutine() populate state before the toggle reads it
+        viewModel.onToggleDay("h1", today)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { analytics.trackStreakMilestone(any()) }
     }
 
     @Test
