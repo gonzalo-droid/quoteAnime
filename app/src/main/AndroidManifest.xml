@@ -52,6 +52,14 @@
         </receiver>
 
         <!--
+            HabitReminderReceiver: handles the "Done" action on habit reminder
+            notifications. Not exported — only this app posts these notifications.
+        -->
+        <receiver
+            android:name=".notification.HabitReminderReceiver"
+            android:exported="false" />
+
+        <!--
             Desactiva el WorkManagerInitializer automático de Jetpack Startup
             para que Hilt pueda inyectar HiltWorkerFactory manualmente
             (ver TokensClaudeApplication).

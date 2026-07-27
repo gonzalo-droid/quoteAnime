@@ -1,32 +1,114 @@
 <resources>
     <string name="app_name">QuoteAnime</string>
-    <string name="app_name_label">Frases Anime</string>
-    <string name="notification_channel_name">Frases motivacionales</string>
-    <string name="notification_channel_description">Recibe una frase motivacional según tu horario elegido</string>
-    <string name="widget_description">Muestra una frase motivacional en tu pantalla de inicio</string>
-    <string name="widget_refresh">Actualizar frase</string>
-    <string name="widget_loading">Cargando frase…</string>
-    <string name="widget_error">No se pudo cargar la frase. Toca para reintentar.</string>
-    <string name="remove_favorite">Quitar favorito</string>
-    <string name="add_favorite">Añadir favorito</string>
-    <string name="action_shared">Compartir</string>
-    <string name="version">Versión</string>
-    <string name="rating">Calificación</string>
+    <string name="app_name_label">Anime Quotes</string>
+    <string name="notification_channel_name">Motivational quotes</string>
+    <string name="notification_channel_description">Get a motivational quote on your chosen schedule</string>
+    <string name="widget_description">Shows a motivational quote on your home screen</string>
+    <string name="widget_refresh">Refresh quote</string>
+    <string name="widget_loading">Loading quote…</string>
+    <string name="widget_error">Couldn\'t load the quote. Tap to retry.</string>
+    <string name="remove_favorite">Remove favorite</string>
+    <string name="add_favorite">Add favorite</string>
+    <string name="action_shared">Share</string>
+    <string name="version">Version</string>
+    <string name="rating">Rating</string>
     <string name="widget">Widget</string>
-    <string name="notifications">Notificaciones</string>
-    <string name="rating_app">Dejános una reseña</string>
-    <string name="subtitle_rating_section">Déjanos una reseña en Google Play</string>
-    <string name="share_app">Compartir la app</string>
-    <string name="share_app_subtitle">Invita a tus amigos a descubrir Frases Anime</string>
-    <string name="share_app_message">¡Descubre QuoteAnime! Las mejores frases de tus animes favoritos 🌟 Descárgala gratis:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
-    <string name="terms_and_conditions">Términos y condiciones</string>
-    <string name="politics_privacy">Política de privacidad</string>
+    <string name="nav_quotes">Quotes</string>
+    <string name="nav_routine">My routine</string>
+    <string name="nav_catalog">Catalog</string>
+    <string name="notifications">Notifications</string>
+    <string name="rating_app">Leave us a review</string>
+    <string name="subtitle_rating_section">Leave us a review on Google Play</string>
+    <string name="share_app">Share the app</string>
+    <string name="share_app_subtitle">Invite your friends to discover Anime Quotes</string>
+    <string name="share_app_message">Discover QuoteAnime! The best quotes from your favorite anime 🌟 Download it for free:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
+    <string name="terms_and_conditions">Terms and conditions</string>
+    <string name="politics_privacy">Privacy policy</string>
 
-    <string name="follow_us">Síguenos</string>
+    <string name="follow_us">Follow us</string>
     <string name="social_facebook">Facebook</string>
     <string name="social_facebook_handle">@FrasesAnime</string>
     <string name="social_instagram">Instagram</string>
     <string name="social_instagram_handle">@quoteanime</string>
     <string name="social_tiktok">TikTok</string>
     <string name="social_tiktok_handle">@quoteanime</string>
+
+    <string name="routine_streak_days">%1$d day streak</string>
+    <string name="routine_progress_today">%1$d of %2$d today</string>
+    <string name="routine_empty_title">Start your routine</string>
+    <string name="routine_empty_body">Pick up to 3 habits and fill in every day you keep them.</string>
+    <string name="routine_add_habit">Add habit</string>
+    <string name="routine_limit_reached">You have reached the maximum of %1$d active habits.</string>
+    <string name="routine_current_streak">Streak: %1$d</string>
+    <string name="routine_best_streak">Best: %1$d</string>
+    <string name="routine_completion_rate">Completion: %1$d%%</string>
+    <string name="routine_mark_today">Mark today</string>
+    <string name="routine_unmark_today">Unmark today</string>
+    <string name="routine_archive">Archive</string>
+    <string name="routine_edit">Edit</string>
+    <string name="routine_message_future_day">You cannot mark a future day.</string>
+    <string name="routine_message_outside_range">That day is outside the habit period.</string>
+    <string name="routine_heatmap_description">Habit completion calendar</string>
+    <string name="routine_heatmap_cell_completed">%1$s, completed</string>
+    <string name="routine_heatmap_cell_not_completed">%1$s, not completed</string>
+    <string name="template_train">Work out</string>
+    <string name="template_read">Read</string>
+    <string name="template_meditate">Meditate</string>
+    <string name="template_water">Drink water</string>
+    <string name="template_sleep_early">Sleep early</string>
+    <string name="template_study">Study</string>
+    <string name="template_write">Write</string>
+    <string name="template_walk">Walk</string>
+
+    <string name="habit_editor_new_title">New habit</string>
+    <string name="habit_editor_edit_title">Edit habit</string>
+    <string name="habit_editor_name">Habit name</string>
+    <string name="habit_editor_templates">Suggestions</string>
+    <string name="habit_editor_color">Color</string>
+    <string name="habit_editor_color_option">Color %1$d</string>
+    <string name="habit_editor_icon">Icon</string>
+    <string name="habit_editor_start_date">Start date</string>
+    <string name="habit_editor_end_date">End date</string>
+    <string name="habit_editor_has_end_date">Set an end date</string>
+    <string name="habit_editor_reminder">Reminder</string>
+    <string name="habit_editor_reminder_time">Time</string>
+    <string name="habit_editor_reminder_days">Days</string>
+    <string name="habit_editor_save">Save</string>
+    <string name="habit_editor_cancel">Cancel</string>
+    <string name="habit_editor_error_blank">Give the habit a name.</string>
+    <string name="habit_editor_error_dates">The end date must be after the start date.</string>
+    <string name="habit_editor_error_limit">You already have %1$d active habits. Archive one to create another.</string>
+
+    <string name="habit_channel_name">Habit reminders</string>
+    <string name="habit_channel_description">Nudges to keep the habits in your routine</string>
+    <string name="habit_notification_action_done">Done</string>
+
+    <string name="habit_card_more_options">More options</string>
+    <string name="icon_dumbbell">Work out</string>
+    <string name="icon_book">Read</string>
+    <string name="icon_self_improvement">Meditate</string>
+    <string name="icon_water_drop">Drink water</string>
+    <string name="icon_bedtime">Sleep early</string>
+    <string name="icon_school">Study</string>
+    <string name="icon_edit_note">Write</string>
+    <string name="icon_directions_walk">Walk</string>
+
+    <string name="routine_intro_title">New: My routine</string>
+    <string name="routine_intro_body">Pick up to 3 habits and fill in every day you keep them. Your streak is waiting.</string>
+    <string name="routine_intro_action">Get started</string>
+    <string name="routine_intro_dismiss">Not now</string>
+    <string name="onboarding_habit_title">Want to start a habit?</string>
+    <string name="onboarding_habit_skip">Skip</string>
+    <string name="onboarding_quote_1">I never give up.\nI will never give up.\nThat\'s my ninja way.</string>
+    <string name="onboarding_quote_2">A man who abandons his dreams is nothing more than a corpse.</string>
+    <string name="onboarding_quote_3">No matter how much power you have, if you use it to hurt others, you\'re no better than them.</string>
+    <string name="onboarding_next">Next</string>
+
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_body">A new version of Quote Anime is ready. Restart the app to apply it.</string>
+    <string name="update_ready_restart">Restart</string>
+    <string name="update_ready_later">Later</string>
+
+    <string name="habit_editor_reminder_permission_denied_message">Notifications are off, so the reminder won\'t work. Enable them in Settings.</string>
+    <string name="habit_editor_reminder_permission_denied_action">Settings</string>
 </resources>

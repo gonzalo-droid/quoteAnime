@@ -363,7 +363,7 @@ fun HabitHeatmap(
                 .testTag("habit_heatmap")
                 .pointerInput(gridStart, today, startDate, endDate) {
                     detectTapGestures { offset ->
-                        val cell = HeatmapGrid.cellAt(offset.x, offset.y, cellPx, gapPx)
+                        val cell = HeatmapGrid.cellAt(offset.x, offset.y, cellPx, gapPx, weeks)
                             ?: return@detectTapGestures
                         val date = HeatmapGrid.dateAt(cell.column, cell.row, gridStart)
                         val isInsideRange = !date.isBefore(startDate) &&

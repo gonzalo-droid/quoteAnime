@@ -28,6 +28,7 @@ class UserPreferencesDataStore @Inject constructor(
         val WIDGET_SIZE                     = stringPreferencesKey("widget_size")
         val WIDGET_UPDATE_TIMES_PER_DAY     = intPreferencesKey("widget_update_times_per_day")
         val ONBOARDING_COMPLETED            = booleanPreferencesKey("onboarding_completed")
+        val ROUTINE_INTRO_SEEN              = booleanPreferencesKey("routine_intro_seen")
     }
 
     val userPreferences: Flow<UserPreferences> = dataStore.data.map { prefs ->
@@ -88,5 +89,12 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun setOnboardingCompleted() {
         dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = true }
+    }
+
+    val isRoutineIntroSeen: Flow<Boolean> =
+        dataStore.data.map { it[Keys.ROUTINE_INTRO_SEEN] ?: false }
+
+    suspend fun setRoutineIntroSeen() {
+        dataStore.edit { it[Keys.ROUTINE_INTRO_SEEN] = true }
     }
 }

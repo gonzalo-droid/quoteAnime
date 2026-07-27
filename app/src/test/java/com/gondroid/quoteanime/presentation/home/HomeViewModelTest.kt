@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
+import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -43,6 +44,7 @@ class HomeViewModelTest {
 
     private lateinit var getAllQuotes: GetAllQuotesUseCase
     private lateinit var toggleFavorite: ToggleFavoriteUseCase
+    private lateinit var shareInterstitialManager: ShareInterstitialManager
 
     private val sampleQuotes = listOf(
         Quote(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", isFavorite = false),
@@ -54,6 +56,7 @@ class HomeViewModelTest {
     fun setup() {
         getAllQuotes = mockk()
         toggleFavorite = mockk()
+        shareInterstitialManager = mockk(relaxed = true)
     }
 
     private fun buildViewModel(
@@ -61,7 +64,8 @@ class HomeViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(
             if (widgetQuoteId != null) mapOf("quoteId" to widgetQuoteId) else emptyMap()
         )
-    ): HomeViewModel = HomeViewModel(savedStateHandle, getAllQuotes, toggleFavorite)
+    ): HomeViewModel =
+        HomeViewModel(savedStateHandle, getAllQuotes, toggleFavorite, shareInterstitialManager)
 
     // ── Initial / loading state ───────────────────────────────────────────────
 
