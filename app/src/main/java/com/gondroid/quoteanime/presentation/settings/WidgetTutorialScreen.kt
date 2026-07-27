@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -98,7 +99,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.cd_back),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -220,7 +221,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                             contentDescription = null,
                             modifier = Modifier.padding(end = 4.dp)
                         )
-                        Text("Anterior")
+                        Text(stringResource(R.string.widget_tutorial_previous))
                     }
                 } else {
                     Spacer(Modifier.weight(1f))
@@ -241,7 +242,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text(if (isLastPage) "Entendido" else "Siguiente")
+                    Text(if (isLastPage) stringResource(R.string.widget_tutorial_done) else stringResource(R.string.onboarding_next))
                     if (!isLastPage) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,

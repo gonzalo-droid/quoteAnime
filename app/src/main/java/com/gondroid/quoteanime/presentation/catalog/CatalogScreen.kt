@@ -61,12 +61,14 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.presentation.components.DetailActionButton
 import com.gondroid.quoteanime.presentation.components.QuoteCard
@@ -149,7 +151,7 @@ fun CatalogScreen(
                             Icon(
                                 imageVector = if (quote.isFavorite) Icons.Default.Favorite
                                               else Icons.Default.FavoriteBorder,
-                                contentDescription = if (quote.isFavorite) "Quitar favorito" else "Añadir favorito",
+                                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite) else stringResource(R.string.add_favorite),
                                 tint = heartTint,
                                 modifier = Modifier.size(24.dp).scale(heartScale)
                             )
@@ -167,7 +169,7 @@ fun CatalogScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Outlined.Share,
-                                contentDescription = "Compartir",
+                                contentDescription = stringResource(R.string.action_shared),
                                 tint = Color.White.copy(alpha = 0.85f),
                                 modifier = Modifier.size(22.dp)
                             )
@@ -178,8 +180,13 @@ fun CatalogScreen(
         }
 
         uiState.selectedFilter != null -> {
+            val filter = uiState.selectedFilter!!
             CatalogListContent(
-                filterLabel = uiState.selectedFilter!!.label,
+                filterLabel = when (filter) {
+                    is CatalogFilter.Favorites -> stringResource(R.string.catalog_favorites)
+                    is CatalogFilter.All -> stringResource(R.string.catalog_all)
+                    is CatalogFilter.ByEmotion -> filter.emotionLabel
+                },
                 quotes = uiState.quotes,
                 isLoading = uiState.isLoading,
                 isEmpty = uiState.isEmpty,
@@ -211,7 +218,7 @@ private fun CatalogSelectorContent(
             TopAppBar(
                 title = {
                     Text(
-                        "Explorar",
+                        stringResource(R.string.explore),
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -220,7 +227,7 @@ private fun CatalogSelectorContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.cd_back),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -246,14 +253,14 @@ private fun CatalogSelectorContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 PrimaryFilterCard(
-                    label = "Favoritos",
+                    label = stringResource(R.string.catalog_favorites),
                     icon = Icons.Default.Favorite,
                     color = AccentPurple,
                     modifier = Modifier.weight(1f),
                     onClick = { onFilterSelected(CatalogFilter.Favorites) }
                 )
                 PrimaryFilterCard(
-                    label = "Todas",
+                    label = stringResource(R.string.catalog_all),
                     icon = Icons.Default.GridView,
                     color = Color(0xFF42A5F5),
                     modifier = Modifier.weight(1f),
@@ -264,7 +271,7 @@ private fun CatalogSelectorContent(
             // Section divider
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Por emoción",
+                text = stringResource(R.string.catalog_by_emotion),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -400,7 +407,7 @@ private fun CatalogListContent(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.cd_back),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -427,7 +434,7 @@ private fun CatalogListContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No hay frases disponibles",
+                        text = stringResource(R.string.catalog_empty_state),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,

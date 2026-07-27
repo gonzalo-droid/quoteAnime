@@ -111,4 +111,38 @@
 
     <string name="habit_editor_reminder_permission_denied_message">Las notificaciones están desactivadas, así que el recordatorio no funcionará. Actívalas desde Ajustes.</string>
     <string name="habit_editor_reminder_permission_denied_action">Ajustes</string>
+
+    <string name="cd_back">Volver</string>
+    <string name="settings">Ajustes</string>
+    <string name="explore">Explorar</string>
+    <string name="catalog_favorites">Favoritos</string>
+    <string name="catalog_all">Todas</string>
+    <string name="catalog_by_emotion">Por emoción</string>
+    <string name="catalog_empty_state">No hay frases disponibles</string>
+
+    <string name="notification_toggle_title">Activar notificaciones</string>
+    <string name="notification_toggle_subtitle">Recibe una frase motivacional en tu horario</string>
+    <string name="notification_schedule_title">Horario permitido</string>
+    <string name="notification_schedule_subtitle">Recibirás notificaciones solo dentro de este rango</string>
+    <string name="notification_time_from">Desde</string>
+    <string name="notification_time_to">Hasta</string>
+    <string name="notification_frequency_title">Frecuencia</string>
+    <string name="notification_permission_denied_message">Permiso denegado. Actívalo desde Ajustes.</string>
+    <string name="frequency_per_day_short">%1$d×/día</string>
+    <plurals name="notification_frequency_per_day">
+        <item quantity="one">%1$d vez al día</item>
+        <item quantity="other">%1$d veces al día</item>
+    </plurals>
+    <plurals name="widget_update_frequency">
+        <item quantity="one">Nueva frase %1$d vez al día</item>
+        <item quantity="other">Nueva frase %1$d veces al día</item>
+    </plurals>
+
+    <string name="time_picker_start_title">Hora de inicio</string>
+    <string name="time_picker_end_title">Hora de fin</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="action_cancel">Cancelar</string>
+
+    <string name="widget_tutorial_previous">Anterior</string>
+    <string name="widget_tutorial_done">Entendido</string>
 </resources>
