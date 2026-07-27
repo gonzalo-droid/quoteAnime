@@ -6,8 +6,7 @@ import java.time.LocalDate
 
 enum class RoutineMessage {
     FutureDayNotAllowed,
-    OutsideHabitRange,
-    HabitLimitReached
+    OutsideHabitRange
 }
 
 data class RoutineUiState(

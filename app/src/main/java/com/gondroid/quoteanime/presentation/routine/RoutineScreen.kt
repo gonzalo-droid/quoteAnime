@@ -77,13 +77,11 @@ fun RoutineContent(
     val snackbarHostState = remember { SnackbarHostState() }
     val futureMessage = stringResource(R.string.routine_message_future_day)
     val outsideMessage = stringResource(R.string.routine_message_outside_range)
-    val limitMessage = stringResource(R.string.routine_limit_reached, state.maxHabits)
 
     LaunchedEffect(state.message) {
         val message = when (state.message) {
             RoutineMessage.FutureDayNotAllowed -> futureMessage
             RoutineMessage.OutsideHabitRange -> outsideMessage
-            RoutineMessage.HabitLimitReached -> limitMessage
             null -> null
         }
         if (message != null) {

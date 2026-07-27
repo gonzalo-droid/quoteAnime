@@ -98,20 +98,29 @@ class NotificationHelper @Inject constructor(
     fun showHabitReminder(habitId: String, habitTitle: String, quoteText: String) {
         val notificationId = habitId.hashCode()
 
+        // The "Done" and "content" PendingIntents must never share a request code, even
+        // when two different habits' hashCode()s happen to be adjacent integers (the old
+        // `notificationId` / `notificationId + 1` scheme could collide across habits in
+        // that case). Doubling the hash guarantees every "Done" request code is even and
+        // every "content" request code is odd, so the two intent TYPES can never collide
+        // with each other by construction, regardless of the raw hashCode values.
+        val doneRequestCode = notificationId * 2
+        val contentRequestCode = notificationId * 2 + 1
+
         val doneIntent = Intent(context, HabitReminderReceiver::class.java).apply {
             putExtra(EXTRA_HABIT_ID, habitId)
             putExtra(EXTRA_NOTIFICATION_ID, notificationId)
         }
         val donePendingIntent = PendingIntent.getBroadcast(
             context,
-            notificationId,
+            doneRequestCode,
             doneIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val contentIntent = PendingIntent.getActivity(
             context,
-            notificationId + 1,
+            contentRequestCode,
             Intent(context, MainActivity::class.java).apply {
                 putExtra(EXTRA_OPEN_ROUTINE, true)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
