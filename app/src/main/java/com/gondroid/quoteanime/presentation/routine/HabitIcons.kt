@@ -11,9 +11,7 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.gondroid.quoteanime.R
 
@@ -52,6 +50,22 @@ object HabitIcons {
 }
 
 /**
+ * Bundled templates' title keys (see [com.gondroid.quoteanime.domain.model.DefaultHabitTemplates])
+ * mapped at compile time so [resolveTemplateTitle] never needs reflection — R8/resource
+ * shrinking can't see a `getIdentifier()` lookup and may strip the referenced strings.
+ */
+private val TEMPLATE_TITLE_RES_BY_KEY: Map<String, Int> = mapOf(
+    "template_train" to R.string.template_train,
+    "template_read" to R.string.template_read,
+    "template_meditate" to R.string.template_meditate,
+    "template_water" to R.string.template_water,
+    "template_sleep_early" to R.string.template_sleep_early,
+    "template_study" to R.string.template_study,
+    "template_write" to R.string.template_write,
+    "template_walk" to R.string.template_walk
+)
+
+/**
  * Resolves a human-readable accessibility description for an icon key. Falls back to the
  * raw key for any future icon that doesn't yet have a mapped string resource.
  */
@@ -68,9 +82,6 @@ fun describeIcon(key: String): String {
  */
 @Composable
 fun resolveTemplateTitle(title: String): String {
-    val context = LocalContext.current
-    val resId = remember(title) {
-        context.resources.getIdentifier(title, "string", context.packageName)
-    }
-    return if (resId != 0) stringResource(resId) else title
+    val resId = TEMPLATE_TITLE_RES_BY_KEY[title]
+    return if (resId != null) stringResource(resId) else title
 }

@@ -8,6 +8,7 @@ import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
 import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
 import com.gondroid.quoteanime.domain.usecase.SetOnboardingCompletedUseCase
+import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val setOnboardingCompleted: SetOnboardingCompletedUseCase,
+    private val setRoutineIntroSeen: SetRoutineIntroSeenUseCase,
     private val getHabitTemplates: GetHabitTemplatesUseCase,
     private val createHabit: CreateHabitUseCase,
     private val analytics: RoutineAnalytics,
@@ -86,6 +88,9 @@ class OnboardingViewModel @Inject constructor(
 
     private suspend fun finishOnboarding(onDone: () -> Unit) {
         setOnboardingCompleted()
+        // Either path through onboarding (picking a habit or tapping Skip) already frames
+        // the new routine feature, so the standalone intro dialog would be redundant.
+        setRoutineIntroSeen()
         onDone()
     }
 }

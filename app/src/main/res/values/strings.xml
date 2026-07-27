@@ -33,7 +33,6 @@
     <string name="social_tiktok">TikTok</string>
     <string name="social_tiktok_handle">@quoteanime</string>
 
-    <string name="routine_title">My routine</string>
     <string name="routine_streak_days">%1$d day streak</string>
     <string name="routine_progress_today">%1$d of %2$d today</string>
     <string name="routine_empty_title">Start your routine</string>

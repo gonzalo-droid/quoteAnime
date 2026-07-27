@@ -24,6 +24,12 @@ class HabitReminderScheduler @Inject constructor(
 ) {
     private val workManager = WorkManager.getInstance(context)
 
+    /**
+     * Deliberately self-replacing: [HabitReminderWorker] calls this on itself at the end of
+     * its own `doWork()` to chain the next occurrence. `ExistingWorkPolicy.REPLACE` cancels
+     * the old unique work item atomically before enqueueing the new one, so a running work
+     * item replacing itself under the same unique name is safe, not a bug — don't "fix" it.
+     */
     fun schedule(habit: Habit) {
         val reminderTime = habit.reminderTime
         if (habit.isArchived || reminderTime == null || habit.reminderDays.isEmpty()) {

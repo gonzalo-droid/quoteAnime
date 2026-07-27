@@ -113,8 +113,6 @@ class HabitEditorViewModel @Inject constructor(
         state.copy(reminderDays = days)
     }
 
-    fun onErrorShown() = _uiState.update { it.copy(error = null) }
-
     fun onSave() {
         val state = _uiState.value
         viewModelScope.launch {

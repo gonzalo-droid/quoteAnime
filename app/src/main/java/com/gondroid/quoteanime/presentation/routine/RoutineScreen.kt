@@ -51,8 +51,8 @@ fun RoutineScreen(
 
     RoutineContent(
         state = state,
-        today = LocalDate.now(),
-        onToggleToday = { habitId -> viewModel.onToggleDay(habitId, LocalDate.now()) },
+        today = state.today,
+        onToggleToday = { habitId -> viewModel.onToggleDay(habitId, state.today) },
         onToggleDay = viewModel::onToggleDay,
         onArchiveHabit = viewModel::onArchiveHabit,
         onAddHabit = onAddHabit,

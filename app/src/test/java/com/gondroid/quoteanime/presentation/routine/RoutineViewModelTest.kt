@@ -6,7 +6,9 @@ import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
 import com.gondroid.quoteanime.domain.model.StreakState
+import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
+import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
@@ -19,6 +21,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -56,14 +59,17 @@ class RoutineViewModelTest {
     private lateinit var setRoutineIntroSeen: SetRoutineIntroSeenUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
     private lateinit var analytics: RoutineAnalytics
+    private lateinit var habitRepository: HabitRepository
+    private val calculateStreak = CalculateStreakUseCase()
     private val premiumGate = PremiumGate()
 
-    private fun habit(id: String) = Habit(
+    private fun habit(id: String, createdAt: Long = 0L) = Habit(
         id = id,
         title = "Entrenar",
         iconKey = "dumbbell",
         colorIndex = 0,
-        startDate = today.minusDays(10)
+        startDate = today.minusDays(10),
+        createdAt = createdAt
     )
 
     private fun progress(id: String, completedToday: Boolean) = HabitWithProgress(
@@ -89,6 +95,8 @@ class RoutineViewModelTest {
         reminderScheduler = reminderScheduler,
         premiumGate = premiumGate,
         analytics = analytics,
+        habitRepository = habitRepository,
+        calculateStreak = calculateStreak,
         clock = fixedClock
     )
 
@@ -102,8 +110,10 @@ class RoutineViewModelTest {
         setRoutineIntroSeen = mockk(relaxed = true)
         reminderScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
+        habitRepository = mockk()
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
         every { isRoutineIntroSeen() } returns flowOf(true)
+        every { habitRepository.getCompletions(any()) } returns flowOf(emptyList())
     }
 
     @Test
@@ -178,5 +188,69 @@ class RoutineViewModelTest {
 
         coVerify(exactly = 1) { archiveHabit("h1") }
         coVerify(exactly = 1) { reminderScheduler.cancel("h1") }
+    }
+
+    @Test
+    fun `given a habit found in state, when archived, then analytics report days active`() = runTest {
+        val daysAgo = 5L
+        val createdAt = fixedClock.millis() - daysAgo * 24 * 60 * 60 * 1000L
+        every { getActiveHabits(today) } returns flowOf(
+            listOf(progress("h1", completedToday = false).copy(habit = habit("h1", createdAt)))
+        )
+        coEvery { archiveHabit("h1") } returns Unit
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle() // let observeRoutine() populate state before archiving reads it
+        viewModel.onArchiveHabit("h1")
+        advanceUntilIdle()
+
+        verify(exactly = 1) { analytics.trackHabitArchived(daysAgo) }
+    }
+
+    @Test
+    fun `given a habit not in state, when archived, then no analytics event is sent`() = runTest {
+        every { getActiveHabits(today) } returns flowOf(emptyList())
+        coEvery { archiveHabit("missing") } returns Unit
+
+        val viewModel = buildViewModel()
+        viewModel.onArchiveHabit("missing")
+        advanceUntilIdle()
+
+        verify(exactly = 0) { analytics.trackHabitArchived(any()) }
+    }
+
+    @Test
+    fun `given a completion that newly reaches a milestone, when toggled, then a milestone event is sent`() = runTest {
+        val sixDayStreak = StreakState(current = 6, best = 6, lastCompletedDate = today.minusDays(1))
+        every { getActiveHabits(today) } returns flowOf(
+            listOf(progress("h1", completedToday = false).copy(streak = sixDayStreak))
+        )
+        every { habitRepository.getCompletions("h1") } returns
+            flowOf((0..6L).map { today.minusDays(it) })
+        coEvery { toggleCompletion("h1", today, today) } returns ToggleCompletionResult.Success(true)
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle() // let observeRoutine() populate state before the toggle reads it
+        viewModel.onToggleDay("h1", today)
+        advanceUntilIdle()
+
+        verify(exactly = 1) { analytics.trackStreakMilestone(7) }
+    }
+
+    @Test
+    fun `given the only completion is unmarked, when toggled, then a streak broken event is sent`() = runTest {
+        val threeDayStreak = StreakState(current = 3, best = 3, lastCompletedDate = today, completedToday = true)
+        every { getActiveHabits(today) } returns flowOf(
+            listOf(progress("h1", completedToday = true).copy(streak = threeDayStreak))
+        )
+        every { habitRepository.getCompletions("h1") } returns flowOf(emptyList())
+        coEvery { toggleCompletion("h1", today, today) } returns ToggleCompletionResult.Success(false)
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle() // let observeRoutine() populate state before the toggle reads it
+        viewModel.onToggleDay("h1", today)
+        advanceUntilIdle()
+
+        verify(exactly = 1) { analytics.trackStreakBroken(3) }
     }
 }

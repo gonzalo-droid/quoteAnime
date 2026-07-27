@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.di.PremiumGate
+import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
+import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -34,6 +37,12 @@ class RoutineViewModel @Inject constructor(
     private val reminderScheduler: HabitReminderScheduler,
     private val premiumGate: PremiumGate,
     private val analytics: RoutineAnalytics,
+    /** Direct repository + streak calculation access is only used for the pre/post streak
+     *  comparison in [trackStreakChange] below — everything else in this ViewModel goes
+     *  through use cases, matching how HabitEditorViewModel already injects the repository
+     *  directly for the same kind of one-off read. */
+    private val habitRepository: HabitRepository,
+    private val calculateStreak: CalculateStreakUseCase,
     /** Injected so tests can pin "today" instead of depending on the device clock. */
     private val clock: Clock
 ) : ViewModel() {
@@ -62,7 +71,8 @@ class RoutineViewModel @Inject constructor(
                             habits = habits,
                             globalStreak = streak,
                             isLoading = false,
-                            maxHabits = premiumGate.maxActiveHabits
+                            maxHabits = premiumGate.maxActiveHabits,
+                            today = today
                         )
                     }
                 }
@@ -71,6 +81,10 @@ class RoutineViewModel @Inject constructor(
 
     fun onToggleDay(habitId: String, date: LocalDate) {
         viewModelScope.launch {
+            val previousStreak = _uiState.value.habits
+                .find { it.habit.id == habitId }
+                ?.streak?.current ?: 0
+
             val result = toggleHabitCompletion(habitId, date, today())
             when (result) {
                 is ToggleCompletionResult.Success -> {
@@ -81,6 +95,7 @@ class RoutineViewModel @Inject constructor(
                             source = RoutineAnalytics.SOURCE_APP
                         )
                     }
+                    trackStreakChange(habitId, previousStreak)
                 }
                 ToggleCompletionResult.FutureDate ->
                     _uiState.update { it.copy(message = RoutineMessage.FutureDayNotAllowed) }
@@ -91,10 +106,37 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Compares the habit's streak right before and after this toggle, computed directly
+     * from the repository rather than waiting on the next `getActiveHabits` emission so the
+     * comparison can't race the reactive state update.
+     *
+     * This only catches a break caused by unmarking a day within this same action. A streak
+     * silently dropping to 0 because a day was missed entirely (no toggle at all) would need
+     * to observe the calendar rolling over past a habit's missed day — this toggle-driven
+     * ViewModel has no natural hook for that; it would need a scheduled check, which is out
+     * of scope for this fix.
+     */
+    private suspend fun trackStreakChange(habitId: String, previousStreak: Int) {
+        val dates = habitRepository.getCompletions(habitId).first()
+        val newStreak = calculateStreak(dates, today())
+        when {
+            newStreak.current in STREAK_MILESTONES && newStreak.current != previousStreak ->
+                analytics.trackStreakMilestone(newStreak.current)
+            previousStreak > 0 && newStreak.current == 0 ->
+                analytics.trackStreakBroken(previousStreak)
+        }
+    }
+
     fun onArchiveHabit(habitId: String) {
         viewModelScope.launch {
+            val habit = _uiState.value.habits.find { it.habit.id == habitId }?.habit
             archiveHabit(habitId)
             reminderScheduler.cancel(habitId)
+            if (habit != null) {
+                val daysActive = (clock.millis() - habit.createdAt) / MILLIS_PER_DAY
+                analytics.trackHabitArchived(daysActive)
+            }
         }
     }
 
@@ -116,5 +158,10 @@ class RoutineViewModel @Inject constructor(
             setRoutineIntroSeen()
             _uiState.update { it.copy(showIntro = false) }
         }
+    }
+
+    private companion object {
+        val STREAK_MILESTONES = setOf(7, 21, 50, 100)
+        const val MILLIS_PER_DAY = 24 * 60 * 60 * 1000L
     }
 }
