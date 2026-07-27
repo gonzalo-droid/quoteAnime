@@ -161,7 +161,7 @@ private fun HomeContent(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Ajustes",
+                        contentDescription = stringResource(R.string.settings),
                         tint = TextSecondary,
                         modifier = Modifier.size(22.dp)
                     )
@@ -251,7 +251,7 @@ private fun BottomActions(
         ActionButton(onClick = onNavigateToCatalog) {
             Icon(
                 imageVector = Icons.Outlined.GridView,
-                contentDescription = "Explorar",
+                contentDescription = stringResource(R.string.explore),
                 tint = TextSecondary,
                 modifier = Modifier.size(22.dp)
             )

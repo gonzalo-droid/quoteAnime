@@ -13,8 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,11 +27,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,7 +66,6 @@ import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
-import com.gondroid.quoteanime.domain.model.Category
 import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -107,8 +102,8 @@ fun SettingsScreen(
             viewModel.onPermissionDeniedPermanently()
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = "Permiso denegado. Actívalo desde Ajustes.",
-                    actionLabel = "Ajustes"
+                    message = context.getString(R.string.notification_permission_denied_message),
+                    actionLabel = context.getString(R.string.habit_editor_reminder_permission_denied_action)
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     context.startActivity(
@@ -154,17 +149,6 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-
-                /*item {
-                    SectionHeader("Categorías")
-                    CategorySection(
-                        categories        = uiState.categories,
-                        selectedIds       = uiState.selectedCategoryIds,
-                        allSelected       = uiState.allCategoriesSelected,
-                        onCategoryToggled = viewModel::onCategoryToggled,
-                        onSelectAll       = viewModel::onSelectAllCategories
-                    )
-                }*/
 
                 item { SectionDivider() }
 
@@ -218,26 +202,6 @@ fun SettingsScreen(
     }
 }
 
-// ── Debug ─────────────────────────────────────────────────────────────────────
-@Composable
-private fun TestNotificationButton(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text("Probar notificación ahora")
-        }
-    }
-}
-
 // ── Top bar ───────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,7 +209,7 @@ private fun SettingsTopBar(onNavigateBack: () -> Unit) {
     TopAppBar(
         title = {
             Text(
-                "Ajustes",
+                stringResource(R.string.settings),
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -254,7 +218,7 @@ private fun SettingsTopBar(onNavigateBack: () -> Unit) {
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver",
+                    contentDescription = stringResource(R.string.cd_back),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -290,48 +254,6 @@ private val listItemColors
         containerColor = MaterialTheme.colorScheme.background
     )
 
-// ── Categorías ────────────────────────────────────────────────────────────────
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun CategorySection(
-    categories: List<Category>,
-    selectedIds: Set<String>,
-    allSelected: Boolean,
-    onCategoryToggled: (String) -> Unit,
-    onSelectAll: () -> Unit
-) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        if (categories.isEmpty()) {
-            Text(
-                "No hay categorías disponibles.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            Text(
-                "Sin selección = todas las categorías",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                FilterChip(selected = allSelected, onClick = onSelectAll, label = { Text("Todas") })
-                categories.forEach { cat ->
-                    FilterChip(
-                        selected = cat.id in selectedIds,
-                        onClick = { onCategoryToggled(cat.id) },
-                        label = { Text(cat.name) }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotificationSection(
@@ -345,11 +267,11 @@ private fun NotificationSection(
 
     ListItem(
         headlineContent = {
-            Text("Activar notificaciones", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.notification_toggle_title), color = MaterialTheme.colorScheme.onBackground)
         },
         supportingContent = {
             Text(
-                "Recibe una frase motivacional en tu horario",
+                stringResource(R.string.notification_toggle_subtitle),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
@@ -377,11 +299,11 @@ private fun NotificationSection(
 
         ListItem(
             headlineContent = {
-                Text("Horario permitido", color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.notification_schedule_title), color = MaterialTheme.colorScheme.onBackground)
             },
             supportingContent = {
                 Text(
-                    "Recibirás notificaciones solo dentro de este rango",
+                    stringResource(R.string.notification_schedule_subtitle),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(10.dp))
@@ -394,7 +316,7 @@ private fun NotificationSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TimeRangeChip(
-                label = "Desde",
+                label = stringResource(R.string.notification_time_from),
                 time = formatTo12h(uiState.notificationStartHour, uiState.notificationStartMinute),
                 amPm = amPmLabel(uiState.notificationStartHour),
                 onClick = { openPicker = "start" },
@@ -406,7 +328,7 @@ private fun NotificationSection(
                 style = MaterialTheme.typography.bodyMedium
             )
             TimeRangeChip(
-                label = "Hasta",
+                label = stringResource(R.string.notification_time_to),
                 time = formatTo12h(uiState.notificationEndHour, uiState.notificationEndMinute),
                 amPm = amPmLabel(uiState.notificationEndHour),
                 onClick = { openPicker = "end" },
@@ -422,12 +344,16 @@ private fun NotificationSection(
         // Frequency
         ListItem(
             headlineContent = {
-                Text("Frecuencia", color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.notification_frequency_title), color = MaterialTheme.colorScheme.onBackground)
             },
             supportingContent = {
                 Column {
                     Text(
-                        "${uiState.notificationFrequency} ${if (uiState.notificationFrequency == 1) "vez" else "veces"} al día",
+                        pluralStringResource(
+                            R.plurals.notification_frequency_per_day,
+                            uiState.notificationFrequency,
+                            uiState.notificationFrequency
+                        ),
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium
@@ -445,12 +371,12 @@ private fun NotificationSection(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "1×/día",
+                            stringResource(R.string.frequency_per_day_short, 1),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            "10×/día",
+                            stringResource(R.string.frequency_per_day_short, 10),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -464,7 +390,7 @@ private fun NotificationSection(
     // Start time picker
     if (openPicker == "start") {
         TimePickerDialog(
-            title = "Hora de inicio",
+            title = stringResource(R.string.time_picker_start_title),
             initialHour = uiState.notificationStartHour,
             initialMinute = uiState.notificationStartMinute,
             onDismiss = { openPicker = null },
@@ -478,7 +404,7 @@ private fun NotificationSection(
     // End time picker
     if (openPicker == "end") {
         TimePickerDialog(
-            title = "Hora de fin",
+            title = stringResource(R.string.time_picker_end_title),
             initialHour = uiState.notificationEndHour,
             initialMinute = uiState.notificationEndMinute,
             onDismiss = { openPicker = null },
@@ -601,7 +527,11 @@ private fun WidgetSection(
         supportingContent = {
             Column {
                 Text(
-                    "Nueva frase $widgetUpdateTimesPerDay ${if (widgetUpdateTimesPerDay == 1) "vez" else "veces"} al día",
+                    pluralStringResource(
+                        R.plurals.widget_update_frequency,
+                        widgetUpdateTimesPerDay,
+                        widgetUpdateTimesPerDay
+                    ),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium
@@ -619,11 +549,11 @@ private fun WidgetSection(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        "1×/día", style = MaterialTheme.typography.labelSmall,
+                        stringResource(R.string.frequency_per_day_short, 1), style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "8×/día", style = MaterialTheme.typography.labelSmall,
+                        stringResource(R.string.frequency_per_day_short, 8), style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -846,10 +776,10 @@ private fun TimePickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(state.hour, state.minute) }) { Text("Aceptar") }
+            TextButton(onClick = { onConfirm(state.hour, state.minute) }) { Text(stringResource(R.string.action_accept)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }
@@ -907,7 +837,7 @@ private fun InformationSection(versionName: String) {
 
     ListItem(
         headlineContent = {
-            Text("Versión", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.version), color = MaterialTheme.colorScheme.onBackground)
         },
         trailingContent = {
             Text(
