@@ -27,6 +27,12 @@ object DatabaseModule {
             "quote_anime_db"
         )
             .addMigrations(MIGRATION_4_5)
+            // Schemas 1-3 predate this app's migration-testing infrastructure and are old/rare
+            // enough (long-dormant installs) that a destructive reset on them is acceptable.
+            // The 4->5 path must stay non-destructive via MIGRATION_4_5 above: it's the common,
+            // recent upgrade path with a large base of real installed users whose favorites we
+            // must not silently wipe.
+            .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1, 2, 3)
             .build()
     }
 
