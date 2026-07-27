@@ -99,4 +99,16 @@
     <string name="routine_intro_dismiss">Not now</string>
     <string name="onboarding_habit_title">Want to start a habit?</string>
     <string name="onboarding_habit_skip">Skip</string>
+    <string name="onboarding_quote_1">I never give up.\nI will never give up.\nThat\'s my ninja way.</string>
+    <string name="onboarding_quote_2">A man who abandons his dreams is nothing more than a corpse.</string>
+    <string name="onboarding_quote_3">No matter how much power you have, if you use it to hurt others, you\'re no better than them.</string>
+    <string name="onboarding_next">Next</string>
+
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_body">A new version of Quote Anime is ready. Restart the app to apply it.</string>
+    <string name="update_ready_restart">Restart</string>
+    <string name="update_ready_later">Later</string>
+
+    <string name="habit_editor_reminder_permission_denied_message">Notifications are off, so the reminder won\'t work. Enable them in Settings.</string>
+    <string name="habit_editor_reminder_permission_denied_action">Settings</string>
 </resources>

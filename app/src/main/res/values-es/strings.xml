@@ -99,4 +99,16 @@
     <string name="routine_intro_dismiss">Ahora no</string>
     <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>
     <string name="onboarding_habit_skip">Saltar</string>
+    <string name="onboarding_quote_1">No me rindo. \nNunca me rendiré. \nEse es mi camino ninja.</string>
+    <string name="onboarding_quote_2">Un hombre que abandona sus sueños no es más que un cadáver.</string>
+    <string name="onboarding_quote_3">No importa cuánto poder tengas. Si lo usas para lastimar a otros, no eres mejor que ellos.</string>
+    <string name="onboarding_next">Siguiente</string>
+
+    <string name="update_ready_title">Actualización lista</string>
+    <string name="update_ready_body">Una nueva versión de Quote Anime está lista. Reinicia la app para aplicarla.</string>
+    <string name="update_ready_restart">Reiniciar</string>
+    <string name="update_ready_later">Después</string>
+
+    <string name="habit_editor_reminder_permission_denied_message">Las notificaciones están desactivadas, así que el recordatorio no funcionará. Actívalas desde Ajustes.</string>
+    <string name="habit_editor_reminder_permission_denied_action">Ajustes</string>
 </resources>

@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.navigation.compose.rememberNavController
@@ -105,14 +106,13 @@ class MainActivity : ComponentActivity() {
                         containerColor = MaterialTheme.colorScheme.surface,
                         title = {
                             Text(
-                                "Actualización lista",
+                                stringResource(R.string.update_ready_title),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         },
                         text = {
                             Text(
-                                "Una nueva versión de Quote Anime está lista. " +
-                                        "Reinicia la app para aplicarla.",
+                                stringResource(R.string.update_ready_body),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
                                 appUpdateManager.completeUpdate()
                             }) {
                                 Text(
-                                    "Reiniciar",
+                                    stringResource(R.string.update_ready_restart),
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
                         dismissButton = {
                             TextButton(onClick = { showUpdateReadyDialog = false }) {
                                 Text(
-                                    "Después",
+                                    stringResource(R.string.update_ready_later),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }

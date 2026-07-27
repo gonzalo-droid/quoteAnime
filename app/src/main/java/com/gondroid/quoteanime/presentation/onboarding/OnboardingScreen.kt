@@ -1,6 +1,7 @@
 package com.gondroid.quoteanime.presentation.onboarding
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -62,14 +63,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 private data class OnboardingPage(
-    val quote: String,
+    @StringRes val quoteRes: Int,
     @DrawableRes val imageRes: Int,
     val overlayGradient: List<Color>
 )
 
 private val pages = listOf(
     OnboardingPage(
-        quote = "No me rindo. \nNunca me rendiré. \nEse es mi camino ninja.",
+        quoteRes = R.string.onboarding_quote_1,
         imageRes = R.drawable.onboarding_01,
         overlayGradient = listOf(
             Color(0xFF0C0C1E).copy(alpha = 0.55f),
@@ -78,7 +79,7 @@ private val pages = listOf(
         )
     ),
     OnboardingPage(
-        quote = "Un hombre que abandona sus sueños no es más que un cadáver.",
+        quoteRes = R.string.onboarding_quote_2,
         imageRes = R.drawable.onboarding_02,
         overlayGradient = listOf(
             Color(0xFF0A1020).copy(alpha = 0.55f),
@@ -87,7 +88,7 @@ private val pages = listOf(
         )
     ),
     OnboardingPage(
-        quote = "No importa cuánto poder tengas. Si lo usas para lastimar a otros, no eres mejor que ellos.",
+        quoteRes = R.string.onboarding_quote_3,
         imageRes = R.drawable.onboarding_03,
         overlayGradient = listOf(
             Color(0xFF12080E).copy(alpha = 0.55f),
@@ -138,7 +139,7 @@ fun OnboardingScreen(
                     .padding(end = 8.dp, top = 4.dp)
             ) {
                 Text(
-                    "Saltar",
+                    stringResource(R.string.onboarding_habit_skip),
                     color = TextSecondary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
@@ -175,7 +176,7 @@ fun OnboardingScreen(
                     )
                 ) {
                     Text(
-                        text = "Siguiente",
+                        text = stringResource(R.string.onboarding_next),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 0.5.sp
@@ -232,7 +233,7 @@ private fun OnboardingPage(page: OnboardingPage) {
 
             // Quote text
             Text(
-                text = page.quote,
+                text = stringResource(page.quoteRes),
                 fontSize = 24.sp,
                 lineHeight = 38.sp,
                 fontFamily = FontFamily.Serif,
