@@ -54,6 +54,7 @@ class RoutineContentUiTest {
                 RoutineContent(
                     state = state,
                     today = today,
+                    onNavigateBack = {},
                     onToggleToday = onToggleToday,
                     onToggleDay = { _, _ -> },
                     onArchiveHabit = {},

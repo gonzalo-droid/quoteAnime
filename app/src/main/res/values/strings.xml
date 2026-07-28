@@ -13,9 +13,7 @@
     <string name="version">Version</string>
     <string name="rating">Rating</string>
     <string name="widget">Widget</string>
-    <string name="nav_quotes">Quotes</string>
     <string name="nav_routine">My routine</string>
-    <string name="nav_catalog">Catalog</string>
     <string name="notifications">Notifications</string>
     <string name="rating_app">Leave us a review</string>
     <string name="subtitle_rating_section">Leave us a review on Google Play</string>
@@ -33,6 +31,7 @@
     <string name="social_tiktok">TikTok</string>
     <string name="social_tiktok_handle">@quoteanime</string>
 
+    <string name="routine_title">My routine</string>
     <string name="routine_streak_days">%1$d day streak</string>
     <string name="routine_progress_today">%1$d of %2$d today</string>
     <string name="routine_empty_title">Start your routine</string>

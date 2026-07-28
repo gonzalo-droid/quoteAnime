@@ -10,17 +10,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +49,7 @@ import java.time.LocalDate
 @Composable
 fun RoutineScreen(
     viewModel: RoutineViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (String) -> Unit
 ) {
@@ -52,6 +58,7 @@ fun RoutineScreen(
     RoutineContent(
         state = state,
         today = state.today,
+        onNavigateBack = onNavigateBack,
         onToggleToday = viewModel::onToggleToday,
         onToggleDay = viewModel::onToggleDay,
         onArchiveHabit = viewModel::onArchiveHabit,
@@ -62,10 +69,12 @@ fun RoutineScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineContent(
     state: RoutineUiState,
     today: LocalDate,
+    onNavigateBack: () -> Unit,
     onToggleToday: (String) -> Unit,
     onToggleDay: (String, LocalDate) -> Unit,
     onArchiveHabit: (String) -> Unit,
@@ -91,6 +100,22 @@ fun RoutineContent(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.routine_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canAddHabit) {
@@ -241,6 +266,7 @@ private fun RoutineContentPreview() {
                 maxHabits = 3
             ),
             today = today,
+            onNavigateBack = {},
             onToggleToday = {},
             onToggleDay = { _, _ -> },
             onArchiveHabit = {},

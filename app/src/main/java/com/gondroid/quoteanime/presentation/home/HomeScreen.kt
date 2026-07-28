@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Share
@@ -65,6 +66,7 @@ private val HeartColor = HeartRed
 fun HomeScreen(
     onNavigateToCatalog: (categoryId: String?) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToRoutine: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,6 +82,7 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToCatalog = onNavigateToCatalog,
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToRoutine = onNavigateToRoutine,
         onToggleFavorite = { viewModel.onToggleFavorite(it) },
         onScrollConsumed = { viewModel.onScrollToPageConsumed() },
         onShare = { quote ->
@@ -101,6 +104,7 @@ private fun HomeContent(
     uiState: HomeUiState,
     onNavigateToCatalog: (categoryId: String?) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToRoutine: () -> Unit,
     onToggleFavorite: (quote: Quote) -> Unit,
     onScrollConsumed: () -> Unit,
     onShare: (quote: Quote) -> Unit
@@ -136,11 +140,12 @@ private fun HomeContent(
                     }
                 }
 
+                // No navigationBarsPadding here on purpose: the background image is meant
+                // to run edge-to-edge behind the system bars, same as the very first version
+                // of this screen — only the floating controls below inset themselves.
                 VerticalPager(
                     state = pagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding()
+                    modifier = Modifier.fillMaxSize()
                 ) { page ->
                     val quote = uiState.quotes[page]
                     val pageOffset = ((pagerState.currentPage - page) +
@@ -167,22 +172,18 @@ private fun HomeContent(
                     )
                 }
 
-                Column(
+                BottomActions(
+                    quote = currentQuote,
+                    onToggleFavorite = { onToggleFavorite(currentQuote) },
+                    onShare = { onShare(currentQuote) },
+                    onNavigateToCatalog = { onNavigateToCatalog(null) },
+                    onNavigateToRoutine = onNavigateToRoutine,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .navigationBarsPadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    BottomActions(
-                        quote = currentQuote,
-                        onToggleFavorite = { onToggleFavorite(currentQuote) },
-                        onShare = { onShare(currentQuote) },
-                        onNavigateToCatalog = { onNavigateToCatalog(null) },
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-                    // BannerAd comentado — reemplazado por interstitial en flujo de compartir
-                    // BannerAd(modifier = Modifier.fillMaxWidth())
-                }
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 24.dp)
+                )
             }
         }
     }
@@ -210,6 +211,7 @@ private fun BottomActions(
     onToggleFavorite: () -> Unit,
     onShare: () -> Unit,
     onNavigateToCatalog: () -> Unit,
+    onNavigateToRoutine: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val heartScale by animateFloatAsState(
@@ -223,35 +225,51 @@ private fun BottomActions(
         label = "heartTint"
     )
 
+    // Catálogo and Mi rutina anchor the row's edges as quick-access shortcuts;
+    // favorite/share stay paired in the center as the quote's own actions.
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ActionButton(onClick = onToggleFavorite) {
+        ActionButton(onClick = onNavigateToCatalog) {
             Icon(
-                imageVector = if (quote.isFavorite) Icons.Default.Favorite
-                else Icons.Default.FavoriteBorder,
-                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite)
-                else stringResource(R.string.add_favorite),
-                tint = heartTint,
-                modifier = Modifier.size(24.dp).scale(heartScale)
-            )
-        }
-
-        ActionButton(onClick = onShare) {
-            Icon(
-                imageVector = Icons.Outlined.Share,
-                contentDescription = stringResource(R.string.action_shared),
+                imageVector = Icons.Outlined.GridView,
+                contentDescription = stringResource(R.string.explore),
                 tint = TextSecondary,
                 modifier = Modifier.size(22.dp)
             )
         }
 
-        ActionButton(onClick = onNavigateToCatalog) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ActionButton(onClick = onToggleFavorite) {
+                Icon(
+                    imageVector = if (quote.isFavorite) Icons.Default.Favorite
+                    else Icons.Default.FavoriteBorder,
+                    contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite)
+                    else stringResource(R.string.add_favorite),
+                    tint = heartTint,
+                    modifier = Modifier.size(24.dp).scale(heartScale)
+                )
+            }
+
+            ActionButton(onClick = onShare) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = stringResource(R.string.action_shared),
+                    tint = TextSecondary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+
+        ActionButton(onClick = onNavigateToRoutine) {
             Icon(
-                imageVector = Icons.Outlined.GridView,
-                contentDescription = stringResource(R.string.explore),
+                imageVector = Icons.Filled.LocalFireDepartment,
+                contentDescription = stringResource(R.string.nav_routine),
                 tint = TextSecondary,
                 modifier = Modifier.size(22.dp)
             )
@@ -288,6 +306,7 @@ fun PreviewHomeContent() {
             ),
             onNavigateToCatalog = {},
             onNavigateToSettings = {},
+            onNavigateToRoutine = {},
             onToggleFavorite = {},
             onScrollConsumed = {},
             onShare = {}
@@ -303,6 +322,7 @@ private fun PreviewHomeLoading() {
             uiState = HomeUiState(isLoading = true),
             onNavigateToCatalog = {},
             onNavigateToSettings = {},
+            onNavigateToRoutine = {},
             onToggleFavorite = {},
             onScrollConsumed = {},
             onShare = {}
@@ -335,6 +355,7 @@ private fun PreviewHomeWithQuotes() {
             ),
             onNavigateToCatalog = {},
             onNavigateToSettings = {},
+            onNavigateToRoutine = {},
             onToggleFavorite = {},
             onScrollConsumed = {},
             onShare = {}
