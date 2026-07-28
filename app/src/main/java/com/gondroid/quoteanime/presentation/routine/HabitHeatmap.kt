@@ -78,6 +78,11 @@ fun HabitHeatmap(
             (cellPx * HeatmapGrid.ROWS + gapPx * (HeatmapGrid.ROWS - 1)).toDp()
         }
 
+        // Every cell in the grid is drawn from day one, even outside the habit's
+        // active window — an empty grid otherwise reads as broken. Only completed
+        // cells inside the valid window get the accent color; everything else
+        // (future days, days before startDate/after endDate, and simply
+        // not-yet-completed days) shares the same muted "empty" tone.
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,10 +94,10 @@ fun HabitHeatmap(
                     val isFuture = date.isAfter(today)
                     val isOutsideRange = date.isBefore(startDate) ||
                         (endDate != null && date.isAfter(endDate))
-                    if (isFuture || isOutsideRange) continue
+                    val isCompleted = date in completions && !isFuture && !isOutsideRange
 
                     drawRoundRect(
-                        color = if (date in completions) activeColor else emptyColor,
+                        color = if (isCompleted) activeColor else emptyColor,
                         topLeft = Offset(
                             x = column * (cellPx + gapPx),
                             y = row * (cellPx + gapPx)
