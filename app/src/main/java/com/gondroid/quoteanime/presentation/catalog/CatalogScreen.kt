@@ -70,6 +70,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.presentation.components.BannerAd
 import com.gondroid.quoteanime.presentation.components.DetailActionButton
 import com.gondroid.quoteanime.presentation.components.QuoteCard
 import com.gondroid.quoteanime.presentation.components.QuoteDetailContent
@@ -140,40 +141,48 @@ fun CatalogScreen(
                 quote = quote,
                 onBack = { viewModel.onBackFromDetail() },
                 actions = {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .navigationBarsPadding()
-                            .padding(bottom = 36.dp),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                            .fillMaxWidth()
+                            .navigationBarsPadding(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        DetailActionButton(onClick = { viewModel.onToggleFavorite(quote) }) {
-                            Icon(
-                                imageVector = if (quote.isFavorite) Icons.Default.Favorite
-                                              else Icons.Default.FavoriteBorder,
-                                contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite) else stringResource(R.string.add_favorite),
-                                tint = heartTint,
-                                modifier = Modifier.size(24.dp).scale(heartScale)
-                            )
-                        }
-                        DetailActionButton(onClick = {
-                            val doShare = {
-                                scope.launch {
-                                    val bitmap = createShareBitmap(quote, context)
-                                    shareQuoteAsBitmap(context, bitmap)
-                                }
-                                Unit
+                        Row(
+                            modifier = Modifier.padding(bottom = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            DetailActionButton(onClick = { viewModel.onToggleFavorite(quote) }) {
+                                Icon(
+                                    imageVector = if (quote.isFavorite) Icons.Default.Favorite
+                                                  else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (quote.isFavorite) stringResource(R.string.remove_favorite) else stringResource(R.string.add_favorite),
+                                    tint = heartTint,
+                                    modifier = Modifier.size(24.dp).scale(heartScale)
+                                )
                             }
-                            if (activity != null) adManager.onShareRequested(activity, doShare)
-                            else doShare()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Share,
-                                contentDescription = stringResource(R.string.action_shared),
-                                tint = Color.White.copy(alpha = 0.85f),
-                                modifier = Modifier.size(22.dp)
-                            )
+                            DetailActionButton(onClick = {
+                                val doShare = {
+                                    scope.launch {
+                                        val bitmap = createShareBitmap(quote, context)
+                                        shareQuoteAsBitmap(context, bitmap)
+                                    }
+                                    Unit
+                                }
+                                if (activity != null) adManager.onShareRequested(activity, doShare)
+                                else doShare()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Share,
+                                    contentDescription = stringResource(R.string.action_shared),
+                                    tint = Color.White.copy(alpha = 0.85f),
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
                         }
+
+                        // Banner solo en el detalle de frase abierto desde el Catálogo — Home se mantiene limpio.
+                        BannerAd(modifier = Modifier.fillMaxWidth())
                     }
                 }
             )
