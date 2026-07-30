@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class HabitEntity(
     @PrimaryKey val id: String,
     val title: String,
+    val description: String? = null,
     val iconKey: String,
     val colorIndex: Int,
     val startDate: String,        // ISO yyyy-MM-dd
@@ -15,6 +16,7 @@ data class HabitEntity(
     val reminderMinute: Int?,
     val reminderDays: String,     // "MONDAY,WEDNESDAY"; empty when no reminder
     val templateId: String?,
+    val coverAnimeSlug: String? = null,
     val isArchived: Boolean,
     val createdAt: Long
 )

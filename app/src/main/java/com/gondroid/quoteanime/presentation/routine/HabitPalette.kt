@@ -17,7 +17,13 @@ object HabitPalette {
         Color(0xFFFBBF24), // amber
         Color(0xFFFB7185), // coral
         Color(0xFF2DD4BF), // teal
-        Color(0xFFE879F9)  // fuchsia
+        Color(0xFFE879F9), // fuchsia
+        Color(0xFF818CF8), // indigo
+        Color(0xFFA3E635), // lime
+        Color(0xFFFB923C), // orange
+        Color(0xFFF87171), // red
+        Color(0xFF67E8F9), // cyan
+        Color(0xFFF472B6)  // pink
     )
 
     fun colorAt(index: Int): Color = COLORS[index.mod(COLORS.size)]

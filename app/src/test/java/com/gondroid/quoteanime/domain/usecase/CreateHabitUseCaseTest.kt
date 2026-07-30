@@ -38,10 +38,12 @@ class CreateHabitUseCaseTest {
 
     private suspend fun create(
         title: String = "Entrenar",
+        description: String? = null,
         startDate: LocalDate = today,
         endDate: LocalDate? = null
     ) = useCase(
         title = title,
+        description = description,
         iconKey = "dumbbell",
         colorIndex = 2,
         startDate = startDate,
@@ -61,6 +63,26 @@ class CreateHabitUseCaseTest {
         assertTrue(result is CreateHabitResult.Success)
         assertEquals("Entrenar", (result as CreateHabitResult.Success).habit.title)
         coVerify(exactly = 1) { repository.saveHabit(any()) }
+    }
+
+    @Test
+    fun `given a blank description, when creating, then it is stored as null`() = runTest {
+        coEvery { repository.countActiveHabits() } returns 0
+        coJustRun { repository.saveHabit(any()) }
+
+        val result = create(description = "   ") as CreateHabitResult.Success
+
+        assertEquals(null, result.habit.description)
+    }
+
+    @Test
+    fun `given a description with surrounding spaces, when creating, then it is trimmed`() = runTest {
+        coEvery { repository.countActiveHabits() } returns 0
+        coJustRun { repository.saveHabit(any()) }
+
+        val result = create(description = "  30 minutos de cardio  ") as CreateHabitResult.Success
+
+        assertEquals("30 minutos de cardio", result.habit.description)
     }
 
     @Test

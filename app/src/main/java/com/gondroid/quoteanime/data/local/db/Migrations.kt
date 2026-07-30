@@ -46,3 +46,15 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
         )
     }
 }
+
+/**
+ * Adds `description` (habit editor's new optional field) and `coverAnimeSlug`
+ * (the themed-background feature) as nullable columns — both are additive,
+ * existing habits just get null for them.
+ */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `habits` ADD COLUMN `description` TEXT")
+        db.execSQL("ALTER TABLE `habits` ADD COLUMN `coverAnimeSlug` TEXT")
+    }
+}

@@ -62,6 +62,8 @@
     <string name="habit_editor_new_title">Nuevo hábito</string>
     <string name="habit_editor_edit_title">Editar hábito</string>
     <string name="habit_editor_name">Nombre del hábito</string>
+    <string name="habit_editor_description">Descripción</string>
+    <string name="habit_editor_description_placeholder">Sin descripción</string>
     <string name="habit_editor_templates">Sugerencias</string>
     <string name="habit_editor_color">Color</string>
     <string name="habit_editor_color_option">Color %1$d</string>

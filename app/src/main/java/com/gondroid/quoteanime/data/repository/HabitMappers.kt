@@ -9,6 +9,7 @@ import java.time.LocalTime
 fun Habit.toEntity(): HabitEntity = HabitEntity(
     id = id,
     title = title,
+    description = description,
     iconKey = iconKey,
     colorIndex = colorIndex,
     startDate = startDate.toString(),
@@ -17,6 +18,7 @@ fun Habit.toEntity(): HabitEntity = HabitEntity(
     reminderMinute = reminderTime?.minute,
     reminderDays = reminderDays.joinToString(",") { it.name },
     templateId = templateId,
+    coverAnimeSlug = coverAnimeSlug,
     isArchived = isArchived,
     createdAt = createdAt
 )
@@ -24,6 +26,7 @@ fun Habit.toEntity(): HabitEntity = HabitEntity(
 fun HabitEntity.toDomain(): Habit = Habit(
     id = id,
     title = title,
+    description = description,
     iconKey = iconKey,
     colorIndex = colorIndex,
     startDate = LocalDate.parse(startDate),
@@ -35,6 +38,7 @@ fun HabitEntity.toDomain(): Habit = Habit(
         .mapNotNull { name -> runCatching { DayOfWeek.valueOf(name.trim()) }.getOrNull() }
         .toSet(),
     templateId = templateId,
+    coverAnimeSlug = coverAnimeSlug,
     isArchived = isArchived,
     createdAt = createdAt
 )

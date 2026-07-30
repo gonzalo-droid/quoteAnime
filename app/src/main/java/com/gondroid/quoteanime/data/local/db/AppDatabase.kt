@@ -16,7 +16,7 @@ import com.gondroid.quoteanime.data.local.db.entity.HabitEntity
         HabitEntity::class,
         HabitCompletionEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 @TypeConverters(StringListConverter::class)

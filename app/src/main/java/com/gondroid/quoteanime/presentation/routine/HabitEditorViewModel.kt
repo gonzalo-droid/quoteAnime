@@ -62,6 +62,7 @@ class HabitEditorViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     title = habit.title,
+                    description = habit.description.orEmpty(),
                     iconKey = habit.iconKey,
                     templateId = habit.templateId,
                     colorIndex = habit.colorIndex,
@@ -77,6 +78,9 @@ class HabitEditorViewModel @Inject constructor(
 
     fun onTitleChanged(title: String) =
         _uiState.update { it.copy(title = title, error = null) }
+
+    fun onDescriptionChanged(description: String) =
+        _uiState.update { it.copy(description = description) }
 
     /**
      * [resolvedTitle] is the already-localized display text for [template] (resolved in
@@ -123,6 +127,7 @@ class HabitEditorViewModel @Inject constructor(
     private suspend fun saveNew(state: HabitEditorUiState) {
         val result = createHabit(
             title = state.title,
+            description = state.description,
             iconKey = state.iconKey,
             colorIndex = state.colorIndex,
             startDate = state.startDate,
@@ -155,6 +160,7 @@ class HabitEditorViewModel @Inject constructor(
         val existing = repository.getHabit(state.habitId!!) ?: return
         val edited = existing.copy(
             title = state.title,
+            description = state.description.trim().takeIf { it.isNotEmpty() },
             iconKey = state.iconKey,
             colorIndex = state.colorIndex,
             startDate = state.startDate,

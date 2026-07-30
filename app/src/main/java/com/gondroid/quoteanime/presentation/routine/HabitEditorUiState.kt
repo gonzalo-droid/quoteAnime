@@ -15,6 +15,7 @@ data class HabitEditorUiState(
     val habitId: String? = null,
     val templates: List<HabitTemplate> = emptyList(),
     val title: String = "",
+    val description: String = "",
     val iconKey: String = "dumbbell",
     val templateId: String? = null,
     val colorIndex: Int = 0,

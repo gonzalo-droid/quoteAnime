@@ -22,13 +22,15 @@ class CreateHabitUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         title: String,
+        description: String? = null,
         iconKey: String,
         colorIndex: Int,
         startDate: LocalDate,
         endDate: LocalDate?,
         reminderTime: LocalTime?,
         reminderDays: Set<DayOfWeek>,
-        templateId: String?
+        templateId: String?,
+        coverAnimeSlug: String? = null
     ): CreateHabitResult {
         val cleanTitle = title.trim()
         if (cleanTitle.isEmpty()) return CreateHabitResult.BlankTitle
@@ -40,6 +42,7 @@ class CreateHabitUseCase @Inject constructor(
         val habit = Habit(
             id = UUID.randomUUID().toString(),
             title = cleanTitle,
+            description = description?.trim()?.takeIf { it.isNotEmpty() },
             iconKey = iconKey,
             colorIndex = colorIndex,
             startDate = startDate,
@@ -47,6 +50,7 @@ class CreateHabitUseCase @Inject constructor(
             reminderTime = reminderTime,
             reminderDays = if (reminderTime == null) emptySet() else reminderDays,
             templateId = templateId,
+            coverAnimeSlug = coverAnimeSlug,
             isArchived = false,
             createdAt = System.currentTimeMillis()
         )

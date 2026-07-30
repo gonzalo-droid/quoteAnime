@@ -107,8 +107,8 @@ class HabitEditorViewModelTest {
 
     @Test
     fun `given a new habit, when saved, then it is created and its reminder scheduled`() = runTest {
-        val created = Habit("h1", "Leer", "book", 0, today)
-        coEvery { createHabit(any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        val created = Habit(id = "h1", title = "Leer", iconKey = "book", colorIndex = 0, startDate = today)
+        coEvery { createHabit(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
             CreateHabitResult.Success(created)
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -117,14 +117,14 @@ class HabitEditorViewModelTest {
         viewModel.onSave()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { createHabit(any(), any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 1) { createHabit(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { reminderScheduler.schedule(created) }
         assertTrue(viewModel.uiState.value.isSaved)
     }
 
     @Test
     fun `given the limit is reached, when saving, then an error is exposed and it is not saved`() = runTest {
-        coEvery { createHabit(any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        coEvery { createHabit(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
             CreateHabitResult.LimitReached(3)
         val viewModel = buildViewModel()
         advanceUntilIdle()
@@ -166,10 +166,10 @@ class HabitEditorViewModelTest {
     fun `given the reminder is turned off, when saving, then time and days are cleared`() = runTest {
         var captured: Set<DayOfWeek>? = null
         coEvery {
-            createHabit(any(), any(), any(), any(), any(), null, any(), any())
+            createHabit(any(), any(), any(), any(), any(), any(), null, any(), any(), any())
         } answers {
-            captured = arg(6)
-            CreateHabitResult.Success(Habit("h1", "Leer", "book", 0, today))
+            captured = arg(7)
+            CreateHabitResult.Success(Habit(id = "h1", title = "Leer", iconKey = "book", colorIndex = 0, startDate = today))
         }
         val viewModel = buildViewModel()
         advanceUntilIdle()

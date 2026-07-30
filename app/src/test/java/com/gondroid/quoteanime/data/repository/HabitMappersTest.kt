@@ -19,6 +19,7 @@ class HabitMappersTest {
     private val fullHabit = Habit(
         id = "h1",
         title = "Entrenar",
+        description = "30 minutos de cardio",
         iconKey = "dumbbell",
         colorIndex = 3,
         startDate = LocalDate.parse("2026-07-01"),
@@ -26,6 +27,7 @@ class HabitMappersTest {
         reminderTime = LocalTime.of(7, 30),
         reminderDays = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY),
         templateId = "train",
+        coverAnimeSlug = "naruto",
         isArchived = false,
         createdAt = 1234L
     )
@@ -58,5 +60,15 @@ class HabitMappersTest {
         val openEnded = fullHabit.copy(endDate = null)
 
         assertNull(openEnded.toEntity().toDomain().endDate)
+    }
+
+    @Test
+    fun `given a habit without description or cover, when mapped both ways, then both stay null`() {
+        val bare = fullHabit.copy(description = null, coverAnimeSlug = null)
+
+        val result = bare.toEntity().toDomain()
+
+        assertNull(result.description)
+        assertNull(result.coverAnimeSlug)
     }
 }

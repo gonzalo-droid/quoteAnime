@@ -16,18 +16,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -69,8 +75,15 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+
+/** Matches the app-wide "12/03/2026" display format requested for the editor's date rows. */
+private val DATE_DISPLAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+/** 14 palette colors laid out as exactly 2 rows of 7. */
+private const val COLOR_COLUMNS = 7
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -176,29 +189,52 @@ fun HabitEditorSheet(
                     .testTag("habit_title_field")
             )
 
+            OutlinedTextField(
+                value = state.description,
+                onValueChange = viewModel::onDescriptionChanged,
+                label = { Text(stringResource(R.string.habit_editor_description)) },
+                placeholder = { Text(stringResource(R.string.habit_editor_description_placeholder)) },
+                minLines = 2,
+                maxLines = 4,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("habit_description_field")
+            )
+
             Text(stringResource(R.string.habit_editor_color))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                HabitPalette.COLORS.forEachIndexed { index, color ->
-                    val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
-                    Column(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable { viewModel.onColorSelected(index) }
-                            .semantics { contentDescription = colorDescription }
-                            .testTag("color_$index"),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+            // Two explicit rows of 7 (not a width-dependent FlowRow) so the layout is exactly
+            // 7 columns on every screen size, per design — each swatch takes equal weight so
+            // all 7 always fit one row instead of wrapping early on narrow phones.
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                HabitPalette.COLORS.chunked(COLOR_COLUMNS).forEach { rowColors ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .background(color, CircleShape)
-                                .border(
-                                    width = if (state.colorIndex == index) 2.dp else 0.dp,
-                                    color = if (state.colorIndex == index) Color.White else Color.Transparent,
-                                    shape = CircleShape
+                        rowColors.forEach { color ->
+                            val index = HabitPalette.COLORS.indexOf(color)
+                            val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clickable { viewModel.onColorSelected(index) }
+                                    .semantics { contentDescription = colorDescription }
+                                    .testTag("color_$index"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(0.6f)
+                                        .background(color, CircleShape)
+                                        .border(
+                                            width = if (state.colorIndex == index) 2.dp else 0.dp,
+                                            color = if (state.colorIndex == index) Color.White else Color.Transparent,
+                                            shape = CircleShape
+                                        )
                                 )
-                        ) {}
+                            }
+                        }
                     }
                 }
             }
@@ -240,7 +276,7 @@ fun HabitEditorSheet(
 
             ListItem(
                 headlineContent = { Text(stringResource(R.string.habit_editor_start_date)) },
-                supportingContent = { Text(state.startDate.toString()) },
+                supportingContent = { Text(DATE_DISPLAY_FORMAT.format(state.startDate)) },
                 modifier = Modifier.clickable { showStartPicker = true }
             )
 
@@ -258,38 +294,70 @@ fun HabitEditorSheet(
             if (state.endDate != null) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.habit_editor_end_date)) },
-                    supportingContent = { Text(state.endDate.toString()) },
+                    supportingContent = { Text(DATE_DISPLAY_FORMAT.format(state.endDate)) },
                     modifier = Modifier.clickable { showEndPicker = true }
                 )
             }
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.habit_editor_reminder)) },
-                trailingContent = {
-                    Switch(
-                        checked = state.reminderEnabled,
-                        onCheckedChange = { enabled -> requestReminderToggle(enabled) },
-                        modifier = Modifier.testTag("reminder_switch")
-                    )
-                }
-            )
-
-            if (state.reminderEnabled) {
+            // Grouped in one bordered card instead of loose ListItems, so the switch and its
+            // time/days detail read as a single unit rather than unrelated rows in the list.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+            ) {
                 ListItem(
-                    headlineContent = { Text(stringResource(R.string.habit_editor_reminder_time)) },
-                    supportingContent = { Text(state.reminderTime.toString()) },
-                    modifier = Modifier.clickable { showTimePicker = true }
-                )
-                Text(stringResource(R.string.habit_editor_reminder_days))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DayOfWeek.entries.forEach { day ->
-                        FilterChip(
-                            selected = day in state.reminderDays,
-                            onClick = { viewModel.onReminderDayToggled(day) },
-                            label = {
-                                Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault()))
-                            }
+                    headlineContent = { Text(stringResource(R.string.habit_editor_reminder)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.NotificationsNone,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = state.reminderEnabled,
+                            onCheckedChange = { enabled -> requestReminderToggle(enabled) },
+                            modifier = Modifier.testTag("reminder_switch")
+                        )
+                    }
+                )
+
+                if (state.reminderEnabled) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showTimePicker = true },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.habit_editor_reminder_time),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = state.reminderTime.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            DayOfWeek.entries.forEach { day ->
+                                FilterChip(
+                                    selected = day in state.reminderDays,
+                                    onClick = { viewModel.onReminderDayToggled(day) },
+                                    label = {
+                                        Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault()))
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }

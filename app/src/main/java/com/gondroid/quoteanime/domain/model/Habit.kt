@@ -7,6 +7,7 @@ import java.time.LocalTime
 data class Habit(
     val id: String,
     val title: String,
+    val description: String? = null,
     val iconKey: String,
     val colorIndex: Int,
     val startDate: LocalDate,
@@ -14,6 +15,8 @@ data class Habit(
     val reminderTime: LocalTime? = null,
     val reminderDays: Set<DayOfWeek> = emptySet(),
     val templateId: String? = null,
+    /** Anime slug used to fetch a themed background for this habit's card, if any. */
+    val coverAnimeSlug: String? = null,
     val isArchived: Boolean = false,
     val createdAt: Long = 0L
 ) {
