@@ -65,6 +65,7 @@
     <string name="habit_editor_description">Description</string>
     <string name="habit_editor_description_placeholder">No description</string>
     <string name="habit_editor_templates">Suggestions</string>
+    <string name="habit_editor_theme_tag">theme · %1$s</string>
     <string name="habit_editor_color">Color</string>
     <string name="habit_editor_color_option">Color %1$d</string>
     <string name="habit_editor_icon">Icon</string>

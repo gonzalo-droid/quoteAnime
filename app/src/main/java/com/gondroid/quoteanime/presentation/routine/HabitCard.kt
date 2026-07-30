@@ -1,6 +1,8 @@
 package com.gondroid.quoteanime.presentation.routine
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,9 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
 import java.time.LocalDate
@@ -41,7 +47,8 @@ fun HabitCard(
     onToggleDay: (LocalDate) -> Unit,
     onEdit: () -> Unit,
     onArchive: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundImageUrl: String? = null
 ) {
     val habit = progress.habit
     val accent = HabitPalette.colorAt(habit.colorIndex)
@@ -55,6 +62,25 @@ fun HabitCard(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
+        Box {
+        if (backgroundImageUrl != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(backgroundImageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
+            )
+            // Keeps the themed image recognizable without compromising text legibility,
+            // by scrimming it close to the card's normal solid background color.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.82f))
+            )
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -142,6 +168,7 @@ fun HabitCard(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+        }
         }
     }
 }

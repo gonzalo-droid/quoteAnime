@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
+import com.gondroid.quoteanime.data.remote.QuoteRemoteDataSource
 import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
@@ -33,6 +34,7 @@ class HabitEditorViewModel @Inject constructor(
     private val repository: HabitRepository,
     private val reminderScheduler: HabitReminderScheduler,
     private val analytics: RoutineAnalytics,
+    private val quoteRemoteDataSource: QuoteRemoteDataSource,
     private val clock: Clock
 ) : ViewModel() {
 
@@ -43,8 +45,12 @@ class HabitEditorViewModel @Inject constructor(
     )
     val uiState: StateFlow<HabitEditorUiState> = _uiState.asStateFlow()
 
+    /** Anime slug -> image URLs, fetched once; empty until [loadAnimeImages] resolves. */
+    private var animeImages: Map<String, List<String>> = emptyMap()
+
     init {
         loadTemplates()
+        loadAnimeImages()
         editedHabitId?.let(::loadHabit)
     }
 
@@ -55,6 +61,18 @@ class HabitEditorViewModel @Inject constructor(
             }
         }
     }
+
+    /** Re-resolves the current selection's preview once images arrive, covering the race
+     *  with [loadHabit]/[onTemplateSelected] running before this fetch completes. */
+    private fun loadAnimeImages() {
+        viewModelScope.launch {
+            animeImages = runCatching { quoteRemoteDataSource.getAnimeImages() }.getOrDefault(emptyMap())
+            _uiState.update { it.copy(themedBackgroundUrl = resolveThemedBackground(it.coverAnimeSlug)) }
+        }
+    }
+
+    private fun resolveThemedBackground(slug: String?): String? =
+        slug?.let { animeImages[it]?.firstOrNull() }
 
     private fun loadHabit(habitId: String) {
         viewModelScope.launch {
@@ -70,7 +88,9 @@ class HabitEditorViewModel @Inject constructor(
                     endDate = habit.endDate,
                     reminderEnabled = habit.reminderTime != null,
                     reminderTime = habit.reminderTime ?: it.reminderTime,
-                    reminderDays = habit.reminderDays.ifEmpty { it.reminderDays }
+                    reminderDays = habit.reminderDays.ifEmpty { it.reminderDays },
+                    coverAnimeSlug = habit.coverAnimeSlug,
+                    themedBackgroundUrl = resolveThemedBackground(habit.coverAnimeSlug)
                 )
             }
         }
@@ -92,6 +112,9 @@ class HabitEditorViewModel @Inject constructor(
             title = resolvedTitle,
             iconKey = template.iconKey,
             templateId = template.id,
+            colorIndex = template.themeColorIndex ?: it.colorIndex,
+            coverAnimeSlug = template.themeAnimeSlug,
+            themedBackgroundUrl = resolveThemedBackground(template.themeAnimeSlug),
             error = null
         )
     }
@@ -134,7 +157,8 @@ class HabitEditorViewModel @Inject constructor(
             endDate = state.endDate,
             reminderTime = if (state.reminderEnabled) state.reminderTime else null,
             reminderDays = if (state.reminderEnabled) state.reminderDays else emptySet(),
-            templateId = state.templateId
+            templateId = state.templateId,
+            coverAnimeSlug = state.coverAnimeSlug
         )
         when (result) {
             is CreateHabitResult.Success -> {
@@ -167,7 +191,8 @@ class HabitEditorViewModel @Inject constructor(
             endDate = state.endDate,
             reminderTime = if (state.reminderEnabled) state.reminderTime else null,
             reminderDays = if (state.reminderEnabled) state.reminderDays else emptySet(),
-            templateId = state.templateId
+            templateId = state.templateId,
+            coverAnimeSlug = state.coverAnimeSlug
         )
         when (updateHabit(edited)) {
             is UpdateHabitResult.Success -> {

@@ -153,7 +153,9 @@ fun RoutineContent(
                         onToggleToday = { onToggleToday(progress.habit.id) },
                         onToggleDay = { date -> onToggleDay(progress.habit.id, date) },
                         onEdit = { onEditHabit(progress.habit.id) },
-                        onArchive = { onArchiveHabit(progress.habit.id) }
+                        onArchive = { onArchiveHabit(progress.habit.id) },
+                        backgroundImageUrl = progress.habit.coverAnimeSlug
+                            ?.let { state.animeImages[it]?.firstOrNull() }
                     )
                 }
                 if (!state.canAddHabit) {

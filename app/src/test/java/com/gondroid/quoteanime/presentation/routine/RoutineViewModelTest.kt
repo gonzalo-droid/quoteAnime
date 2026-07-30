@@ -2,6 +2,7 @@ package com.gondroid.quoteanime.presentation.routine
 
 import app.cash.turbine.test
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
+import com.gondroid.quoteanime.data.remote.QuoteRemoteDataSource
 import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
@@ -60,6 +61,7 @@ class RoutineViewModelTest {
     private lateinit var reminderScheduler: HabitReminderScheduler
     private lateinit var analytics: RoutineAnalytics
     private lateinit var habitRepository: HabitRepository
+    private lateinit var quoteRemoteDataSource: QuoteRemoteDataSource
     private val calculateStreak = CalculateStreakUseCase()
     private val premiumGate = PremiumGate()
 
@@ -97,6 +99,7 @@ class RoutineViewModelTest {
         analytics = analytics,
         habitRepository = habitRepository,
         calculateStreak = calculateStreak,
+        quoteRemoteDataSource = quoteRemoteDataSource,
         clock = fixedClock
     )
 
@@ -111,9 +114,11 @@ class RoutineViewModelTest {
         reminderScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
         habitRepository = mockk()
+        quoteRemoteDataSource = mockk()
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
         every { isRoutineIntroSeen() } returns flowOf(true)
         every { habitRepository.getCompletions(any()) } returns flowOf(emptyList())
+        coEvery { quoteRemoteDataSource.getAnimeImages() } returns emptyMap()
     }
 
     @Test

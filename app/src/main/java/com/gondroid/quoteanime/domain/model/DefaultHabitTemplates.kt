@@ -7,13 +7,13 @@ package com.gondroid.quoteanime.domain.model
  */
 object DefaultHabitTemplates {
     val ALL: List<HabitTemplate> = listOf(
-        HabitTemplate("train", "template_train", "dumbbell", 1),
+        HabitTemplate("train", "template_train", "dumbbell", 1, themeColorIndex = 10, themeAnimeSlug = "naruto"),
         HabitTemplate("read", "template_read", "book", 2),
-        HabitTemplate("meditate", "template_meditate", "self_improvement", 3),
+        HabitTemplate("meditate", "template_meditate", "self_improvement", 3, themeColorIndex = 4, themeAnimeSlug = "dragon_ball"),
         HabitTemplate("water", "template_water", "water_drop", 4),
         HabitTemplate("sleep_early", "template_sleep_early", "bedtime", 5),
         HabitTemplate("study", "template_study", "school", 6),
-        HabitTemplate("write", "template_write", "edit_note", 7),
-        HabitTemplate("walk", "template_walk", "directions_walk", 8)
+        HabitTemplate("write", "template_write", "edit_note", 7, themeColorIndex = 11, themeAnimeSlug = "death_note"),
+        HabitTemplate("walk", "template_walk", "directions_walk", 8, themeColorIndex = 3, themeAnimeSlug = "one_piece")
     )
 }
