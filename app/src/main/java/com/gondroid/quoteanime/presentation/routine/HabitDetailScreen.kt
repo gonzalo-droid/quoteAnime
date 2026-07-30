@@ -155,7 +155,7 @@ fun HabitDetailContent(
                 },
                 actions = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.cd_back))
+                        Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.cd_close))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
