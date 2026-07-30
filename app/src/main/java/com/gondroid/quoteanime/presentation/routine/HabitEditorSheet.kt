@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -69,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -408,14 +410,15 @@ fun HabitEditorSheet(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             DayOfWeek.entries.forEach { day ->
-                                FilterChip(
-                                    selected = day in state.reminderDays,
-                                    onClick = { viewModel.onReminderDayToggled(day) },
-                                    label = {
-                                        Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault()))
-                                    }
+                                val selected = day in state.reminderDays
+                                DayDot(
+                                    label = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                                    fullLabel = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                                    selected = selected,
+                                    onToggle = { viewModel.onReminderDayToggled(day) },
+                                    modifier = Modifier.testTag("reminder_day_${day.name}")
                                 )
                             }
                         }
@@ -474,6 +477,38 @@ fun HabitEditorSheet(
             initialTime = state.reminderTime,
             onTimeSelected = { viewModel.onReminderTimeChanged(it); showTimePicker = false },
             onDismiss = { showTimePicker = false }
+        )
+    }
+}
+
+/** Compact circular day toggle used by the reminder card, matching the approved mockup's
+ *  "day-dot" design instead of a full-size FilterChip. */
+@Composable
+private fun DayDot(
+    label: String,
+    fullLabel: String,
+    selected: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .toggleable(value = selected, onValueChange = { onToggle() }, role = Role.Checkbox)
+            .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .border(
+                width = 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                shape = CircleShape
+            )
+            .semantics { contentDescription = fullLabel },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
