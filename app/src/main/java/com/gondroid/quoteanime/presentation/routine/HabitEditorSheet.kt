@@ -171,7 +171,11 @@ fun HabitEditorSheet(
         }
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
         if (showIconPicker) {
             HabitIconPickerContent(

@@ -45,6 +45,12 @@
     <string name="routine_unmark_today">Desmarcar hoy</string>
     <string name="routine_archive">Archivar</string>
     <string name="routine_edit">Editar</string>
+    <string name="routine_restore">Restaurar</string>
+    <string name="routine_filter_active">Activos</string>
+    <string name="routine_filter_archived">Archivados</string>
+    <string name="routine_archived_empty">Todavía no tienes hábitos archivados.</string>
+    <string name="routine_confirm_archive_title">¿Archivar este hábito?</string>
+    <string name="routine_confirm_archive_body">Se moverá al filtro de Archivados y dejará de recordarte. Su historial se conserva — puedes restaurarlo cuando quieras.</string>
     <string name="routine_message_future_day">No puedes marcar un día futuro.</string>
     <string name="routine_message_outside_range">Ese día está fuera del periodo del hábito.</string>
     <string name="routine_heatmap_description">Calendario de cumplimiento del hábito</string>
@@ -270,6 +276,9 @@
     <string name="habit_detail_state_not_completed">No completado</string>
     <string name="habit_detail_previous_month">Mes anterior</string>
     <string name="habit_detail_next_month">Mes siguiente</string>
+    <string name="habit_detail_delete">Borrar</string>
+    <string name="habit_detail_confirm_delete_title">¿Borrar este hábito?</string>
+    <string name="habit_detail_confirm_delete_body">Esta acción no se puede deshacer. Se perderá todo su historial de forma permanente.</string>
 
     <string name="cd_back">Volver</string>
     <string name="cd_close">Cerrar</string>

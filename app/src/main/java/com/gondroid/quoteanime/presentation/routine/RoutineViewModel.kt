@@ -4,15 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.di.PremiumGate
+import com.gondroid.quoteanime.domain.model.HabitWithProgress
+import com.gondroid.quoteanime.domain.model.StreakState
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
+import com.gondroid.quoteanime.domain.usecase.GetArchivedHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +33,11 @@ import javax.inject.Inject
 @HiltViewModel
 class RoutineViewModel @Inject constructor(
     private val getActiveHabits: GetActiveHabitsUseCase,
+    private val getArchivedHabits: GetArchivedHabitsUseCase,
     private val getGlobalStreak: GetGlobalStreakUseCase,
     private val toggleHabitCompletion: ToggleHabitCompletionUseCase,
     private val archiveHabit: ArchiveHabitUseCase,
+    private val unarchiveHabit: UnarchiveHabitUseCase,
     private val isRoutineIntroSeen: IsRoutineIntroSeenUseCase,
     private val setRoutineIntroSeen: SetRoutineIntroSeenUseCase,
     private val reminderScheduler: HabitReminderScheduler,
@@ -50,6 +56,8 @@ class RoutineViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RoutineUiState(maxHabits = premiumGate.maxActiveHabits))
     val uiState: StateFlow<RoutineUiState> = _uiState.asStateFlow()
 
+    private val _filter = MutableStateFlow(RoutineFilter.ACTIVE)
+
     private fun today(): LocalDate = LocalDate.now(clock)
 
     init {
@@ -61,22 +69,33 @@ class RoutineViewModel @Inject constructor(
     private fun observeRoutine() {
         val today = today()
         viewModelScope.launch {
+            // Active habits are always observed (regardless of the selected filter) so
+            // canAddHabit stays correct even while browsing the archived tab.
             combine(
                 getActiveHabits(today),
-                getGlobalStreak(today)
-            ) { habits, streak -> habits to streak }
-                .collect { (habits, streak) ->
-                    _uiState.update {
-                        it.copy(
-                            habits = habits,
-                            globalStreak = streak,
-                            isLoading = false,
-                            maxHabits = premiumGate.maxActiveHabits,
-                            today = today
-                        )
-                    }
+                getArchivedHabits(today),
+                getGlobalStreak(today),
+                _filter
+            ) { active, archived, streak, filter ->
+                RoutineSnapshot(active, archived, streak, filter)
+            }.collect { snapshot ->
+                _uiState.update {
+                    it.copy(
+                        habits = if (snapshot.filter == RoutineFilter.ACTIVE) snapshot.active else snapshot.archived,
+                        activeCount = snapshot.active.size,
+                        globalStreak = snapshot.streak,
+                        isLoading = false,
+                        maxHabits = premiumGate.maxActiveHabits,
+                        filter = snapshot.filter,
+                        today = today
+                    )
                 }
+            }
         }
+    }
+
+    fun onFilterChanged(filter: RoutineFilter) {
+        _filter.value = filter
     }
 
     /** Resolves "today" fresh at the moment of the tap, unlike the cached RoutineUiState.today
@@ -145,6 +164,10 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
+    fun onUnarchiveHabit(habitId: String) {
+        viewModelScope.launch { unarchiveHabit(habitId) }
+    }
+
     /** Consumed by the UI after showing the snackbar. */
     fun onMessageShown() {
         _uiState.update { it.copy(message = null) }
@@ -170,3 +193,10 @@ class RoutineViewModel @Inject constructor(
         const val MILLIS_PER_DAY = 24 * 60 * 60 * 1000L
     }
 }
+
+private data class RoutineSnapshot(
+    val active: List<HabitWithProgress>,
+    val archived: List<HabitWithProgress>,
+    val streak: StreakState,
+    val filter: RoutineFilter
+)

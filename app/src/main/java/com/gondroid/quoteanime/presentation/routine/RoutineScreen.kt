@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +31,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -63,6 +67,8 @@ fun RoutineScreen(
         onToggleToday = viewModel::onToggleToday,
         onToggleDay = viewModel::onToggleDay,
         onArchiveHabit = viewModel::onArchiveHabit,
+        onUnarchiveHabit = viewModel::onUnarchiveHabit,
+        onFilterChanged = viewModel::onFilterChanged,
         onAddHabit = onAddHabit,
         onEditHabit = onEditHabit,
         onOpenHabitDetail = onOpenHabitDetail,
@@ -80,6 +86,8 @@ fun RoutineContent(
     onToggleToday: (String) -> Unit,
     onToggleDay: (String, LocalDate) -> Unit,
     onArchiveHabit: (String) -> Unit,
+    onUnarchiveHabit: (String) -> Unit,
+    onFilterChanged: (RoutineFilter) -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (String) -> Unit,
     onOpenHabitDetail: (String) -> Unit,
@@ -89,6 +97,9 @@ fun RoutineContent(
     val snackbarHostState = remember { SnackbarHostState() }
     val futureMessage = stringResource(R.string.routine_message_future_day)
     val outsideMessage = stringResource(R.string.routine_message_outside_range)
+    // Confirmed at the screen level (not per-card) so every card's "Archivar" reuses the
+    // same dialog instead of each needing its own AlertDialog instance.
+    var pendingArchiveHabitId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(state.message) {
         val message = when (state.message) {
@@ -121,7 +132,7 @@ fun RoutineContent(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            if (state.canAddHabit) {
+            if (state.filter == RoutineFilter.ACTIVE && state.canAddHabit) {
                 ExtendedFloatingActionButton(
                     onClick = onAddHabit,
                     modifier = Modifier.testTag("add_habit_fab"),
@@ -132,12 +143,22 @@ fun RoutineContent(
         }
     ) { padding ->
         when {
-            state.isEmpty -> EmptyRoutine(
-                onAddHabit = onAddHabit,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            )
+            state.isEmpty && state.filter == RoutineFilter.ACTIVE -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
+                EmptyRoutine(onAddHabit = onAddHabit, modifier = Modifier.fillMaxSize())
+            }
+
+            state.isEmpty -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(R.string.routine_archived_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(32.dp)
+                    )
+                }
+            }
 
             else -> LazyColumn(
                 modifier = Modifier
@@ -149,6 +170,9 @@ fun RoutineContent(
                 item {
                     RoutineHeader(state = state)
                 }
+                item {
+                    RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
+                }
                 items(items = state.habits, key = { it.habit.id }) { progress ->
                     HabitCard(
                         progress = progress,
@@ -156,11 +180,12 @@ fun RoutineContent(
                         onToggleToday = { onToggleToday(progress.habit.id) },
                         onToggleDay = { date -> onToggleDay(progress.habit.id, date) },
                         onEdit = { onEditHabit(progress.habit.id) },
-                        onArchive = { onArchiveHabit(progress.habit.id) },
+                        onRequestArchive = { pendingArchiveHabitId = progress.habit.id },
+                        onUnarchive = { onUnarchiveHabit(progress.habit.id) },
                         onOpenDetail = { onOpenHabitDetail(progress.habit.id) }
                     )
                 }
-                if (!state.canAddHabit) {
+                if (state.filter == RoutineFilter.ACTIVE && !state.canAddHabit) {
                     item {
                         Text(
                             text = stringResource(R.string.routine_limit_reached, state.maxHabits),
@@ -192,6 +217,49 @@ fun RoutineContent(
                     Text(stringResource(R.string.routine_intro_dismiss))
                 }
             }
+        )
+    }
+
+    pendingArchiveHabitId?.let { habitId ->
+        AlertDialog(
+            onDismissRequest = { pendingArchiveHabitId = null },
+            title = { Text(stringResource(R.string.routine_confirm_archive_title)) },
+            text = { Text(stringResource(R.string.routine_confirm_archive_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onArchiveHabit(habitId); pendingArchiveHabitId = null },
+                    modifier = Modifier.testTag("confirm_archive")
+                ) {
+                    Text(stringResource(R.string.routine_archive))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingArchiveHabitId = null }) {
+                    Text(stringResource(R.string.habit_editor_cancel))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun RoutineFilterRow(filter: RoutineFilter, onFilterChanged: (RoutineFilter) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp)
+            .testTag("routine_filter_row")
+    ) {
+        FilterChip(
+            selected = filter == RoutineFilter.ACTIVE,
+            onClick = { onFilterChanged(RoutineFilter.ACTIVE) },
+            label = { Text(stringResource(R.string.routine_filter_active)) }
+        )
+        FilterChip(
+            selected = filter == RoutineFilter.ARCHIVED,
+            onClick = { onFilterChanged(RoutineFilter.ARCHIVED) },
+            label = { Text(stringResource(R.string.routine_filter_archived)) }
         )
     }
 }
@@ -265,6 +333,7 @@ private fun RoutineContentPreview() {
                         completionRate = 0.62f
                     )
                 ),
+                activeCount = 1,
                 globalStreak = StreakState(2, 11, today, true),
                 isLoading = false,
                 maxHabits = 3
@@ -274,6 +343,8 @@ private fun RoutineContentPreview() {
             onToggleToday = {},
             onToggleDay = { _, _ -> },
             onArchiveHabit = {},
+            onUnarchiveHabit = {},
+            onFilterChanged = {},
             onAddHabit = {},
             onEditHabit = {},
             onOpenHabitDetail = {},

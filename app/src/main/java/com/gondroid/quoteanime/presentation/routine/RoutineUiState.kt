@@ -9,13 +9,24 @@ enum class RoutineMessage {
     OutsideHabitRange
 }
 
+enum class RoutineFilter {
+    ACTIVE,
+    ARCHIVED
+}
+
 data class RoutineUiState(
+    /** The list for whichever [filter] is currently selected. */
     val habits: List<HabitWithProgress> = emptyList(),
+    /** Always the active count, regardless of [filter] — the habit limit is never about
+     *  how many archived habits exist, so this keeps [canAddHabit] correct while browsing
+     *  the archived tab too. */
+    val activeCount: Int = 0,
     val globalStreak: StreakState = StreakState(),
     val isLoading: Boolean = true,
     val maxHabits: Int = 0,
     val message: RoutineMessage? = null,
     val showIntro: Boolean = false,
+    val filter: RoutineFilter = RoutineFilter.ACTIVE,
     /**
      * "Today" as the ViewModel's injected Clock sees it. This default is only ever
      * observed by a bare `RoutineUiState()` in a test — production always overwrites it
@@ -25,6 +36,6 @@ data class RoutineUiState(
 ) {
     val completedToday: Int get() = habits.count { it.streak.completedToday }
     val totalHabits: Int get() = habits.size
-    val canAddHabit: Boolean get() = habits.size < maxHabits
+    val canAddHabit: Boolean get() = activeCount < maxHabits
     val isEmpty: Boolean get() = !isLoading && habits.isEmpty()
 }

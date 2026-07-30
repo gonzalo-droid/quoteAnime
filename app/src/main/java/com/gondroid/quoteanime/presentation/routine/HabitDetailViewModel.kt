@@ -7,8 +7,10 @@ import com.gondroid.quoteanime.analytics.RoutineAnalytics
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
+import com.gondroid.quoteanime.domain.usecase.DeleteHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +29,8 @@ class HabitDetailViewModel @Inject constructor(
     private val repository: HabitRepository,
     private val toggleHabitCompletion: ToggleHabitCompletionUseCase,
     private val archiveHabit: ArchiveHabitUseCase,
+    private val unarchiveHabit: UnarchiveHabitUseCase,
+    private val deleteHabit: DeleteHabitUseCase,
     private val calculateStreak: CalculateStreakUseCase,
     private val reminderScheduler: HabitReminderScheduler,
     private val analytics: RoutineAnalytics,
@@ -102,6 +106,27 @@ class HabitDetailViewModel @Inject constructor(
             val daysActive = (clock.millis() - habitSnapshot.createdAt) / MILLIS_PER_DAY
             analytics.trackHabitArchived(daysActive)
             _uiState.update { it.copy(isArchived = true) }
+        }
+    }
+
+    /** Restores an archived habit in place — the screen stays open, its actions just
+     *  switch back to the active set (Archive instead of Restore). */
+    fun onUnarchive() {
+        val habitSnapshot = _uiState.value.habit ?: return
+        viewModelScope.launch {
+            unarchiveHabit(habitId)
+            val restored = habitSnapshot.copy(isArchived = false)
+            reminderScheduler.schedule(restored)
+            _uiState.update { it.copy(habit = restored) }
+        }
+    }
+
+    /** Permanent, unlike archiving — the UI must confirm before calling this. */
+    fun onDelete() {
+        viewModelScope.launch {
+            deleteHabit(habitId)
+            reminderScheduler.cancel(habitId)
+            _uiState.update { it.copy(isDeleted = true) }
         }
     }
 

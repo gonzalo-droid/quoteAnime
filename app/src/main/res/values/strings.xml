@@ -45,6 +45,12 @@
     <string name="routine_unmark_today">Unmark today</string>
     <string name="routine_archive">Archive</string>
     <string name="routine_edit">Edit</string>
+    <string name="routine_restore">Restore</string>
+    <string name="routine_filter_active">Active</string>
+    <string name="routine_filter_archived">Archived</string>
+    <string name="routine_archived_empty">No archived habits yet.</string>
+    <string name="routine_confirm_archive_title">Archive this habit?</string>
+    <string name="routine_confirm_archive_body">It will move to the Archived filter and stop reminding you. Its history is kept — you can restore it anytime.</string>
     <string name="routine_message_future_day">You cannot mark a future day.</string>
     <string name="routine_message_outside_range">That day is outside the habit period.</string>
     <string name="routine_heatmap_description">Habit completion calendar</string>
@@ -270,6 +276,9 @@
     <string name="habit_detail_state_not_completed">Not completed</string>
     <string name="habit_detail_previous_month">Previous month</string>
     <string name="habit_detail_next_month">Next month</string>
+    <string name="habit_detail_delete">Delete</string>
+    <string name="habit_detail_confirm_delete_title">Delete this habit?</string>
+    <string name="habit_detail_confirm_delete_body">This can\'t be undone. All of its history will be permanently deleted.</string>
 
     <string name="cd_back">Back</string>
     <string name="cd_close">Close</string>

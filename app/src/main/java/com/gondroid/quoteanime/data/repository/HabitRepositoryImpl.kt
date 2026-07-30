@@ -20,6 +20,9 @@ class HabitRepositoryImpl @Inject constructor(
     override fun getActiveHabits(): Flow<List<Habit>> =
         habitDao.getActive().map { entities -> entities.map { it.toDomain() } }
 
+    override fun getArchivedHabits(): Flow<List<Habit>> =
+        habitDao.getArchived().map { entities -> entities.map { it.toDomain() } }
+
     override fun getCompletions(habitId: String): Flow<List<LocalDate>> =
         completionDao.getByHabit(habitId).map { rows -> rows.map { LocalDate.parse(it.date) } }
 
@@ -33,6 +36,10 @@ class HabitRepositoryImpl @Inject constructor(
     override suspend fun saveHabit(habit: Habit) = habitDao.upsert(habit.toEntity())
 
     override suspend fun archiveHabit(id: String) = habitDao.archive(id)
+
+    override suspend fun unarchiveHabit(id: String) = habitDao.unarchive(id)
+
+    override suspend fun deleteHabit(id: String) = habitDao.delete(id)
 
     override suspend fun setCompletion(habitId: String, date: LocalDate, completed: Boolean) {
         if (completed) {

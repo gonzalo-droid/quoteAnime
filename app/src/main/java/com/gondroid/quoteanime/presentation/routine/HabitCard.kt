@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,7 +46,8 @@ fun HabitCard(
     onToggleToday: () -> Unit,
     onToggleDay: (LocalDate) -> Unit,
     onEdit: () -> Unit,
-    onArchive: () -> Unit,
+    onRequestArchive: () -> Unit,
+    onUnarchive: () -> Unit,
     onOpenDetail: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -96,43 +98,60 @@ fun HabitCard(
                         .weight(1f)
                         .padding(start = 12.dp)
                 )
-                IconButton(
-                    onClick = onToggleToday,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .testTag("toggle_today_${habit.id}")
-                ) {
-                    Icon(
-                        imageVector = if (progress.streak.completedToday) {
-                            Icons.Filled.CheckCircle
-                        } else {
-                            Icons.Outlined.CheckCircle
-                        },
-                        contentDescription = stringResource(
-                            if (progress.streak.completedToday) R.string.routine_unmark_today
-                            else R.string.routine_mark_today
-                        ),
-                        tint = accent
-                    )
-                }
-                IconButton(
-                    onClick = { menuExpanded = true },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.habit_card_more_options)
-                    )
-                }
-                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.routine_edit)) },
-                        onClick = { menuExpanded = false; onEdit() }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.routine_archive)) },
-                        onClick = { menuExpanded = false; onArchive() }
-                    )
+                if (habit.isArchived) {
+                    // Archived habits aren't actively tracked — the only action left is
+                    // putting them back; no toggle-today, no edit/archive menu.
+                    IconButton(
+                        onClick = onUnarchive,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .testTag("unarchive_${habit.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Unarchive,
+                            contentDescription = stringResource(R.string.routine_restore),
+                            tint = accent
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = onToggleToday,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .testTag("toggle_today_${habit.id}")
+                    ) {
+                        Icon(
+                            imageVector = if (progress.streak.completedToday) {
+                                Icons.Filled.CheckCircle
+                            } else {
+                                Icons.Outlined.CheckCircle
+                            },
+                            contentDescription = stringResource(
+                                if (progress.streak.completedToday) R.string.routine_unmark_today
+                                else R.string.routine_mark_today
+                            ),
+                            tint = accent
+                        )
+                    }
+                    IconButton(
+                        onClick = { menuExpanded = true },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.habit_card_more_options)
+                        )
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.routine_edit)) },
+                            onClick = { menuExpanded = false; onEdit() }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.routine_archive)) },
+                            onClick = { menuExpanded = false; onRequestArchive() }
+                        )
+                    }
                 }
             }
 

@@ -18,11 +18,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,13 +36,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -76,13 +82,17 @@ fun HabitDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    LaunchedEffect(state.isArchived) {
-        if (state.isArchived) onNavigateBack()
+    LaunchedEffect(state.isArchived, state.isDeleted) {
+        if (state.isArchived || state.isDeleted) onNavigateBack()
     }
 
     // Fullscreen modal (not a push-navigation destination): opens fully expanded and can be
     // swiped down to dismiss, matching HabitEditorSheet's pattern.
-    ModalBottomSheet(onDismissRequest = onNavigateBack, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onNavigateBack,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background
+    ) {
         HabitDetailContent(
             state = state,
             onNavigateBack = onNavigateBack,
@@ -90,6 +100,8 @@ fun HabitDetailScreen(
             onDayClick = viewModel::onDayClick,
             onMonthChanged = viewModel::onMonthChanged,
             onArchive = viewModel::onArchive,
+            onUnarchive = viewModel::onUnarchive,
+            onDelete = viewModel::onDelete,
             onMessageShown = viewModel::onMessageShown
         )
     }
@@ -104,11 +116,16 @@ fun HabitDetailContent(
     onDayClick: (LocalDate) -> Unit,
     onMonthChanged: (Long) -> Unit,
     onArchive: () -> Unit,
+    onUnarchive: () -> Unit,
+    onDelete: () -> Unit,
     onMessageShown: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val futureMessage = stringResource(R.string.routine_message_future_day)
     val outsideMessage = stringResource(R.string.routine_message_outside_range)
+    // Both destructive-ish actions always confirm first — archiving is reversible but hides
+    // the habit, deleting is permanent — neither should fire straight off a single tap.
+    var pendingAction by remember { mutableStateOf<PendingAction?>(null) }
 
     LaunchedEffect(state.message) {
         val message = when (state.message) {
@@ -213,8 +230,11 @@ fun HabitDetailContent(
             StatRow(
                 streak = state.streak,
                 accent = HabitPalette.colorAt(habit.colorIndex),
+                isArchived = habit.isArchived,
                 onEdit = onEditHabit,
-                onArchive = onArchive
+                onArchive = { pendingAction = PendingAction.Archive },
+                onUnarchive = onUnarchive,
+                onDelete = { pendingAction = PendingAction.Delete }
             )
 
             HorizontalDivider(
@@ -237,7 +257,48 @@ fun HabitDetailContent(
             )
         }
     }
+
+    pendingAction?.let { action ->
+        val (titleRes, bodyRes, confirmRes) = when (action) {
+            PendingAction.Archive -> Triple(
+                R.string.routine_confirm_archive_title,
+                R.string.routine_confirm_archive_body,
+                R.string.routine_archive
+            )
+            PendingAction.Delete -> Triple(
+                R.string.habit_detail_confirm_delete_title,
+                R.string.habit_detail_confirm_delete_body,
+                R.string.habit_detail_delete
+            )
+        }
+        AlertDialog(
+            onDismissRequest = { pendingAction = null },
+            title = { Text(stringResource(titleRes)) },
+            text = { Text(stringResource(bodyRes)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        when (action) {
+                            PendingAction.Archive -> onArchive()
+                            PendingAction.Delete -> onDelete()
+                        }
+                        pendingAction = null
+                    },
+                    modifier = Modifier.testTag("confirm_${action.name}")
+                ) {
+                    Text(stringResource(confirmRes))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingAction = null }) {
+                    Text(stringResource(R.string.habit_editor_cancel))
+                }
+            }
+        )
+    }
 }
+
+private enum class PendingAction { Archive, Delete }
 
 @Composable
 private fun SelectedDayCallout(date: LocalDate, isCompleted: Boolean, accent: Color) {
@@ -277,8 +338,11 @@ private fun SelectedDayCallout(date: LocalDate, isCompleted: Boolean, accent: Co
 private fun StatRow(
     streak: StreakState,
     accent: Color,
+    isArchived: Boolean,
     onEdit: () -> Unit,
-    onArchive: () -> Unit
+    onArchive: () -> Unit,
+    onUnarchive: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -304,19 +368,34 @@ private fun StatRow(
         }
         Spacer(modifier = Modifier.weight(1f))
         // A single-item overflow menu is an anti-pattern (and, anchored this close to the
-        // trailing edge, has no room to open without overlapping the Edit button) — Archive
-        // is just as visible as Edit, side by side, no menu needed.
+        // trailing edge, has no room to open without overlapping the Edit button) — every
+        // action is just as visible as Edit, side by side, no menu needed.
         SquareIconButton(
             icon = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.routine_edit),
             onClick = onEdit,
             modifier = Modifier.testTag("habit_detail_edit")
         )
+        if (isArchived) {
+            SquareIconButton(
+                icon = Icons.Filled.Unarchive,
+                contentDescription = stringResource(R.string.routine_restore),
+                onClick = onUnarchive,
+                modifier = Modifier.testTag("habit_detail_unarchive")
+            )
+        } else {
+            SquareIconButton(
+                icon = Icons.Filled.Archive,
+                contentDescription = stringResource(R.string.routine_archive),
+                onClick = onArchive,
+                modifier = Modifier.testTag("habit_detail_archive")
+            )
+        }
         SquareIconButton(
-            icon = Icons.Filled.Archive,
-            contentDescription = stringResource(R.string.routine_archive),
-            onClick = onArchive,
-            modifier = Modifier.testTag("habit_detail_archive")
+            icon = Icons.Filled.Delete,
+            contentDescription = stringResource(R.string.habit_detail_delete),
+            onClick = onDelete,
+            modifier = Modifier.testTag("habit_detail_delete")
         )
     }
 }

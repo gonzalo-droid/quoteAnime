@@ -6,8 +6,10 @@ import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
+import com.gondroid.quoteanime.domain.usecase.DeleteHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
@@ -49,6 +51,8 @@ class HabitDetailViewModelTest {
     private lateinit var repository: HabitRepository
     private lateinit var toggleHabitCompletion: ToggleHabitCompletionUseCase
     private lateinit var archiveHabit: ArchiveHabitUseCase
+    private lateinit var unarchiveHabit: UnarchiveHabitUseCase
+    private lateinit var deleteHabit: DeleteHabitUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
     private lateinit var analytics: RoutineAnalytics
     private val calculateStreak = CalculateStreakUseCase()
@@ -66,6 +70,8 @@ class HabitDetailViewModelTest {
         repository = repository,
         toggleHabitCompletion = toggleHabitCompletion,
         archiveHabit = archiveHabit,
+        unarchiveHabit = unarchiveHabit,
+        deleteHabit = deleteHabit,
         calculateStreak = calculateStreak,
         reminderScheduler = reminderScheduler,
         analytics = analytics,
@@ -77,6 +83,8 @@ class HabitDetailViewModelTest {
         repository = mockk()
         toggleHabitCompletion = mockk()
         archiveHabit = mockk()
+        unarchiveHabit = mockk()
+        deleteHabit = mockk()
         reminderScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
         coEvery { repository.getHabit("h1") } returns habit
@@ -155,5 +163,35 @@ class HabitDetailViewModelTest {
         coVerify(exactly = 1) { archiveHabit("h1") }
         coVerify(exactly = 1) { reminderScheduler.cancel("h1") }
         assertTrue(viewModel.uiState.value.isArchived)
+    }
+
+    @Test
+    fun `given an archived habit, when restored, then the use case runs and the habit stays open with isArchived false`() = runTest {
+        coEvery { repository.getHabit("h1") } returns habit.copy(isArchived = true)
+        coEvery { unarchiveHabit("h1") } returns Unit
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onUnarchive()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { unarchiveHabit("h1") }
+        coVerify(exactly = 1) { reminderScheduler.schedule(any()) }
+        assertEquals(false, viewModel.uiState.value.habit?.isArchived)
+        assertEquals(false, viewModel.uiState.value.isArchived)
+    }
+
+    @Test
+    fun `given a habit, when deleted, then the use case runs, the reminder is cancelled and the state is flagged`() = runTest {
+        coEvery { deleteHabit("h1") } returns Unit
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onDelete()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { deleteHabit("h1") }
+        coVerify(exactly = 1) { reminderScheduler.cancel("h1") }
+        assertTrue(viewModel.uiState.value.isDeleted)
     }
 }

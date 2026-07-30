@@ -21,5 +21,7 @@ data class HabitDetailUiState(
     val message: HabitDetailMessage? = null,
     /** Set once archiving completes, so the screen can navigate back. */
     val isArchived: Boolean = false,
+    /** Set once deletion completes, so the screen can navigate back. */
+    val isDeleted: Boolean = false,
     val isLoading: Boolean = true
 )

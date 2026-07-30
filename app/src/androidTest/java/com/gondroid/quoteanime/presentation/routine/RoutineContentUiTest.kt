@@ -58,6 +58,8 @@ class RoutineContentUiTest {
                     onToggleToday = onToggleToday,
                     onToggleDay = { _, _ -> },
                     onArchiveHabit = {},
+                    onUnarchiveHabit = {},
+                    onFilterChanged = {},
                     onAddHabit = onAddHabit,
                     onEditHabit = {},
                     onOpenHabitDetail = {},
@@ -111,6 +113,7 @@ class RoutineContentUiTest {
         setContent(
             RoutineUiState(
                 habits = listOf(progress("h1"), progress("h2"), progress("h3")),
+                activeCount = 3,
                 isLoading = false,
                 maxHabits = 3
             )

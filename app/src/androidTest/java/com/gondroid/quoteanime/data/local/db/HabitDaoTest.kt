@@ -62,6 +62,35 @@ class HabitDaoTest {
     }
 
     @Test
+    fun getArchivedReturnsOnlyArchivedHabits() = runTest {
+        habitDao.upsert(habit("h1"))
+        habitDao.upsert(habit("h2", archived = true))
+
+        assertEquals(listOf("h2"), habitDao.getArchived().first().map { it.id })
+    }
+
+    @Test
+    fun unarchiveMovesTheHabitBackToActive() = runTest {
+        habitDao.upsert(habit("h1", archived = true))
+
+        habitDao.unarchive("h1")
+
+        assertEquals(listOf("h1"), habitDao.getActive().first().map { it.id })
+        assertTrue(habitDao.getArchived().first().isEmpty())
+    }
+
+    @Test
+    fun deletingAHabitCascadesToItsCompletions() = runTest {
+        habitDao.upsert(habit("h1"))
+        completionDao.insert(HabitCompletionEntity("h1", "2026-07-25", 1))
+
+        habitDao.delete("h1")
+
+        assertEquals(null, habitDao.getById("h1"))
+        assertTrue(completionDao.getByHabit("h1").first().isEmpty())
+    }
+
+    @Test
     fun insertingSameDayTwiceKeepsOneRow() = runTest {
         habitDao.upsert(habit("h1"))
         completionDao.insert(HabitCompletionEntity("h1", "2026-07-25", 1))

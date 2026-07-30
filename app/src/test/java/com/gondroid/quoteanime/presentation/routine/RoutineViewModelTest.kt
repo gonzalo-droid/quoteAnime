@@ -10,11 +10,13 @@ import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.CalculateStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
+import com.gondroid.quoteanime.domain.usecase.GetArchivedHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
+import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
@@ -52,9 +54,11 @@ class RoutineViewModelTest {
     private val today = LocalDate.parse("2026-07-25")
 
     private lateinit var getActiveHabits: GetActiveHabitsUseCase
+    private lateinit var getArchivedHabits: GetArchivedHabitsUseCase
     private lateinit var getGlobalStreak: GetGlobalStreakUseCase
     private lateinit var toggleCompletion: ToggleHabitCompletionUseCase
     private lateinit var archiveHabit: ArchiveHabitUseCase
+    private lateinit var unarchiveHabit: UnarchiveHabitUseCase
     private lateinit var isRoutineIntroSeen: IsRoutineIntroSeenUseCase
     private lateinit var setRoutineIntroSeen: SetRoutineIntroSeenUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
@@ -87,9 +91,11 @@ class RoutineViewModelTest {
 
     private fun buildViewModel() = RoutineViewModel(
         getActiveHabits = getActiveHabits,
+        getArchivedHabits = getArchivedHabits,
         getGlobalStreak = getGlobalStreak,
         toggleHabitCompletion = toggleCompletion,
         archiveHabit = archiveHabit,
+        unarchiveHabit = unarchiveHabit,
         isRoutineIntroSeen = isRoutineIntroSeen,
         setRoutineIntroSeen = setRoutineIntroSeen,
         reminderScheduler = reminderScheduler,
@@ -103,9 +109,11 @@ class RoutineViewModelTest {
     @Before
     fun setup() {
         getActiveHabits = mockk()
+        getArchivedHabits = mockk()
         getGlobalStreak = mockk()
         toggleCompletion = mockk()
         archiveHabit = mockk()
+        unarchiveHabit = mockk()
         isRoutineIntroSeen = mockk()
         setRoutineIntroSeen = mockk(relaxed = true)
         reminderScheduler = mockk(relaxed = true)
@@ -114,6 +122,7 @@ class RoutineViewModelTest {
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
         every { isRoutineIntroSeen() } returns flowOf(true)
         every { habitRepository.getCompletions(any()) } returns flowOf(emptyList())
+        every { getArchivedHabits(today) } returns flowOf(emptyList())
     }
 
     @Test
@@ -288,5 +297,34 @@ class RoutineViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.trackStreakBroken(3) }
+    }
+
+    @Test
+    fun `given the archived filter, when selected, then the state shows archived habits and stays active-count aware`() = runTest {
+        every { getActiveHabits(today) } returns flowOf(listOf(progress("h1", false)))
+        every { getArchivedHabits(today) } returns flowOf(listOf(progress("h2", false)))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        viewModel.onFilterChanged(RoutineFilter.ARCHIVED)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(RoutineFilter.ARCHIVED, state.filter)
+        assertEquals(listOf("h2"), state.habits.map { it.habit.id })
+        // The limit is about active habits, not whichever list is on screen.
+        assertEquals(1, state.activeCount)
+    }
+
+    @Test
+    fun `given an archived habit id, when restored, then the use case is invoked`() = runTest {
+        every { getActiveHabits(today) } returns flowOf(emptyList())
+        coEvery { unarchiveHabit("h1") } returns Unit
+
+        val viewModel = buildViewModel()
+        viewModel.onUnarchiveHabit("h1")
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { unarchiveHabit("h1") }
     }
 }
