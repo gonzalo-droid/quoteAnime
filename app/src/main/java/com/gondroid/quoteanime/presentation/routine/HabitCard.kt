@@ -133,24 +133,26 @@ fun HabitCard(
                             tint = accent
                         )
                     }
-                    IconButton(
-                        onClick = { menuExpanded = true },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.habit_card_more_options)
-                        )
-                    }
-                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.routine_edit)) },
-                            onClick = { menuExpanded = false; onEdit() }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.routine_archive)) },
-                            onClick = { menuExpanded = false; onRequestArchive() }
-                        )
+                    Box {
+                        IconButton(
+                            onClick = { menuExpanded = true },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = stringResource(R.string.habit_card_more_options)
+                            )
+                        }
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.routine_edit)) },
+                                onClick = { menuExpanded = false; onEdit() }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.routine_archive)) },
+                                onClick = { menuExpanded = false; onRequestArchive() }
+                            )
+                        }
                     }
                 }
             }

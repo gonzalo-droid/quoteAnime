@@ -34,7 +34,26 @@
       "Bash(./gradlew :app:compileReleaseUnitTestKotlin)",
       "Bash(./gradlew :app:testDebugUnitTest --stacktrace)",
       "Bash(grep -v \"AndroidStudioProjects/quoteAnime$\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(./gradlew :app:compileDebugKotlin -q)",
+      "Read(//Volumes/Neko/AndroidStudioProjects/quoteAnime/**)",
+      "Bash(./gradlew :app:assembleDebug -q)",
+      "Bash(adb -s emulator-5554 install -r app/build/outputs/apk/debug/app-debug.apk)",
+      "Bash(adb -s emulator-5554 shell am start -n com.gondroid.quoteanime/.MainActivity)",
+      "Bash(adb -s emulator-5554 exec-out screencap -p)",
+      "Bash(adb -s emulator-5554 shell dumpsys activity activities)",
+      "Bash(adb -s emulator-5554 logcat -d -t 200)",
+      "Bash(adb -s emulator-5554 logcat -d)",
+      "Bash(adb -s emulator-5554 shell input tap 131 1961)",
+      "Bash(sips *)",
+      "Bash(adb -s emulator-5554 shell uiautomator dump /sdcard/window_dump.xml)",
+      "Bash(adb -s emulator-5554 pull /sdcard/window_dump.xml /private/tmp/claude-502/-Volumes-Neko-AndroidStudioProjects-quoteAnime/9197c0c9-a565-43ad-a8b5-afe180078a71/scratchpad/window_dump.xml)",
+      "Bash(adb -s emulator-5554 shell input tap 640 550)",
+      "Bash(git check-ignore *)",
+      "Bash(git -C /Volumes/Neko/AndroidStudioProjects/quoteAnime status --porcelain)",
+      "Bash(git -C /Volumes/Neko/AndroidStudioProjects/quoteAnime branch --show-current)",
+      "Bash(git -C /Volumes/Neko/AndroidStudioProjects/quoteAnime diff -- app/src/main/java/com/gondroid/quoteanime/presentation/catalog/CatalogScreen.kt)",
+      "Bash(git *)"
     ]
   }
 }
