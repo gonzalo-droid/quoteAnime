@@ -190,7 +190,18 @@ fun HabitEditorSheet(
                 .testTag("habit_editor_sheet"),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(
+                        if (state.isEditing) R.string.habit_editor_edit_title
+                        else R.string.habit_editor_new_title
+                    ),
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier.testTag("habit_editor_close")
@@ -200,13 +211,6 @@ fun HabitEditorSheet(
                         contentDescription = stringResource(R.string.cd_close)
                     )
                 }
-                Text(
-                    text = stringResource(
-                        if (state.isEditing) R.string.habit_editor_edit_title
-                        else R.string.habit_editor_new_title
-                    ),
-                    style = MaterialTheme.typography.headlineSmall
-                )
             }
 
             Text(stringResource(R.string.habit_editor_templates))

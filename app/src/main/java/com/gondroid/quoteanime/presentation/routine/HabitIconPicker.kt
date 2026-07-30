@@ -66,18 +66,19 @@ fun HabitIconPickerContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = stringResource(R.string.habit_icon_picker_title),
+                style = MaterialTheme.typography.titleMedium
+            )
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(R.string.cd_close)
                 )
             }
-            Text(
-                text = stringResource(R.string.habit_icon_picker_title),
-                style = MaterialTheme.typography.titleMedium
-            )
         }
 
         OutlinedTextField(

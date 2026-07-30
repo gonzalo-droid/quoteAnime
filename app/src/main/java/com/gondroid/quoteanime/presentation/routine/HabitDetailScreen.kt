@@ -16,32 +16,30 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,6 +66,7 @@ private const val DETAIL_HEATMAP_WEEKS = 26
 
 private val DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(
     onNavigateBack: () -> Unit,
@@ -75,20 +74,25 @@ fun HabitDetailScreen(
     viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(state.isArchived) {
         if (state.isArchived) onNavigateBack()
     }
 
-    HabitDetailContent(
-        state = state,
-        onNavigateBack = onNavigateBack,
-        onEditHabit = { state.habit?.let { onEditHabit(it.id) } },
-        onDayClick = viewModel::onDayClick,
-        onMonthChanged = viewModel::onMonthChanged,
-        onArchive = viewModel::onArchive,
-        onMessageShown = viewModel::onMessageShown
-    )
+    // Fullscreen modal (not a push-navigation destination): opens fully expanded and can be
+    // swiped down to dismiss, matching HabitEditorSheet's pattern.
+    ModalBottomSheet(onDismissRequest = onNavigateBack, sheetState = sheetState) {
+        HabitDetailContent(
+            state = state,
+            onNavigateBack = onNavigateBack,
+            onEditHabit = { state.habit?.let { onEditHabit(it.id) } },
+            onDayClick = viewModel::onDayClick,
+            onMonthChanged = viewModel::onMonthChanged,
+            onArchive = viewModel::onArchive,
+            onMessageShown = viewModel::onMessageShown
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -276,7 +280,6 @@ private fun StatRow(
     onEdit: () -> Unit,
     onArchive: () -> Unit
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -300,26 +303,21 @@ private fun StatRow(
             Text(text = streak.current.toString(), style = MaterialTheme.typography.labelMedium, color = accent)
         }
         Spacer(modifier = Modifier.weight(1f))
+        // A single-item overflow menu is an anti-pattern (and, anchored this close to the
+        // trailing edge, has no room to open without overlapping the Edit button) — Archive
+        // is just as visible as Edit, side by side, no menu needed.
         SquareIconButton(
             icon = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.routine_edit),
             onClick = onEdit,
             modifier = Modifier.testTag("habit_detail_edit")
         )
-        Box {
-            SquareIconButton(
-                icon = Icons.Filled.Settings,
-                contentDescription = stringResource(R.string.habit_card_more_options),
-                onClick = { menuExpanded = true },
-                modifier = Modifier.testTag("habit_detail_more_options")
-            )
-            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.routine_archive)) },
-                    onClick = { menuExpanded = false; onArchive() }
-                )
-            }
-        }
+        SquareIconButton(
+            icon = Icons.Filled.Archive,
+            contentDescription = stringResource(R.string.routine_archive),
+            onClick = onArchive,
+            modifier = Modifier.testTag("habit_detail_archive")
+        )
     }
 }
 

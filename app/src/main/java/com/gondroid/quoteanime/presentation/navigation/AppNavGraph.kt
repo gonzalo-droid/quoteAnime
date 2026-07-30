@@ -154,7 +154,7 @@ fun AppNavGraph(
             )
         }
 
-        composable(
+        dialog(
             route = Screen.HabitDetail.routeWithArg,
             arguments = listOf(navArgument(Screen.HabitDetail.ARG) { type = NavType.StringType })
         ) {
