@@ -145,7 +145,6 @@
     <string name="habit_editor_reminder_permission_denied_message">Notifications are off, so the reminder won\'t work. Enable them in Settings.</string>
     <string name="habit_editor_reminder_permission_denied_action">Settings</string>
 
-    <string name="habit_detail_no_streak_goal">No streak goal</string>
     <string name="habit_detail_selected_label">Selected day</string>
     <string name="habit_detail_state_completed">✓ Completed</string>
     <string name="habit_detail_state_not_completed">Not completed</string>

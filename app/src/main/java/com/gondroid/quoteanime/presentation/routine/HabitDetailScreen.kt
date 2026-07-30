@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -274,18 +275,6 @@ private fun StatRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.habit_detail_no_streak_goal),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
         Row(
             modifier = Modifier
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
@@ -301,6 +290,7 @@ private fun StatRow(
             )
             Text(text = streak.current.toString(), style = MaterialTheme.typography.labelMedium, color = accent)
         }
+        Spacer(modifier = Modifier.weight(1f))
         SquareIconButton(
             icon = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.routine_edit),
@@ -356,14 +346,12 @@ private fun MonthFooter(visibleMonth: YearMonth, onMonthChanged: (Long) -> Unit,
                 icon = Icons.Filled.KeyboardArrowLeft,
                 contentDescription = stringResource(R.string.habit_detail_previous_month),
                 onClick = { onMonthChanged(-1L) },
-                size = 30.dp,
                 modifier = Modifier.testTag("habit_detail_prev_month")
             )
             SquareIconButton(
                 icon = Icons.Filled.KeyboardArrowRight,
                 contentDescription = stringResource(R.string.habit_detail_next_month),
                 onClick = { onMonthChanged(1L) },
-                size = 30.dp,
                 modifier = Modifier.testTag("habit_detail_next_month")
             )
         }
