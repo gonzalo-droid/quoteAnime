@@ -51,7 +51,8 @@ fun RoutineScreen(
     viewModel: RoutineViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onAddHabit: () -> Unit,
-    onEditHabit: (String) -> Unit
+    onEditHabit: (String) -> Unit,
+    onOpenHabitDetail: (String) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -64,6 +65,7 @@ fun RoutineScreen(
         onArchiveHabit = viewModel::onArchiveHabit,
         onAddHabit = onAddHabit,
         onEditHabit = onEditHabit,
+        onOpenHabitDetail = onOpenHabitDetail,
         onMessageShown = viewModel::onMessageShown,
         onIntroDismissed = viewModel::onIntroDismissed
     )
@@ -80,6 +82,7 @@ fun RoutineContent(
     onArchiveHabit: (String) -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (String) -> Unit,
+    onOpenHabitDetail: (String) -> Unit,
     onMessageShown: () -> Unit,
     onIntroDismissed: () -> Unit
 ) {
@@ -153,7 +156,8 @@ fun RoutineContent(
                         onToggleToday = { onToggleToday(progress.habit.id) },
                         onToggleDay = { date -> onToggleDay(progress.habit.id, date) },
                         onEdit = { onEditHabit(progress.habit.id) },
-                        onArchive = { onArchiveHabit(progress.habit.id) }
+                        onArchive = { onArchiveHabit(progress.habit.id) },
+                        onOpenDetail = { onOpenHabitDetail(progress.habit.id) }
                     )
                 }
                 if (!state.canAddHabit) {
@@ -272,6 +276,7 @@ private fun RoutineContentPreview() {
             onArchiveHabit = {},
             onAddHabit = {},
             onEditHabit = {},
+            onOpenHabitDetail = {},
             onMessageShown = {},
             onIntroDismissed = {}
         )

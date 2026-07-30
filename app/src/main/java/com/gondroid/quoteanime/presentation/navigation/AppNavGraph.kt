@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.gondroid.quoteanime.presentation.catalog.CatalogScreen
 import com.gondroid.quoteanime.presentation.home.HomeScreen
 import com.gondroid.quoteanime.presentation.onboarding.OnboardingScreen
+import com.gondroid.quoteanime.presentation.routine.HabitDetailScreen
 import com.gondroid.quoteanime.presentation.routine.HabitEditorSheet
 import com.gondroid.quoteanime.presentation.routine.RoutineScreen
 import com.gondroid.quoteanime.presentation.settings.SettingsScreen
@@ -40,6 +41,11 @@ sealed class Screen(val route: String) {
         val routeWithArg = "habit_editor?$ARG={$ARG}"
         fun createRoute(habitId: String?) =
             if (habitId != null) "habit_editor?$ARG=$habitId" else "habit_editor"
+    }
+    data object HabitDetail : Screen("habit_detail") {
+        const val ARG = "habitId"
+        val routeWithArg = "habit_detail/{$ARG}"
+        fun createRoute(habitId: String) = "habit_detail/$habitId"
     }
 }
 
@@ -139,6 +145,21 @@ fun AppNavGraph(
                 onAddHabit = {
                     navController.navigate(Screen.HabitEditor.createRoute(null))
                 },
+                onEditHabit = { habitId ->
+                    navController.navigate(Screen.HabitEditor.createRoute(habitId))
+                },
+                onOpenHabitDetail = { habitId ->
+                    navController.navigate(Screen.HabitDetail.createRoute(habitId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.HabitDetail.routeWithArg,
+            arguments = listOf(navArgument(Screen.HabitDetail.ARG) { type = NavType.StringType })
+        ) {
+            HabitDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
                 onEditHabit = { habitId ->
                     navController.navigate(Screen.HabitEditor.createRoute(habitId))
                 }

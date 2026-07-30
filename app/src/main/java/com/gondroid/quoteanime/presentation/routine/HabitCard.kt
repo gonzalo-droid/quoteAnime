@@ -46,6 +46,7 @@ fun HabitCard(
     onToggleDay: (LocalDate) -> Unit,
     onEdit: () -> Unit,
     onArchive: () -> Unit,
+    onOpenDetail: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val habit = progress.habit
@@ -53,7 +54,10 @@ fun HabitCard(
     val themeImageRes = HabitThemeImages.resFor(habit.coverAnimeSlug)
     var menuExpanded by remember { mutableStateOf(false) }
 
+    // Tapping the card body opens the detail screen; the toggle-today and overflow
+    // IconButtons inside still consume their own taps first, so this never fires for them.
     Card(
+        onClick = onOpenDetail,
         modifier = modifier
             .fillMaxWidth()
             .testTag("habit_card_${habit.id}"),

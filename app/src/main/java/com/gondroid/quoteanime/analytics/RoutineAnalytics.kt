@@ -15,6 +15,8 @@ class RoutineAnalytics @Inject constructor(
 ) {
     fun trackTabOpened() = analytics.logEvent("routine_tab_opened", Bundle())
 
+    fun trackHabitDetailOpened() = analytics.logEvent("habit_detail_opened", Bundle())
+
     fun trackHabitCreated(
         templateId: String?,
         isCustom: Boolean,

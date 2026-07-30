@@ -145,6 +145,13 @@
     <string name="habit_editor_reminder_permission_denied_message">Las notificaciones están desactivadas, así que el recordatorio no funcionará. Actívalas desde Ajustes.</string>
     <string name="habit_editor_reminder_permission_denied_action">Ajustes</string>
 
+    <string name="habit_detail_no_streak_goal">Sin meta de racha</string>
+    <string name="habit_detail_selected_label">Día seleccionado</string>
+    <string name="habit_detail_state_completed">✓ Completado</string>
+    <string name="habit_detail_state_not_completed">No completado</string>
+    <string name="habit_detail_previous_month">Mes anterior</string>
+    <string name="habit_detail_next_month">Mes siguiente</string>
+
     <string name="cd_back">Volver</string>
     <string name="settings">Ajustes</string>
     <string name="explore">Explorar</string>
