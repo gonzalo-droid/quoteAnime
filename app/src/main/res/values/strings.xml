@@ -153,6 +153,7 @@
     <string name="habit_detail_next_month">Next month</string>
 
     <string name="cd_back">Back</string>
+    <string name="cd_close">Close</string>
     <string name="settings">Settings</string>
     <string name="explore">Explore</string>
     <string name="catalog_favorites">Favorites</string>

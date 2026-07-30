@@ -31,7 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.NotificationsNone
@@ -193,11 +193,11 @@ fun HabitEditorSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier.testTag("habit_editor_back")
+                    modifier = Modifier.testTag("habit_editor_close")
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back)
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.cd_close)
                     )
                 }
                 Text(

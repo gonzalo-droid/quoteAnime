@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,11 +43,10 @@ import com.gondroid.quoteanime.R
 private const val ICON_GRID_COLUMNS = 6
 
 /**
- * Full-screen icon picker (not a dialog), matching the pattern already used by Catálogo and
- * Mi rutina: back arrow up top, search, and icons grouped into the categories defined in
- * [HabitIcons.CATEGORIES]. Hosted inline by [HabitEditorSheet] — the surrounding
- * ModalBottomSheet already opens fully expanded, so swapping its content in place reads as a
- * real screen without adding a new navigation destination.
+ * Full-screen icon picker (not a dialog): close (X) up top, search, and icons grouped into the
+ * categories defined in [HabitIcons.CATEGORIES]. Hosted inline by [HabitEditorSheet] — the
+ * surrounding ModalBottomSheet already opens fully expanded, so swapping its content in place
+ * reads as a real screen without adding a new navigation destination.
  */
 @Composable
 fun HabitIconPickerContent(
@@ -71,8 +70,8 @@ fun HabitIconPickerContent(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_back)
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.cd_close)
                 )
             }
             Text(

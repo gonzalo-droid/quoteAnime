@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +33,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,12 +48,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
-import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.StreakState
 import java.time.LocalDate
 import java.time.YearMonth
@@ -87,6 +90,7 @@ fun HabitDetailScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailContent(
     state: HabitDetailUiState,
@@ -113,8 +117,51 @@ fun HabitDetailContent(
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
-        val habit = state.habit
+    val habit = state.habit
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    if (habit != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .background(
+                                        HabitPalette.colorAt(habit.colorIndex).copy(alpha = 0.16f),
+                                        RoundedCornerShape(8.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = HabitIcons.iconFor(habit.iconKey),
+                                    contentDescription = null,
+                                    tint = HabitPalette.colorAt(habit.colorIndex),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Text(
+                                text = habit.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.cd_back))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         if (habit == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding))
             return@Scaffold
@@ -125,11 +172,17 @@ fun HabitDetailContent(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp)
                 .testTag("habit_detail_screen"),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            DetailHeader(habit = habit, onNavigateBack = onNavigateBack)
+            Text(
+                text = habit.description?.takeIf { it.isNotBlank() }
+                    ?: stringResource(R.string.habit_editor_description_placeholder),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             HabitHeatmap(
                 completions = state.completions,
@@ -176,51 +229,6 @@ fun HabitDetailContent(
                 onMonthChanged = onMonthChanged,
                 modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun DetailHeader(habit: Habit, onNavigateBack: () -> Unit) {
-    val accent = HabitPalette.colorAt(habit.colorIndex)
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .background(accent.copy(alpha = 0.16f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = HabitIcons.iconFor(habit.iconKey),
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            Column(modifier = Modifier.padding(start = 12.dp)) {
-                Text(
-                    text = habit.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = habit.description?.takeIf { it.isNotBlank() }
-                        ?: stringResource(R.string.habit_editor_description_placeholder),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        IconButton(onClick = onNavigateBack) {
-            Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.cd_back))
         }
     }
 }
