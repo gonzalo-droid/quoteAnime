@@ -90,19 +90,24 @@ class HabitEditorViewModelTest {
     }
 
     @Test
-    fun `given a template, when selected, then the resolved title and icon are filled`() = runTest {
+    fun `given a template, when selected, then the resolved title, icon and theme are filled`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
         val template = DefaultHabitTemplates.ALL.first()
-        // No Compose context in a JVM unit test, so the resolved title is passed as a
-        // literal — mirroring what resolveTemplateTitle would produce at the call site.
-        val resolvedTitle = "Entrenar"
+        // No Compose context in a JVM unit test, so the resolved text is passed as a
+        // literal — mirroring what resolveTemplateTitle/resolveThemeDescription would
+        // produce at the call site.
+        val resolvedTitle = "Camino ninja"
+        val resolvedDescription = "Como todo ninja, la disciplina diaria es tu mayor entrenamiento."
 
-        viewModel.onTemplateSelected(template, resolvedTitle)
+        viewModel.onTemplateSelected(template, resolvedTitle, resolvedDescription)
 
         assertEquals(resolvedTitle, viewModel.uiState.value.title)
+        assertEquals(resolvedDescription, viewModel.uiState.value.description)
         assertEquals(template.iconKey, viewModel.uiState.value.iconKey)
         assertEquals(template.id, viewModel.uiState.value.templateId)
+        assertEquals(template.themeColorIndex, viewModel.uiState.value.colorIndex)
+        assertEquals(template.themeKey, viewModel.uiState.value.themeKey)
     }
 
     @Test

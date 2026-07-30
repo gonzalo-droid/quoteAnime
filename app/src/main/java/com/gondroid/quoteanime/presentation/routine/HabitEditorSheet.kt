@@ -152,6 +152,19 @@ fun HabitEditorSheet(
         if (state.isSaved) onDismiss()
     }
 
+    // Suggestions are 100% themed, so a new habit always starts from one instead of a
+    // blank/generic default — the first suggestion is applied automatically until the
+    // user picks a different one or types their own title. Never runs while editing an
+    // existing habit, whose own selection (or lack of one) must be left untouched.
+    val firstTemplate = state.templates.firstOrNull()
+    val firstResolvedTitle = firstTemplate?.let { resolveTemplateTitle(it.title) }
+    val firstResolvedDescription = firstTemplate?.let { resolveThemeDescription(it.themeKey) }
+    LaunchedEffect(firstTemplate, state.isEditing, state.templateId) {
+        if (!state.isEditing && state.templateId == null && firstTemplate != null) {
+            viewModel.onTemplateSelected(firstTemplate, firstResolvedTitle.orEmpty(), firstResolvedDescription)
+        }
+    }
+
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
