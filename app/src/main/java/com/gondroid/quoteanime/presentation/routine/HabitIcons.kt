@@ -1,22 +1,61 @@
 package com.gondroid.quoteanime.presentation.routine
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CleanHands
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.Laptop
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Pool
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.gondroid.quoteanime.R
 
+/** One group of related icons shown together in the full-screen picker. */
+data class HabitIconCategory(val titleRes: Int, val keys: List<String>)
+
 /** Icons are stored as stable keys so the domain never depends on Compose. */
 object HabitIcons {
+
+    /** Grouping shown by the picker (see [com.gondroid.quoteanime.presentation.routine.HabitIconPickerScreen]). */
+    val CATEGORIES: List<HabitIconCategory> = listOf(
+        HabitIconCategory(
+            R.string.icon_category_physical,
+            listOf("dumbbell", "running", "directions_walk", "cycling", "swimming", "self_improvement")
+        ),
+        HabitIconCategory(
+            R.string.icon_category_mind,
+            listOf("book", "headphones", "bedtime", "wb_sunny", "nights_stay", "water_drop")
+        ),
+        HabitIconCategory(
+            R.string.icon_category_study,
+            listOf("school", "edit_note", "laptop", "notebook", "folder", "alarm")
+        ),
+        HabitIconCategory(
+            R.string.icon_category_routine,
+            listOf("restaurant", "clean_hands", "cleaning", "bed", "spa", "pets")
+        )
+    )
 
     private val BY_KEY: Map<String, ImageVector> = mapOf(
         "dumbbell" to Icons.Filled.FitnessCenter,
@@ -26,10 +65,27 @@ object HabitIcons {
         "bedtime" to Icons.Filled.Bedtime,
         "school" to Icons.Filled.School,
         "edit_note" to Icons.Filled.EditNote,
-        "directions_walk" to Icons.Filled.DirectionsWalk
+        "directions_walk" to Icons.Filled.DirectionsWalk,
+        "running" to Icons.AutoMirrored.Filled.DirectionsRun,
+        "cycling" to Icons.AutoMirrored.Filled.DirectionsBike,
+        "swimming" to Icons.Filled.Pool,
+        "headphones" to Icons.Filled.Headphones,
+        "wb_sunny" to Icons.Filled.WbSunny,
+        "nights_stay" to Icons.Filled.NightsStay,
+        "laptop" to Icons.Filled.Laptop,
+        "notebook" to Icons.Filled.Description,
+        "folder" to Icons.Filled.Folder,
+        "alarm" to Icons.Filled.Alarm,
+        "restaurant" to Icons.Filled.Restaurant,
+        "clean_hands" to Icons.Filled.CleanHands,
+        "cleaning" to Icons.Filled.CleaningServices,
+        "bed" to Icons.Filled.Bed,
+        "spa" to Icons.Filled.Spa,
+        "pets" to Icons.Filled.Pets
     )
 
-    /** Human-readable description for each icon key, used as a screen-reader label. */
+    /** Human-readable description for each icon key, used as a screen-reader label and as the
+     *  searchable text in the icon picker. */
     private val DESCRIPTION_RES_BY_KEY: Map<String, Int> = mapOf(
         "dumbbell" to R.string.icon_dumbbell,
         "book" to R.string.icon_book,
@@ -38,7 +94,23 @@ object HabitIcons {
         "bedtime" to R.string.icon_bedtime,
         "school" to R.string.icon_school,
         "edit_note" to R.string.icon_edit_note,
-        "directions_walk" to R.string.icon_directions_walk
+        "directions_walk" to R.string.icon_directions_walk,
+        "running" to R.string.icon_running,
+        "cycling" to R.string.icon_cycling,
+        "swimming" to R.string.icon_swimming,
+        "headphones" to R.string.icon_headphones,
+        "wb_sunny" to R.string.icon_wb_sunny,
+        "nights_stay" to R.string.icon_nights_stay,
+        "laptop" to R.string.icon_laptop,
+        "notebook" to R.string.icon_notebook,
+        "folder" to R.string.icon_folder,
+        "alarm" to R.string.icon_alarm,
+        "restaurant" to R.string.icon_restaurant,
+        "clean_hands" to R.string.icon_clean_hands,
+        "cleaning" to R.string.icon_cleaning,
+        "bed" to R.string.icon_bed,
+        "spa" to R.string.icon_spa,
+        "pets" to R.string.icon_pets
     )
 
     val ALL_KEYS: List<String> = BY_KEY.keys.toList()

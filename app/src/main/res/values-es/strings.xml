@@ -100,6 +100,31 @@
     <string name="icon_school">Estudiar</string>
     <string name="icon_edit_note">Escribir</string>
     <string name="icon_directions_walk">Caminar</string>
+    <string name="icon_running">Correr</string>
+    <string name="icon_cycling">Andar en bici</string>
+    <string name="icon_swimming">Nadar</string>
+    <string name="icon_headphones">Escuchar</string>
+    <string name="icon_wb_sunny">Mañana</string>
+    <string name="icon_nights_stay">Noche</string>
+    <string name="icon_laptop">Trabajar</string>
+    <string name="icon_notebook">Tomar notas</string>
+    <string name="icon_folder">Organizar</string>
+    <string name="icon_alarm">Madrugar</string>
+    <string name="icon_restaurant">Comer</string>
+    <string name="icon_clean_hands">Higiene</string>
+    <string name="icon_cleaning">Limpiar</string>
+    <string name="icon_bed">Tender la cama</string>
+    <string name="icon_spa">Cuidado personal</string>
+    <string name="icon_pets">Cuidar mascota</string>
+
+    <string name="icon_category_physical">Actividad física</string>
+    <string name="icon_category_mind">Mente y bienestar</string>
+    <string name="icon_category_study">Estudio y trabajo</string>
+    <string name="icon_category_routine">Rutina diaria</string>
+
+    <string name="habit_icon_picker_title">Elegir icono</string>
+    <string name="habit_icon_picker_search">Buscar…</string>
+    <string name="habit_icon_picker_empty">No se encontraron iconos</string>
 
     <string name="routine_intro_title">Nuevo: Mi rutina</string>
     <string name="routine_intro_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>

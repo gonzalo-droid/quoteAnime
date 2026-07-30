@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.Button
@@ -106,6 +107,7 @@ fun HabitEditorSheet(
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showIconPicker by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -169,6 +171,14 @@ fun HabitEditorSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Box(modifier = Modifier.fillMaxSize()) {
+        if (showIconPicker) {
+            HabitIconPickerContent(
+                selectedKey = state.iconKey,
+                onIconSelected = { key -> viewModel.onIconSelected(key); showIconPicker = false },
+                onBack = { showIconPicker = false },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -275,40 +285,36 @@ fun HabitEditorSheet(
                 }
             }
 
-            Text(stringResource(R.string.habit_editor_icon))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                HabitIcons.ALL_KEYS.forEach { key ->
-                    Column(
+            // The icon is no longer chosen inline: this row shows the current pick and a
+            // chevron that opens the full-screen categorized picker (HabitIconPickerContent).
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.habit_editor_icon)) },
+                supportingContent = { Text(describeIcon(state.iconKey)) },
+                leadingContent = {
+                    Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clickable { viewModel.onIconSelected(key) }
-                            .testTag("icon_$key"),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                            .size(40.dp)
+                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = HabitIcons.iconFor(key),
-                            contentDescription = describeIcon(key),
-                            tint = if (state.iconKey == key) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(
-                                    color = if (state.iconKey == key) {
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    } else {
-                                        Color.Transparent
-                                    },
-                                    shape = CircleShape
-                                )
-                                .padding(4.dp)
+                            imageVector = HabitIcons.iconFor(state.iconKey),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                }
-            }
+                },
+                trailingContent = {
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowRight,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier
+                    .clickable { showIconPicker = true }
+                    .testTag("habit_icon_row")
+            )
 
             // Grouped in one bordered card — same treatment as the reminder card below it,
             // so the form's lower section reads as a consistent set of grouped controls
@@ -455,6 +461,7 @@ fun HabitEditorSheet(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+        }
         }
     }
 

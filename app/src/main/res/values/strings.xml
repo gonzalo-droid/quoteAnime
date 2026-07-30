@@ -100,6 +100,31 @@
     <string name="icon_school">Study</string>
     <string name="icon_edit_note">Write</string>
     <string name="icon_directions_walk">Walk</string>
+    <string name="icon_running">Run</string>
+    <string name="icon_cycling">Cycle</string>
+    <string name="icon_swimming">Swim</string>
+    <string name="icon_headphones">Listen</string>
+    <string name="icon_wb_sunny">Morning</string>
+    <string name="icon_nights_stay">Night</string>
+    <string name="icon_laptop">Work</string>
+    <string name="icon_notebook">Take notes</string>
+    <string name="icon_folder">Organize</string>
+    <string name="icon_alarm">Wake up early</string>
+    <string name="icon_restaurant">Eat</string>
+    <string name="icon_clean_hands">Hygiene</string>
+    <string name="icon_cleaning">Clean</string>
+    <string name="icon_bed">Make the bed</string>
+    <string name="icon_spa">Self-care</string>
+    <string name="icon_pets">Pet care</string>
+
+    <string name="icon_category_physical">Physical activity</string>
+    <string name="icon_category_mind">Mind and wellness</string>
+    <string name="icon_category_study">Study and work</string>
+    <string name="icon_category_routine">Daily routine</string>
+
+    <string name="habit_icon_picker_title">Choose icon</string>
+    <string name="habit_icon_picker_search">Search…</string>
+    <string name="habit_icon_picker_empty">No icons found</string>
 
     <string name="routine_intro_title">New: My routine</string>
     <string name="routine_intro_body">Pick up to 3 habits and fill in every day you keep them. Your streak is waiting.</string>
