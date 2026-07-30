@@ -8,6 +8,14 @@ val SurfaceDark     = Color(0xFF131326)
 val SurfaceVariant  = Color(0xFF1E1A30)
 val OutlineColor    = Color(0xFF3A3050)
 
+// Extra tonal steps so every Material3 "surface container" role (used by things
+// like Switch's unchecked track and ModalBottomSheet's default background) stays
+// within this palette instead of silently falling back to Material's stock theme.
+val SurfaceContainerHigh    = Color(0xFF241F38)
+val SurfaceContainerHighest = Color(0xFF2C2545)
+val SurfaceBright           = Color(0xFF352C52)
+val RoseContainerDark       = Color(0xFF3D1F28)
+
 val TextPrimary     = Color(0xFFF0EAFF)
 val TextSecondary   = Color(0xFF9B8DB3)
 
