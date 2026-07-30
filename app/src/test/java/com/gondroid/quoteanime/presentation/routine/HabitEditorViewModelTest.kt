@@ -2,7 +2,6 @@ package com.gondroid.quoteanime.presentation.routine
 
 import androidx.lifecycle.SavedStateHandle
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
-import com.gondroid.quoteanime.data.remote.QuoteRemoteDataSource
 import com.gondroid.quoteanime.domain.model.DefaultHabitTemplates
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.repository.HabitRepository
@@ -52,7 +51,6 @@ class HabitEditorViewModelTest {
     private lateinit var repository: HabitRepository
     private lateinit var reminderScheduler: HabitReminderScheduler
     private lateinit var analytics: RoutineAnalytics
-    private lateinit var quoteRemoteDataSource: QuoteRemoteDataSource
 
     private val today = LocalDate.parse("2026-07-25")
 
@@ -69,7 +67,6 @@ class HabitEditorViewModelTest {
         repository = repository,
         reminderScheduler = reminderScheduler,
         analytics = analytics,
-        quoteRemoteDataSource = quoteRemoteDataSource,
         clock = fixedClock
     )
 
@@ -81,9 +78,7 @@ class HabitEditorViewModelTest {
         repository = mockk()
         reminderScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
-        quoteRemoteDataSource = mockk()
         every { getTemplates() } returns flowOf(DefaultHabitTemplates.ALL)
-        coEvery { quoteRemoteDataSource.getAnimeImages() } returns emptyMap()
     }
 
     @Test

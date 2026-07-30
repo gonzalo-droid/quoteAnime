@@ -16,8 +16,6 @@ data class RoutineUiState(
     val maxHabits: Int = 0,
     val message: RoutineMessage? = null,
     val showIntro: Boolean = false,
-    /** Anime slug -> image URLs, used to render themed habit card backgrounds. */
-    val animeImages: Map<String, List<String>> = emptyMap(),
     /**
      * "Today" as the ViewModel's injected Clock sees it. This default is only ever
      * observed by a bare `RoutineUiState()` in a test — production always overwrites it

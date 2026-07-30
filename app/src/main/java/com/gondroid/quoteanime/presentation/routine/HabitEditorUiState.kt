@@ -19,10 +19,10 @@ data class HabitEditorUiState(
     val iconKey: String = "dumbbell",
     val templateId: String? = null,
     val colorIndex: Int = 0,
-    /** Anime slug carried by the selected themed template, if any; persisted on the habit. */
-    val coverAnimeSlug: String? = null,
-    /** Resolved preview image for [coverAnimeSlug], shown in the Sugerencias section. */
-    val themedBackgroundUrl: String? = null,
+    /** Theme key carried by the selected themed template, if any; persisted on the habit
+     *  as [com.gondroid.quoteanime.domain.model.Habit.coverAnimeSlug]. Resolved to a bundled
+     *  cover image via [HabitThemeImages]. */
+    val themeKey: String? = null,
     val startDate: LocalDate = LocalDate.now(),
     val endDate: LocalDate? = null,
     val reminderEnabled: Boolean = false,

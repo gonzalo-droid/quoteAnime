@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -65,6 +67,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -72,8 +75,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.gondroid.quoteanime.R
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -176,20 +177,21 @@ fun HabitEditorSheet(
                     // Resolve once per template so both the chip label and the click
                     // handler use the same legible text (not the raw resource key).
                     val resolvedTitle = resolveTemplateTitle(template.title)
+                    val resolvedDescription = resolveThemeDescription(template.themeKey)
                     FilterChip(
                         selected = state.templateId == template.id,
-                        onClick = { viewModel.onTemplateSelected(template, resolvedTitle) },
+                        onClick = { viewModel.onTemplateSelected(template, resolvedTitle, resolvedDescription) },
                         label = { Text(resolvedTitle) }
                     )
                 }
             }
 
-            state.coverAnimeSlug?.let { animeSlug ->
+            state.themeKey?.let { themeKey ->
                 ThemedSuggestionPreview(
                     iconKey = state.iconKey,
                     title = state.title,
-                    animeSlug = animeSlug,
-                    backgroundUrl = state.themedBackgroundUrl,
+                    description = state.description,
+                    imageRes = HabitThemeImages.resFor(themeKey),
                     accentColor = HabitPalette.colorAt(state.colorIndex),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -293,29 +295,56 @@ fun HabitEditorSheet(
                 }
             }
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.habit_editor_start_date)) },
-                supportingContent = { Text(DATE_DISPLAY_FORMAT.format(state.startDate)) },
-                modifier = Modifier.clickable { showStartPicker = true }
-            )
-
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.habit_editor_has_end_date)) },
-                trailingContent = {
-                    Switch(
-                        checked = state.endDate != null,
-                        onCheckedChange = { checked ->
-                            if (checked) showEndPicker = true else viewModel.onEndDateChanged(null)
-                        }
+            // Grouped in one bordered card — same treatment as the reminder card below it,
+            // so the form's lower section reads as a consistent set of grouped controls
+            // instead of a mix of loose rows and cards.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.habit_editor_start_date)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingContent = {
+                        Text(
+                            text = DATE_DISPLAY_FORMAT.format(state.startDate),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    modifier = Modifier.clickable { showStartPicker = true }
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.habit_editor_has_end_date)) },
+                    trailingContent = {
+                        Switch(
+                            checked = state.endDate != null,
+                            onCheckedChange = { checked ->
+                                if (checked) showEndPicker = true else viewModel.onEndDateChanged(null)
+                            }
+                        )
+                    }
+                )
+                if (state.endDate != null) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.habit_editor_end_date)) },
+                        trailingContent = {
+                            Text(
+                                text = DATE_DISPLAY_FORMAT.format(state.endDate),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        modifier = Modifier.clickable { showEndPicker = true }
                     )
                 }
-            )
-            if (state.endDate != null) {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.habit_editor_end_date)) },
-                    supportingContent = { Text(DATE_DISPLAY_FORMAT.format(state.endDate)) },
-                    modifier = Modifier.clickable { showEndPicker = true }
-                )
             }
 
             // Grouped in one bordered card instead of loose ListItems, so the switch and its
@@ -436,25 +465,24 @@ fun HabitEditorSheet(
     }
 }
 
-/** Small themed-cover card shown once a template with a clear anime tie-in is selected. */
+/** Themed-cover card shown once a themed template ([HabitTemplate.themeKey]) is selected. */
 @Composable
 private fun ThemedSuggestionPreview(
     iconKey: String,
     title: String,
-    animeSlug: String,
-    backgroundUrl: String?,
+    description: String,
+    imageRes: Int?,
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     Box(
         modifier = modifier
-            .height(96.dp)
+            .height(108.dp)
             .clip(RoundedCornerShape(16.dp))
     ) {
-        if (backgroundUrl != null) {
-            AsyncImage(
-                model = ImageRequest.Builder(context).data(backgroundUrl).crossfade(true).build(),
+        if (imageRes != null) {
+            Image(
+                painter = painterResource(id = imageRes),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -471,7 +499,7 @@ private fun ThemedSuggestionPreview(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f))
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.82f))
                     )
                 )
         )
@@ -501,19 +529,15 @@ private fun ThemedSuggestionPreview(
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
-                    text = stringResource(R.string.habit_editor_theme_tag, formatAnimeSlug(animeSlug)),
+                    text = description,
                     color = Color.White.copy(alpha = 0.85f),
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2
                 )
             }
         }
     }
 }
-
-private fun formatAnimeSlug(slug: String): String =
-    slug.split('_', '-')
-        .filter { it.isNotBlank() }
-        .joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

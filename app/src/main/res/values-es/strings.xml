@@ -58,6 +58,13 @@
     <string name="template_study">Estudiar</string>
     <string name="template_write">Escribir</string>
     <string name="template_walk">Caminar</string>
+    <string name="template_theme_ninja">Camino ninja</string>
+    <string name="template_theme_one_piece">Buscar el One Piece</string>
+    <string name="template_theme_saiyan">Sé un saiyan</string>
+
+    <string name="habit_theme_description_ninja">Como todo ninja, la disciplina diaria es tu mayor entrenamiento.</string>
+    <string name="habit_theme_description_one_piece">Cada hábito cumplido es un paso más cerca de tu propio tesoro.</string>
+    <string name="habit_theme_description_saiyan">Entrena cada día hasta superar tus límites, como un guerrero saiyan.</string>
 
     <string name="habit_editor_new_title">Nuevo hábito</string>
     <string name="habit_editor_edit_title">Editar hábito</string>
@@ -65,7 +72,6 @@
     <string name="habit_editor_description">Descripción</string>
     <string name="habit_editor_description_placeholder">Sin descripción</string>
     <string name="habit_editor_templates">Sugerencias</string>
-    <string name="habit_editor_theme_tag">tema · %1$s</string>
     <string name="habit_editor_color">Color</string>
     <string name="habit_editor_color_option">Color %1$d</string>
     <string name="habit_editor_icon">Icono</string>

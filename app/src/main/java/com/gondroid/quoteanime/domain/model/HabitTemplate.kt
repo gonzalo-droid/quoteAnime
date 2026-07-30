@@ -5,8 +5,8 @@ data class HabitTemplate(
     val title: String,
     val iconKey: String,
     val order: Int,
-    /** Suggested [com.gondroid.quoteanime.presentation.routine.HabitPalette] index, for templates with a clear anime tie-in. */
+    /** Suggested [com.gondroid.quoteanime.presentation.routine.HabitPalette] index, for themed templates. */
     val themeColorIndex: Int? = null,
-    /** Anime slug used to fetch this template's themed background, if any. */
-    val themeAnimeSlug: String? = null
+    /** Opaque key resolved by the presentation layer to this theme's cover image and description. */
+    val themeKey: String? = null
 )

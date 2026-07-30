@@ -9,7 +9,7 @@ data class HabitTemplateDto(
     val iconKey: String = "",
     val order: Int = 0,
     val themeColorIndex: Int? = null,
-    val themeAnimeSlug: String? = null
+    val themeKey: String? = null
 )
 
 fun DataSnapshot.toHabitTemplateDto(): HabitTemplateDto? {
@@ -18,14 +18,14 @@ fun DataSnapshot.toHabitTemplateDto(): HabitTemplateDto? {
     val iconKey = child("iconKey").getValue(String::class.java) ?: return null
     val order = child("order").getValue(Int::class.java) ?: 0
     val themeColorIndex = child("themeColorIndex").getValue(Int::class.java)
-    val themeAnimeSlug = child("themeAnimeSlug").getValue(String::class.java)
+    val themeKey = child("themeKey").getValue(String::class.java)
     return HabitTemplateDto(
         id = id,
         title = title,
         iconKey = iconKey,
         order = order,
         themeColorIndex = themeColorIndex,
-        themeAnimeSlug = themeAnimeSlug
+        themeKey = themeKey
     )
 }
 
@@ -36,5 +36,5 @@ fun HabitTemplateDto.toDomain(): HabitTemplate =
         iconKey = iconKey,
         order = order,
         themeColorIndex = themeColorIndex,
-        themeAnimeSlug = themeAnimeSlug
+        themeKey = themeKey
     )

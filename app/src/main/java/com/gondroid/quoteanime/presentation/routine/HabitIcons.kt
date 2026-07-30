@@ -62,8 +62,24 @@ private val TEMPLATE_TITLE_RES_BY_KEY: Map<String, Int> = mapOf(
     "template_sleep_early" to R.string.template_sleep_early,
     "template_study" to R.string.template_study,
     "template_write" to R.string.template_write,
-    "template_walk" to R.string.template_walk
+    "template_walk" to R.string.template_walk,
+    "template_theme_ninja" to R.string.template_theme_ninja,
+    "template_theme_one_piece" to R.string.template_theme_one_piece,
+    "template_theme_saiyan" to R.string.template_theme_saiyan
 )
+
+/** Thematic filler text shown/prefilled when a themed template ([HabitTemplate.themeKey]) is selected. */
+private val THEME_DESCRIPTION_RES_BY_KEY: Map<String, Int> = mapOf(
+    "ninja" to R.string.habit_theme_description_ninja,
+    "one_piece" to R.string.habit_theme_description_one_piece,
+    "saiyan" to R.string.habit_theme_description_saiyan
+)
+
+@Composable
+fun resolveThemeDescription(themeKey: String?): String? {
+    val resId = themeKey?.let { THEME_DESCRIPTION_RES_BY_KEY[it] } ?: return null
+    return stringResource(resId)
+}
 
 /**
  * Resolves a human-readable accessibility description for an icon key. Falls back to the

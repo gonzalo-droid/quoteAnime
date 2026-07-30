@@ -15,7 +15,7 @@ data class Habit(
     val reminderTime: LocalTime? = null,
     val reminderDays: Set<DayOfWeek> = emptySet(),
     val templateId: String? = null,
-    /** Anime slug used to fetch a themed background for this habit's card, if any. */
+    /** Theme key resolved by the presentation layer to a bundled cover image for this habit's card, if any. */
     val coverAnimeSlug: String? = null,
     val isArchived: Boolean = false,
     val createdAt: Long = 0L

@@ -3,7 +3,6 @@ package com.gondroid.quoteanime.presentation.routine
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.analytics.RoutineAnalytics
-import com.gondroid.quoteanime.data.remote.QuoteRemoteDataSource
 import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.ArchiveHabitUseCase
@@ -44,7 +43,6 @@ class RoutineViewModel @Inject constructor(
      *  directly for the same kind of one-off read. */
     private val habitRepository: HabitRepository,
     private val calculateStreak: CalculateStreakUseCase,
-    private val quoteRemoteDataSource: QuoteRemoteDataSource,
     /** Injected so tests can pin "today" instead of depending on the device clock. */
     private val clock: Clock
 ) : ViewModel() {
@@ -58,15 +56,6 @@ class RoutineViewModel @Inject constructor(
         analytics.trackTabOpened()
         observeRoutine()
         observeIntro()
-        loadAnimeImages()
-    }
-
-    /** Powers the themed background on habit cards created from a themed template. */
-    private fun loadAnimeImages() {
-        viewModelScope.launch {
-            val images = runCatching { quoteRemoteDataSource.getAnimeImages() }.getOrDefault(emptyMap())
-            _uiState.update { it.copy(animeImages = images) }
-        }
     }
 
     private fun observeRoutine() {
