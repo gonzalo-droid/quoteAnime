@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.NotificationsNone
@@ -41,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -188,13 +190,24 @@ fun HabitEditorSheet(
                 .testTag("habit_editor_sheet"),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(
-                    if (state.isEditing) R.string.habit_editor_edit_title
-                    else R.string.habit_editor_new_title
-                ),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag("habit_editor_back")
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.cd_back)
+                    )
+                }
+                Text(
+                    text = stringResource(
+                        if (state.isEditing) R.string.habit_editor_edit_title
+                        else R.string.habit_editor_new_title
+                    ),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
 
             Text(stringResource(R.string.habit_editor_templates))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
