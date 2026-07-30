@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.gondroid.quoteanime.ui.theme.Didot
-import com.gondroid.quoteanime.ui.theme.Georgia
+import com.gondroid.quoteanime.ui.theme.Fraunces
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -125,7 +125,7 @@ fun QuoteDetailContent(
                 text = quote.quote.orEmpty(),
                 fontSize = 22.sp,
                 lineHeight = 34.sp,
-                fontFamily = Georgia,
+                fontFamily = Fraunces,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Normal,
                 color = Color.White,
