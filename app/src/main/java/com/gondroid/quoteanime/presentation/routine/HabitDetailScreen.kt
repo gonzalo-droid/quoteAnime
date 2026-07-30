@@ -193,6 +193,7 @@ fun HabitDetailContent(
                 onDayClick = onDayClick,
                 weeks = DETAIL_HEATMAP_WEEKS,
                 showMonthLabels = true,
+                showDayLabels = true,
                 modifier = Modifier.padding(top = 8.dp)
             )
 
