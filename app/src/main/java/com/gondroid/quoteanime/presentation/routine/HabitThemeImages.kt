@@ -6,9 +6,11 @@ import com.gondroid.quoteanime.R
 object HabitThemeImages {
 
     private val BY_KEY: Map<String, Int> = mapOf(
-        "ninja" to R.drawable.onboarding_01,
-        "one_piece" to R.drawable.onboarding_02,
-        "saiyan" to R.drawable.onboarding_03
+        "ninja" to R.drawable.naruto,
+        "one_piece" to R.drawable.onepiece,
+        "saiyan" to R.drawable.dragonball,
+        "pokemon" to R.drawable.pokemon,
+        "black_clover" to R.drawable.blackclover,
     )
 
     fun resFor(themeKey: String?): Int? = themeKey?.let { BY_KEY[it] }

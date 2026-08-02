@@ -29,6 +29,7 @@ class UserPreferencesDataStore @Inject constructor(
         val WIDGET_UPDATE_TIMES_PER_DAY     = intPreferencesKey("widget_update_times_per_day")
         val ONBOARDING_COMPLETED            = booleanPreferencesKey("onboarding_completed")
         val ROUTINE_INTRO_SEEN              = booleanPreferencesKey("routine_intro_seen")
+        val IS_PREMIUM                      = booleanPreferencesKey("is_premium")
     }
 
     val userPreferences: Flow<UserPreferences> = dataStore.data.map { prefs ->
@@ -96,5 +97,15 @@ class UserPreferencesDataStore @Inject constructor(
 
     suspend fun setRoutineIntroSeen() {
         dataStore.edit { it[Keys.ROUTINE_INTRO_SEEN] = true }
+    }
+
+    /** Local-only entitlement flag, set by the paywall's mock "subscribe" action until
+     *  Google Play Billing is wired in — at that point this becomes the cache that mirrors
+     *  the verified purchase state instead of the source of truth itself. */
+    val isPremium: Flow<Boolean> =
+        dataStore.data.map { it[Keys.IS_PREMIUM] ?: false }
+
+    suspend fun setPremium(enabled: Boolean) {
+        dataStore.edit { it[Keys.IS_PREMIUM] = enabled }
     }
 }

@@ -13,11 +13,13 @@ import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetArchivedHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,7 +43,9 @@ class RoutineViewModel @Inject constructor(
     private val isRoutineIntroSeen: IsRoutineIntroSeenUseCase,
     private val setRoutineIntroSeen: SetRoutineIntroSeenUseCase,
     private val reminderScheduler: HabitReminderScheduler,
+    private val routineWidgetScheduler: RoutineWidgetScheduler,
     private val premiumGate: PremiumGate,
+    private val observePremiumStatus: ObservePremiumStatusUseCase,
     private val analytics: RoutineAnalytics,
     /** Direct repository + streak calculation access is only used for the pre/post streak
      *  comparison in [trackStreakChange] below — everything else in this ViewModel goes
@@ -53,7 +57,7 @@ class RoutineViewModel @Inject constructor(
     private val clock: Clock
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RoutineUiState(maxHabits = premiumGate.maxActiveHabits))
+    private val _uiState = MutableStateFlow(RoutineUiState(maxHabits = premiumGate.maxActiveHabits(false)))
     val uiState: StateFlow<RoutineUiState> = _uiState.asStateFlow()
 
     private val _filter = MutableStateFlow(RoutineFilter.ACTIVE)
@@ -75,9 +79,10 @@ class RoutineViewModel @Inject constructor(
                 getActiveHabits(today),
                 getArchivedHabits(today),
                 getGlobalStreak(today),
-                _filter
-            ) { active, archived, streak, filter ->
-                RoutineSnapshot(active, archived, streak, filter)
+                _filter,
+                observePremiumStatus()
+            ) { active, archived, streak, filter, isPremium ->
+                RoutineSnapshot(active, archived, streak, filter, isPremium)
             }.collect { snapshot ->
                 _uiState.update {
                     it.copy(
@@ -85,7 +90,7 @@ class RoutineViewModel @Inject constructor(
                         activeCount = snapshot.active.size,
                         globalStreak = snapshot.streak,
                         isLoading = false,
-                        maxHabits = premiumGate.maxActiveHabits,
+                        maxHabits = premiumGate.maxActiveHabits(snapshot.isPremium),
                         filter = snapshot.filter,
                         today = today
                     )
@@ -120,6 +125,7 @@ class RoutineViewModel @Inject constructor(
                         )
                     }
                     trackStreakChange(habitId, previousStreak)
+                    routineWidgetScheduler.triggerImmediateUpdate()
                 }
                 ToggleCompletionResult.FutureDate ->
                     _uiState.update { it.copy(message = RoutineMessage.FutureDayNotAllowed) }
@@ -161,11 +167,15 @@ class RoutineViewModel @Inject constructor(
                 val daysActive = (clock.millis() - habit.createdAt) / MILLIS_PER_DAY
                 analytics.trackHabitArchived(daysActive)
             }
+            routineWidgetScheduler.triggerImmediateUpdate()
         }
     }
 
     fun onUnarchiveHabit(habitId: String) {
-        viewModelScope.launch { unarchiveHabit(habitId) }
+        viewModelScope.launch {
+            unarchiveHabit(habitId)
+            routineWidgetScheduler.triggerImmediateUpdate()
+        }
     }
 
     /** Consumed by the UI after showing the snackbar. */
@@ -198,5 +208,6 @@ private data class RoutineSnapshot(
     val active: List<HabitWithProgress>,
     val archived: List<HabitWithProgress>,
     val streak: StreakState,
-    val filter: RoutineFilter
+    val filter: RoutineFilter,
+    val isPremium: Boolean
 )

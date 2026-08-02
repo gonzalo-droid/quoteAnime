@@ -128,9 +128,18 @@ import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material.icons.filled.Weekend
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.R
 
 /** One group of related icons shown together in the full-screen picker. */
@@ -525,14 +534,18 @@ private val TEMPLATE_TITLE_RES_BY_KEY: Map<String, Int> = mapOf(
     "template_walk" to R.string.template_walk,
     "template_theme_ninja" to R.string.template_theme_ninja,
     "template_theme_one_piece" to R.string.template_theme_one_piece,
-    "template_theme_saiyan" to R.string.template_theme_saiyan
+    "template_theme_saiyan" to R.string.template_theme_saiyan,
+    "template_theme_pokemon" to R.string.template_theme_pokemon,
+    "template_theme_black_clover" to R.string.template_theme_black_clover
 )
 
 /** Thematic filler text shown/prefilled when a themed template ([HabitTemplate.themeKey]) is selected. */
 private val THEME_DESCRIPTION_RES_BY_KEY: Map<String, Int> = mapOf(
     "ninja" to R.string.habit_theme_description_ninja,
     "one_piece" to R.string.habit_theme_description_one_piece,
-    "saiyan" to R.string.habit_theme_description_saiyan
+    "saiyan" to R.string.habit_theme_description_saiyan,
+    "pokemon" to R.string.habit_theme_description_pokemon,
+    "black_clover" to R.string.habit_theme_description_black_clover
 )
 
 @Composable
@@ -560,4 +573,39 @@ fun describeIcon(key: String): String {
 fun resolveTemplateTitle(title: String): String {
     val resId = TEMPLATE_TITLE_RES_BY_KEY[title]
     return if (resId != null) stringResource(resId) else title
+}
+
+/**
+ * A template chip that's aware of premium locking, shared by the habit editor and the
+ * onboarding habit picker so both stay in sync as this gets tuned. Locked chips show a
+ * small lock leading-icon and route the tap to [onPremiumTapped] (the paywall) instead of
+ * [onSelected] — they can still render as visually distinct from unlocked ones without a
+ * separate disabled state, since tapping them is a valid, deliberate action.
+ */
+@Composable
+fun TemplateFilterChip(
+    template: HabitTemplate,
+    label: String,
+    selected: Boolean,
+    isPremium: Boolean,
+    onSelected: () -> Unit,
+    onPremiumTapped: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val locked = template.isPremiumOnly && !isPremium
+    FilterChip(
+        selected = selected,
+        onClick = { if (locked) onPremiumTapped() else onSelected() },
+        label = { Text(label) },
+        leadingIcon = if (locked) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(FilterChipDefaults.IconSize - 2.dp)
+                )
+            }
+        } else null,
+        modifier = modifier
+    )
 }

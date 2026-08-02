@@ -7,6 +7,17 @@
     <string name="widget_refresh">Refresh quote</string>
     <string name="widget_loading">Loading quote…</string>
     <string name="widget_error">Couldn\'t load the quote. Tap to retry.</string>
+    <string name="routine_widget_description">Track your habits from the home screen</string>
+    <string name="routine_widget_title">My routine</string>
+    <string name="routine_widget_progress">%1$d/%2$d today</string>
+    <string name="routine_widget_loading">Loading…</string>
+    <string name="routine_widget_error">Couldn\'t load your routine.</string>
+    <string name="routine_widget_empty">No active habits. Tap to add one.</string>
+    <string name="habit_widget_description">Track one habit\'s progress from the home screen</string>
+    <string name="habit_widget_configure_title">Choose a habit</string>
+    <string name="habit_widget_configure_empty">You don\'t have any active habits yet.</string>
+    <string name="habit_widget_deleted">This habit no longer exists.</string>
+    <string name="habit_widget_streak_short">%1$d days</string>
     <string name="remove_favorite">Remove favorite</string>
     <string name="add_favorite">Add favorite</string>
     <string name="action_shared">Share</string>
@@ -34,8 +45,8 @@
     <string name="routine_title">My routine</string>
     <string name="routine_streak_days">%1$d day streak</string>
     <string name="routine_progress_today">%1$d of %2$d today</string>
-    <string name="routine_empty_title">Start your routine</string>
-    <string name="routine_empty_body">Pick up to 3 habits and fill in every day you keep them.</string>
+    <string name="routine_empty_title">Your first habit awaits</string>
+    <string name="routine_empty_body">Pick up to 3 habits and check them off every day you keep them — consistency does the rest.</string>
     <string name="routine_add_habit">Add habit</string>
     <string name="routine_limit_reached">You have reached the maximum of %1$d active habits.</string>
     <string name="routine_current_streak">Streak: %1$d</string>
@@ -48,7 +59,9 @@
     <string name="routine_restore">Restore</string>
     <string name="routine_filter_active">Active</string>
     <string name="routine_filter_archived">Archived</string>
-    <string name="routine_archived_empty">No archived habits yet.</string>
+    <string name="routine_archived_empty_title">Archived habits</string>
+    <string name="routine_archived_empty_body">Archiving a habit pauses it and stops it from counting toward your streak, but keeps its full history — restore it anytime.</string>
+    <string name="routine_archived_empty_subtext">You haven\'t archived any yet.</string>
     <string name="routine_confirm_archive_title">Archive this habit?</string>
     <string name="routine_confirm_archive_body">It will move to the Archived filter and stop reminding you. Its history is kept — you can restore it anytime.</string>
     <string name="routine_message_future_day">You cannot mark a future day.</string>
@@ -67,10 +80,14 @@
     <string name="template_theme_ninja">Ninja path</string>
     <string name="template_theme_one_piece">Find the One Piece</string>
     <string name="template_theme_saiyan">Become a Saiyan</string>
+    <string name="template_theme_pokemon">Become a Pokémon master</string>
+    <string name="template_theme_black_clover">Become the Wizard King</string>
 
     <string name="habit_theme_description_ninja">Like every ninja, daily discipline is your greatest training.</string>
     <string name="habit_theme_description_one_piece">Every habit kept is one step closer to your own treasure.</string>
     <string name="habit_theme_description_saiyan">Train every day until you surpass your limits, like a Saiyan warrior.</string>
+    <string name="habit_theme_description_pokemon">Train every day to grow stronger, like a true Pokémon master.</string>
+    <string name="habit_theme_description_black_clover">No magic, pure grit: every habit brings you closer to becoming the Wizard King.</string>
 
     <string name="habit_editor_new_title">New habit</string>
     <string name="habit_editor_edit_title">Edit habit</string>
@@ -257,6 +274,8 @@
     <string name="routine_intro_action">Get started</string>
     <string name="routine_intro_dismiss">Not now</string>
     <string name="onboarding_habit_title">Want to start a habit?</string>
+    <string name="onboarding_habit_subtitle">Pick a suggestion to start today — you can change it anytime.</string>
+    <string name="onboarding_habit_create">Get started</string>
     <string name="onboarding_habit_skip">Skip</string>
     <string name="onboarding_quote_1">I never give up.\nI will never give up.\nThat\'s my ninja way.</string>
     <string name="onboarding_quote_2">A man who abandons his dreams is nothing more than a corpse.</string>
@@ -314,4 +333,22 @@
 
     <string name="widget_tutorial_previous">Previous</string>
     <string name="widget_tutorial_done">Got it</string>
+
+    <string name="paywall_title">Go Premium</string>
+    <string name="paywall_subtitle">Unlock your routine\'s full potential.</string>
+    <string name="paywall_benefit_habits_title">Unlimited habits</string>
+    <string name="paywall_benefit_habits_body">No more 3-active-habit limit — create as many as you need.</string>
+    <string name="paywall_benefit_ads_title">No ads</string>
+    <string name="paywall_benefit_ads_body">Browse the quote catalog with no banners.</string>
+    <string name="paywall_benefit_themes_title">Exclusive themes</string>
+    <string name="paywall_benefit_themes_body">Unlock exclusive theme collections, like Pokémon and Black Clover.</string>
+    <string name="paywall_subscribe">Subscribe</string>
+    <string name="paywall_disclaimer">Test activation — real billing is coming soon.</string>
+    <string name="paywall_already_premium">✨ You\'re premium</string>
+    <string name="paywall_remove_debug">Remove premium (testing only)</string>
+    <string name="paywall_locked_template_cd">Premium-exclusive suggestion</string>
+    <string name="settings_premium_title">Premium</string>
+    <string name="settings_premium_subtitle_free">Unlimited habits, no ads, and exclusive themes</string>
+    <string name="settings_premium_subtitle_active">Active ✨</string>
+    <string name="routine_limit_reached_upgrade">Upgrade to premium</string>
 </resources>

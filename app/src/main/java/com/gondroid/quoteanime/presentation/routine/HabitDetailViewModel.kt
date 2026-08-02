@@ -12,6 +12,7 @@ import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +34,7 @@ class HabitDetailViewModel @Inject constructor(
     private val deleteHabit: DeleteHabitUseCase,
     private val calculateStreak: CalculateStreakUseCase,
     private val reminderScheduler: HabitReminderScheduler,
+    private val routineWidgetScheduler: RoutineWidgetScheduler,
     private val analytics: RoutineAnalytics,
     private val clock: Clock
 ) : ViewModel() {
@@ -82,6 +84,7 @@ class HabitDetailViewModel @Inject constructor(
                             source = RoutineAnalytics.SOURCE_APP
                         )
                     }
+                    routineWidgetScheduler.triggerImmediateUpdate()
                 }
                 ToggleCompletionResult.FutureDate ->
                     _uiState.update { it.copy(message = HabitDetailMessage.FutureDayNotAllowed) }
@@ -106,6 +109,7 @@ class HabitDetailViewModel @Inject constructor(
             val daysActive = (clock.millis() - habitSnapshot.createdAt) / MILLIS_PER_DAY
             analytics.trackHabitArchived(daysActive)
             _uiState.update { it.copy(isArchived = true) }
+            routineWidgetScheduler.triggerImmediateUpdate()
         }
     }
 
@@ -118,6 +122,7 @@ class HabitDetailViewModel @Inject constructor(
             val restored = habitSnapshot.copy(isArchived = false)
             reminderScheduler.schedule(restored)
             _uiState.update { it.copy(habit = restored) }
+            routineWidgetScheduler.triggerImmediateUpdate()
         }
     }
 
@@ -127,6 +132,7 @@ class HabitDetailViewModel @Inject constructor(
             deleteHabit(habitId)
             reminderScheduler.cancel(habitId)
             _uiState.update { it.copy(isDeleted = true) }
+            routineWidgetScheduler.triggerImmediateUpdate()
         }
     }
 

@@ -25,9 +25,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -229,5 +231,43 @@ fun HabitHeatmap(
                 }
             }
         }
+    }
+}
+
+private fun previewCompletions(today: LocalDate): Set<LocalDate> =
+    (0 until 90).filter { it % 3 != 0 }.map { today.minusDays(it.toLong()) }.toSet()
+
+@Preview(name = "Compact card heatmap", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitHeatmapCompactPreview() {
+    val today = LocalDate.now()
+    QuoteAnimeTheme {
+        HabitHeatmap(
+            completions = previewCompletions(today),
+            colorIndex = 0,
+            today = today,
+            startDate = today.minusMonths(3),
+            endDate = null,
+            onDayClick = {}
+        )
+    }
+}
+
+@Preview(name = "Detail heatmap, labeled", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitHeatmapDetailPreview() {
+    val today = LocalDate.now()
+    QuoteAnimeTheme {
+        HabitHeatmap(
+            completions = previewCompletions(today),
+            colorIndex = 3,
+            today = today,
+            startDate = today.minusMonths(6),
+            endDate = null,
+            onDayClick = {},
+            weeks = 26,
+            showMonthLabels = true,
+            showDayLabels = true
+        )
     }
 }

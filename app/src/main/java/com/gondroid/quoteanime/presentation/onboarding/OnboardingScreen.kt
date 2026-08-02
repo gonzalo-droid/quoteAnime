@@ -18,18 +18,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,9 +57,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.presentation.routine.HabitEditorError
+import com.gondroid.quoteanime.presentation.routine.HabitPalette
+import com.gondroid.quoteanime.presentation.routine.HabitThemeImages
+import com.gondroid.quoteanime.presentation.routine.TemplateFilterChip
+import com.gondroid.quoteanime.presentation.routine.ThemedSuggestionPreview
 import com.gondroid.quoteanime.presentation.routine.resolveTemplateTitle
+import com.gondroid.quoteanime.presentation.routine.resolveThemeDescription
 import com.gondroid.quoteanime.ui.theme.AccentPurple
 import com.gondroid.quoteanime.ui.theme.AccentPurpleDim
+import com.gondroid.quoteanime.ui.theme.BgDark
+import com.gondroid.quoteanime.ui.theme.SurfaceVariant
 import com.gondroid.quoteanime.ui.theme.TextPrimary
 import com.gondroid.quoteanime.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
@@ -101,6 +113,7 @@ private val pages = listOf(
 @Composable
 fun OnboardingScreen(
     onFinished: () -> Unit,
+    onNavigateToPaywall: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -110,6 +123,12 @@ fun OnboardingScreen(
     val isHabitPage = pagerState.currentPage == pages.size
 
     fun finish() = viewModel.onOnboardingFinished(onFinished)
+
+    // Resolved here (composable scope) so both the shared bottom button and the habit page
+    // itself read the same legible text — never the raw "template_xxx" resource key.
+    val selectedTemplate = uiState.templates.find { it.id == uiState.selectedTemplateId }
+    val resolvedSelectedTitle = selectedTemplate?.let { resolveTemplateTitle(it.title) }
+    val canCreate = !isHabitPage || resolvedSelectedTitle != null
 
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(
@@ -122,66 +141,77 @@ fun OnboardingScreen(
                 HabitOnboardingPage(
                     templates = uiState.templates,
                     selectedTemplateId = uiState.selectedTemplateId,
+                    isPremium = uiState.isPremium,
+                    error = uiState.error,
                     onTemplateSelected = viewModel::onTemplateSelected,
-                    onCreate = { resolvedTitle -> viewModel.onCreateHabit(resolvedTitle, onFinished) },
-                    onSkip = ::finish
+                    onPremiumTemplateTapped = onNavigateToPaywall
                 )
             }
         }
 
-        // Skip button
-        if (!isHabitPage) {
-            TextButton(
-                onClick = ::finish,
+        // A single, always-visible skip control (instead of the previous split between a
+        // top-right button on pages 1–3 and a separate one only on the habit page) so every
+        // page in the flow offers the same way out.
+        IconButton(
+            onClick = ::finish,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(end = 12.dp, top = 8.dp)
+                .testTag("onboarding_skip")
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(R.string.onboarding_habit_skip),
+                tint = TextSecondary
+            )
+        }
+
+        // Dots + one primary button on every page: pages 1–3 advance the pager, the last
+        // page creates the habit instead — same layout throughout, only the action changes.
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 32.dp, vertical = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DotsIndicator(
+                total = pageCount,
+                current = pagerState.currentPage
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            Button(
+                onClick = {
+                    if (isHabitPage) {
+                        resolvedSelectedTitle?.let { title ->
+                            viewModel.onCreateHabit(title, onFinished)
+                        }
+                    } else {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
+                },
+                enabled = canCreate,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .statusBarsPadding()
-                    .padding(end = 8.dp, top = 4.dp)
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .testTag("onboarding_primary_action"),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentPurple,
+                    contentColor = Color(0xFF0C0C1E)
+                )
             ) {
                 Text(
-                    stringResource(R.string.onboarding_habit_skip),
-                    color = TextSecondary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    text = stringResource(
+                        if (isHabitPage) R.string.onboarding_habit_create else R.string.onboarding_next
+                    ),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.5.sp
                 )
-            }
-        }
-
-        if (!isHabitPage) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(horizontal = 32.dp, vertical = 40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                DotsIndicator(
-                    total = pageCount,
-                    current = pagerState.currentPage
-                )
-
-                Spacer(Modifier.height(32.dp))
-
-                Button(
-                    onClick = {
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentPurple,
-                        contentColor = Color(0xFF0C0C1E)
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.onboarding_next),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.5.sp
-                    )
-                }
             }
         }
     }
@@ -220,7 +250,7 @@ private fun OnboardingPage(page: OnboardingPage) {
 
             // Opening quote mark
             Text(
-                text = "\u201C",
+                text = "“",
                 fontSize = 64.sp,
                 color = AccentPurple.copy(alpha = 0.5f),
                 fontFamily = FontFamily.Serif,
@@ -248,55 +278,110 @@ private fun OnboardingPage(page: OnboardingPage) {
     }
 }
 
+/**
+ * The habit-picker page. Purely presentational — the shared bottom action bar in
+ * [OnboardingScreen] owns the Create/Skip buttons so this page's layout stays in sync with
+ * pages 1–3 instead of reading as a bolted-on plain form at the end of three full-bleed
+ * hero pages.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HabitOnboardingPage(
     templates: List<HabitTemplate>,
     selectedTemplateId: String?,
+    isPremium: Boolean,
+    error: HabitEditorError?,
     onTemplateSelected: (HabitTemplate) -> Unit,
-    onCreate: (String) -> Unit,
-    onSkip: () -> Unit
+    onPremiumTemplateTapped: () -> Unit
 ) {
-    // Resolve the selected template's display text here (composable scope) so the
-    // persisted habit title is legible text, not the raw "template_xxx" key.
     val selectedTemplate = templates.find { it.id == selectedTemplateId }
-    val resolvedSelectedTitle = selectedTemplate?.let { resolveTemplateTitle(it.title) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                Brush.verticalGradient(listOf(BgDark, SurfaceVariant, BgDark))
+            )
     ) {
-        Text(
-            text = stringResource(R.string.onboarding_habit_title),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(top = 24.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 140.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            templates.forEach { template ->
-                FilterChip(
-                    selected = selectedTemplateId == template.id,
-                    onClick = { onTemplateSelected(template) },
-                    label = { Text(resolveTemplateTitle(template.title)) }
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(AccentPurple.copy(alpha = 0.16f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AutoAwesome,
+                    contentDescription = null,
+                    tint = AccentPurple,
+                    modifier = Modifier.size(28.dp)
                 )
             }
-        }
-        Button(
-            onClick = { resolvedSelectedTitle?.let(onCreate) },
-            enabled = resolvedSelectedTitle != null,
-            modifier = Modifier
-                .padding(top = 32.dp)
-                .testTag("onboarding_create_habit")
-        ) {
-            Text(stringResource(R.string.routine_add_habit))
-        }
-        TextButton(onClick = onSkip, modifier = Modifier.padding(top = 8.dp)) {
-            Text(stringResource(R.string.onboarding_habit_skip))
+
+            Text(
+                text = stringResource(R.string.onboarding_habit_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = TextPrimary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 20.dp)
+            )
+            Text(
+                text = stringResource(R.string.onboarding_habit_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 24.dp)
+            ) {
+                templates.forEach { template ->
+                    TemplateFilterChip(
+                        template = template,
+                        label = resolveTemplateTitle(template.title),
+                        selected = selectedTemplateId == template.id,
+                        isPremium = isPremium,
+                        onSelected = { onTemplateSelected(template) },
+                        onPremiumTapped = onPremiumTemplateTapped
+                    )
+                }
+            }
+
+            selectedTemplate?.let { template ->
+                ThemedSuggestionPreview(
+                    iconKey = template.iconKey,
+                    title = resolveTemplateTitle(template.title),
+                    description = resolveThemeDescription(template.themeKey).orEmpty(),
+                    imageRes = HabitThemeImages.resFor(template.themeKey),
+                    accentColor = HabitPalette.colorAt(template.themeColorIndex ?: 0),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                )
+            }
+
+            error?.let {
+                Text(
+                    text = when (it) {
+                        HabitEditorError.BlankTitle -> stringResource(R.string.habit_editor_error_blank)
+                        HabitEditorError.InvalidDateRange -> stringResource(R.string.habit_editor_error_dates)
+                        is HabitEditorError.LimitReached -> stringResource(R.string.habit_editor_error_limit, it.max)
+                    },
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
         }
     }
 }
@@ -344,6 +429,21 @@ private fun PreviewOnboardingPage1() {
 private fun PreviewOnboardingPage2() {
     QuoteAnimeTheme {
         OnboardingPage(page = pages[1])
+    }
+}
+
+@Preview(name = "Onboarding — habit page", showSystemUi = true)
+@Composable
+private fun PreviewHabitOnboardingPage() {
+    QuoteAnimeTheme {
+        HabitOnboardingPage(
+            templates = com.gondroid.quoteanime.domain.model.DefaultHabitTemplates.ALL,
+            selectedTemplateId = "theme_ninja",
+            isPremium = false,
+            error = null,
+            onTemplateSelected = {},
+            onPremiumTemplateTapped = {}
+        )
     }
 }
 

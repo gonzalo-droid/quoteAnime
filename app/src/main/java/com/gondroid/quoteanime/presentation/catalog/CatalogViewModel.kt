@@ -7,6 +7,7 @@ import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetFavoriteQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetQuotesByCategoryUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
 import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.navigation.Screen
@@ -33,6 +34,7 @@ class CatalogViewModel @Inject constructor(
     private val getQuotesByCategory: GetQuotesByCategoryUseCase,
     private val getFavoriteQuotes: GetFavoriteQuotesUseCase,
     private val toggleFavorite: ToggleFavoriteUseCase,
+    private val observePremiumStatus: ObservePremiumStatusUseCase,
     val shareInterstitialManager: ShareInterstitialManager
 ) : ViewModel() {
 
@@ -68,14 +70,16 @@ class CatalogViewModel @Inject constructor(
     val uiState: StateFlow<CatalogUiState> = combine(
         _selectedFilter,
         _selectedQuoteId,
-        quotesStateFlow
-    ) { filter, quoteId, state ->
+        quotesStateFlow,
+        observePremiumStatus()
+    ) { filter, quoteId, state, isPremium ->
         val quotes = (state as? QuotesState.Ready)?.quotes ?: emptyList()
         CatalogUiState(
             selectedFilter = filter,
             selectedQuote = quoteId?.let { id -> quotes.find { it.id == id } },
             quotes = quotes,
-            isLoading = state is QuotesState.Loading
+            isLoading = state is QuotesState.Loading,
+            isPremium = isPremium
         )
     }.stateIn(
         scope = viewModelScope,

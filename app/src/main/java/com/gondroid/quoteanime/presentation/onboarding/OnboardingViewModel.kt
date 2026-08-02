@@ -7,12 +7,15 @@ import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
 import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.SetOnboardingCompletedUseCase
 import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
+import com.gondroid.quoteanime.presentation.routine.HabitEditorError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -25,6 +28,7 @@ class OnboardingViewModel @Inject constructor(
     private val setRoutineIntroSeen: SetRoutineIntroSeenUseCase,
     private val getHabitTemplates: GetHabitTemplatesUseCase,
     private val createHabit: CreateHabitUseCase,
+    private val observePremiumStatus: ObservePremiumStatusUseCase,
     private val analytics: RoutineAnalytics,
     private val clock: Clock
 ) : ViewModel() {
@@ -33,19 +37,34 @@ class OnboardingViewModel @Inject constructor(
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     init {
-        loadTemplates()
+        observeTemplatesAndPremium()
     }
 
-    private fun loadTemplates() {
+    /**
+     * Combined (not two separate collectors) so the auto-select below always sees the two
+     * values together — reading a separately-collected `state.isPremium` here raced the
+     * templates emission and could still resolve to the pre-load default (false) even for
+     * an already-premium user, since flowOf(...) fires synchronously the moment it's collected.
+     */
+    private fun observeTemplatesAndPremium() {
         viewModelScope.launch {
-            getHabitTemplates().collect { templates ->
-                _uiState.update { it.copy(templates = templates) }
+            combine(getHabitTemplates(), observePremiumStatus()) { templates, isPremium ->
+                templates to isPremium
+            }.collect { (templates, isPremium) ->
+                _uiState.update { state ->
+                    // Mirrors the habit editor: a free-tier user always starts from a
+                    // selectable (non-locked) suggestion instead of a blank/disabled Create
+                    // button, and never has their pick silently swapped once made.
+                    val selected = state.selectedTemplateId?.let { id -> templates.find { it.id == id } }
+                        ?: templates.firstOrNull { !it.isPremiumOnly || isPremium }
+                    state.copy(templates = templates, isPremium = isPremium, selectedTemplateId = selected?.id)
+                }
             }
         }
     }
 
     fun onTemplateSelected(template: HabitTemplate) {
-        _uiState.update { it.copy(selectedTemplateId = template.id) }
+        _uiState.update { it.copy(selectedTemplateId = template.id, error = null) }
     }
 
     fun onOnboardingFinished(onDone: () -> Unit) {
@@ -72,17 +91,24 @@ class OnboardingViewModel @Inject constructor(
                 templateId = template.id
             )
             when (result) {
-                is CreateHabitResult.Success -> analytics.trackHabitCreated(
-                    templateId = template.id,
-                    isCustom = false,
-                    hasReminder = false,
-                    hasEndDate = false
-                )
-                is CreateHabitResult.LimitReached -> Unit
-                CreateHabitResult.BlankTitle -> Unit
-                CreateHabitResult.InvalidDateRange -> Unit
+                is CreateHabitResult.Success -> {
+                    analytics.trackHabitCreated(
+                        templateId = template.id,
+                        isCustom = false,
+                        hasReminder = false,
+                        hasEndDate = false
+                    )
+                    finishOnboarding(onFinished)
+                }
+                // Surfaced instead of silently doing nothing — the sheet used to just sit
+                // there with a Create button that appeared to do nothing on failure.
+                is CreateHabitResult.LimitReached ->
+                    _uiState.update { it.copy(error = HabitEditorError.LimitReached(result.max)) }
+                CreateHabitResult.BlankTitle ->
+                    _uiState.update { it.copy(error = HabitEditorError.BlankTitle) }
+                CreateHabitResult.InvalidDateRange ->
+                    _uiState.update { it.copy(error = HabitEditorError.InvalidDateRange) }
             }
-            finishOnboarding(onFinished)
         }
     }
 

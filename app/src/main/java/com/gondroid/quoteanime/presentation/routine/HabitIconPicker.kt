@@ -37,8 +37,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 private const val ICON_GRID_COLUMNS = 6
 
@@ -62,16 +64,19 @@ fun HabitIconPickerContent(
         .filter { (_, keys) -> keys.isNotEmpty() }
 
     Column(modifier = modifier.fillMaxSize()) {
+        // Same header treatment as HabitEditorSheet's own title row (headlineSmall, 24dp
+        // horizontal margin, title left / close right) since this content replaces that
+        // sheet's body in place rather than opening as a separate screen.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
+                .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.habit_icon_picker_title),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineSmall
             )
             IconButton(onClick = onBack) {
                 Icon(
@@ -89,7 +94,7 @@ fun HabitIconPickerContent(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
                 .testTag("icon_picker_search")
         )
 
@@ -98,13 +103,13 @@ fun HabitIconPickerContent(
                 text = stringResource(R.string.habit_icon_picker_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(24.dp)
             )
             return@Column
         }
 
         LazyColumn(
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items = visibleCategories, key = { it.first.titleRes }) { (category, keys) ->
@@ -168,6 +173,41 @@ private fun IconCell(
             contentDescription = null,
             tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Preview(name = "Icon picker", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitIconPickerContentPreview() {
+    QuoteAnimeTheme {
+        HabitIconPickerContent(
+            selectedKey = "dumbbell",
+            onIconSelected = {},
+            onBack = {},
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Preview(name = "Icon picker, no matches", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitIconPickerContentEmptyPreview() {
+    QuoteAnimeTheme {
+        HabitIconPickerEmptyPreviewContent()
+    }
+}
+
+/** Forces the "no results" branch without depending on internal search state, by reusing
+ *  the same empty-state Text the real composable renders when a query matches nothing. */
+@Composable
+private fun HabitIconPickerEmptyPreviewContent() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(R.string.habit_icon_picker_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(24.dp)
         )
     }
 }

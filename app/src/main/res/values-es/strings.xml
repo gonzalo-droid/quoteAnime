@@ -7,6 +7,17 @@
     <string name="widget_refresh">Actualizar frase</string>
     <string name="widget_loading">Cargando frase…</string>
     <string name="widget_error">No se pudo cargar la frase. Toca para reintentar.</string>
+    <string name="routine_widget_description">Sigue tus hábitos desde la pantalla de inicio</string>
+    <string name="routine_widget_title">Mi rutina</string>
+    <string name="routine_widget_progress">%1$d/%2$d hoy</string>
+    <string name="routine_widget_loading">Cargando…</string>
+    <string name="routine_widget_error">No se pudo cargar tu rutina.</string>
+    <string name="routine_widget_empty">Sin hábitos activos. Toca para agregar uno.</string>
+    <string name="habit_widget_description">Sigue el progreso de un hábito desde la pantalla de inicio</string>
+    <string name="habit_widget_configure_title">Elige un hábito</string>
+    <string name="habit_widget_configure_empty">Todavía no tienes hábitos activos.</string>
+    <string name="habit_widget_deleted">Este hábito ya no existe.</string>
+    <string name="habit_widget_streak_short">%1$d días</string>
     <string name="remove_favorite">Quitar favorito</string>
     <string name="add_favorite">Añadir favorito</string>
     <string name="action_shared">Compartir</string>
@@ -34,8 +45,8 @@
     <string name="routine_title">Mi rutina</string>
     <string name="routine_streak_days">%1$d días seguidos</string>
     <string name="routine_progress_today">%1$d de %2$d hoy</string>
-    <string name="routine_empty_title">Empieza tu rutina</string>
-    <string name="routine_empty_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas.</string>
+    <string name="routine_empty_title">Tu primer hábito te espera</string>
+    <string name="routine_empty_body">Elegí hasta 3 hábitos y marcá cada día que los cumplas — la constancia hace el resto.</string>
     <string name="routine_add_habit">Añadir hábito</string>
     <string name="routine_limit_reached">Has alcanzado el máximo de %1$d hábitos activos.</string>
     <string name="routine_current_streak">Racha: %1$d</string>
@@ -48,7 +59,9 @@
     <string name="routine_restore">Restaurar</string>
     <string name="routine_filter_active">Activos</string>
     <string name="routine_filter_archived">Archivados</string>
-    <string name="routine_archived_empty">Todavía no tienes hábitos archivados.</string>
+    <string name="routine_archived_empty_title">Hábitos archivados</string>
+    <string name="routine_archived_empty_body">Cuando archivás un hábito se pausa y deja de sumar a tu racha, pero conserva todo su historial — restauralo cuando quieras.</string>
+    <string name="routine_archived_empty_subtext">Todavía no archivaste ninguno.</string>
     <string name="routine_confirm_archive_title">¿Archivar este hábito?</string>
     <string name="routine_confirm_archive_body">Se moverá al filtro de Archivados y dejará de recordarte. Su historial se conserva — puedes restaurarlo cuando quieras.</string>
     <string name="routine_message_future_day">No puedes marcar un día futuro.</string>
@@ -67,10 +80,14 @@
     <string name="template_theme_ninja">Camino ninja</string>
     <string name="template_theme_one_piece">Buscar el One Piece</string>
     <string name="template_theme_saiyan">Sé un saiyan</string>
+    <string name="template_theme_pokemon">Sé un maestro Pokémon</string>
+    <string name="template_theme_black_clover">Sé el Rey Mago</string>
 
     <string name="habit_theme_description_ninja">Como todo ninja, la disciplina diaria es tu mayor entrenamiento.</string>
     <string name="habit_theme_description_one_piece">Cada hábito cumplido es un paso más cerca de tu propio tesoro.</string>
     <string name="habit_theme_description_saiyan">Entrena cada día hasta superar tus límites, como un guerrero saiyan.</string>
+    <string name="habit_theme_description_pokemon">Entrena cada día para hacerte más fuerte, como un verdadero maestro Pokémon.</string>
+    <string name="habit_theme_description_black_clover">Sin magia, con pura garra: cada hábito te acerca a ser el Rey Mago.</string>
 
     <string name="habit_editor_new_title">Nuevo hábito</string>
     <string name="habit_editor_edit_title">Editar hábito</string>
@@ -257,6 +274,8 @@
     <string name="routine_intro_action">Empezar</string>
     <string name="routine_intro_dismiss">Ahora no</string>
     <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>
+    <string name="onboarding_habit_subtitle">Elige una sugerencia para arrancar hoy mismo — podés cambiarlo cuando quieras.</string>
+    <string name="onboarding_habit_create">Comenzar</string>
     <string name="onboarding_habit_skip">Saltar</string>
     <string name="onboarding_quote_1">No me rindo. \nNunca me rendiré. \nEse es mi camino ninja.</string>
     <string name="onboarding_quote_2">Un hombre que abandona sus sueños no es más que un cadáver.</string>
@@ -314,4 +333,22 @@
 
     <string name="widget_tutorial_previous">Anterior</string>
     <string name="widget_tutorial_done">Entendido</string>
+
+    <string name="paywall_title">Hazte Premium</string>
+    <string name="paywall_subtitle">Desbloqueá todo el potencial de tu rutina.</string>
+    <string name="paywall_benefit_habits_title">Hábitos ilimitados</string>
+    <string name="paywall_benefit_habits_body">Sin el límite de 3 hábitos activos — creá todos los que necesites.</string>
+    <string name="paywall_benefit_ads_title">Sin anuncios</string>
+    <string name="paywall_benefit_ads_body">Navegá el catálogo de frases sin banners.</string>
+    <string name="paywall_benefit_themes_title">Temas exclusivos</string>
+    <string name="paywall_benefit_themes_body">Accedé a colecciones temáticas exclusivas, como Pokémon y Black Clover.</string>
+    <string name="paywall_subscribe">Suscribirme</string>
+    <string name="paywall_disclaimer">Activación de prueba — la suscripción real llega pronto.</string>
+    <string name="paywall_already_premium">✨ Ya sos premium</string>
+    <string name="paywall_remove_debug">Quitar premium (solo pruebas)</string>
+    <string name="paywall_locked_template_cd">Sugerencia exclusiva para premium</string>
+    <string name="settings_premium_title">Premium</string>
+    <string name="settings_premium_subtitle_free">Hábitos ilimitados, sin anuncios y temas exclusivos</string>
+    <string name="settings_premium_subtitle_active">Activo ✨</string>
+    <string name="routine_limit_reached_upgrade">Mejorar a premium</string>
 </resources>

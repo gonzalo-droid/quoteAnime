@@ -52,6 +52,45 @@
         </receiver>
 
         <!--
+            Widget: RoutineSummaryWidgetReceiver shows all active habits (streak + today
+            check) in one glanceable widget. Tapping it opens "Mi rutina" directly.
+        -->
+        <receiver
+            android:name=".widget.RoutineSummaryWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/routine_summary_widget_info" />
+        </receiver>
+
+        <!--
+            Widget: HabitWidget shows one habit's heatmap. Each instance is bound to a
+            different habit via HabitWidgetConfigureActivity (android:configure below).
+        -->
+        <receiver
+            android:name=".widget.HabitWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/habit_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".presentation.widget.HabitWidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@style/Theme.QuoteAnime">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!--
             HabitReminderReceiver: handles the "Done" action on habit reminder
             notifications. Not exported — only this app posts these notifications.
         -->

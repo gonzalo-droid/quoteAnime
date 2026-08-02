@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.AlertDialog
@@ -81,6 +82,7 @@ private const val TERM_AND_CONDITIONS_URL = "https://quote-anime-web.vercel.app/
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToWidgetTutorial: () -> Unit = {},
+    onNavigateToPaywall: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -149,6 +151,15 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+
+                item { SectionDivider() }
+
+                item {
+                    PremiumSettingsRow(
+                        isPremium = uiState.isPremium,
+                        onClick = onNavigateToPaywall
+                    )
+                }
 
                 item { SectionDivider() }
 
@@ -253,6 +264,35 @@ private val listItemColors
     @Composable get() = ListItemDefaults.colors(
         containerColor = MaterialTheme.colorScheme.background
     )
+
+@Composable
+private fun PremiumSettingsRow(isPremium: Boolean, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_premium_title)) },
+        supportingContent = {
+            Text(
+                if (isPremium) stringResource(R.string.settings_premium_subtitle_active)
+                else stringResource(R.string.settings_premium_subtitle_free)
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Filled.WorkspacePremium,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        colors = listItemColors,
+        modifier = Modifier.clickable(onClick = onClick)
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

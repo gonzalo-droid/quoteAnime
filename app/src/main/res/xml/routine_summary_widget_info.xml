@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/routine_widget_description"
+    android:minWidth="110dp"
+    android:minHeight="80dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="400dp"
+    android:maxResizeHeight="350dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/routine_summary_widget_preview" />
+<!--
+    Same convention as quote_widget_info.xml: updatePeriodMillis="0" because every
+    refresh goes through WorkManager (UpdateRoutineSummaryWidgetWorker), triggered on
+    add/reboot, periodically, and immediately after marking a habit in the app.
+-->

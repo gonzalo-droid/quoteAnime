@@ -23,8 +23,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -119,5 +121,21 @@ fun HabitCalendarMonth(
                 }
             }
         }
+    }
+}
+
+@Preview(name = "Calendar month", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitCalendarMonthPreview() {
+    val today = LocalDate.now()
+    val completions = (0 until 20).filter { it % 2 == 0 }.map { today.minusDays(it.toLong()) }.toSet()
+    QuoteAnimeTheme {
+        HabitCalendarMonth(
+            month = YearMonth.from(today),
+            completions = completions,
+            today = today,
+            colorIndex = 4,
+            onDayClick = {}
+        )
     }
 }

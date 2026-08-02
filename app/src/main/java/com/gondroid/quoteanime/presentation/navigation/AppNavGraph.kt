@@ -17,6 +17,7 @@ import com.gondroid.quoteanime.presentation.routine.RoutineScreen
 import com.gondroid.quoteanime.presentation.settings.SettingsScreen
 import com.gondroid.quoteanime.presentation.settings.WidgetTutorialScreen
 import com.gondroid.quoteanime.presentation.splash.SplashScreen
+import com.gondroid.quoteanime.presentation.subscription.PaywallScreen
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
@@ -47,6 +48,7 @@ sealed class Screen(val route: String) {
         val routeWithArg = "habit_detail/{$ARG}"
         fun createRoute(habitId: String) = "habit_detail/$habitId"
     }
+    data object Paywall : Screen("paywall")
 }
 
 @Composable
@@ -92,7 +94,8 @@ fun AppNavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
             )
         }
 
@@ -131,12 +134,17 @@ fun AppNavGraph(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToWidgetTutorial = { navController.navigate(Screen.WidgetTutorial.route) }
+                onNavigateToWidgetTutorial = { navController.navigate(Screen.WidgetTutorial.route) },
+                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
             )
         }
 
         composable(Screen.WidgetTutorial.route) {
             WidgetTutorialScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.Paywall.route) {
+            PaywallScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(Screen.Routine.route) {
@@ -150,7 +158,8 @@ fun AppNavGraph(
                 },
                 onOpenHabitDetail = { habitId ->
                     navController.navigate(Screen.HabitDetail.createRoute(habitId))
-                }
+                },
+                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
             )
         }
 
@@ -176,7 +185,10 @@ fun AppNavGraph(
                 }
             )
         ) {
-            HabitEditorSheet(onDismiss = { navController.popBackStack() })
+            HabitEditorSheet(
+                onDismiss = { navController.popBackStack() },
+                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
+            )
         }
     }
 }

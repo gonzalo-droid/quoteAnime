@@ -9,9 +9,11 @@ import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
 import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitResult
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +34,8 @@ class HabitEditorViewModel @Inject constructor(
     private val updateHabit: UpdateHabitUseCase,
     private val repository: HabitRepository,
     private val reminderScheduler: HabitReminderScheduler,
+    private val routineWidgetScheduler: RoutineWidgetScheduler,
+    private val observePremiumStatus: ObservePremiumStatusUseCase,
     private val analytics: RoutineAnalytics,
     private val clock: Clock
 ) : ViewModel() {
@@ -45,6 +49,7 @@ class HabitEditorViewModel @Inject constructor(
 
     init {
         loadTemplates()
+        observePremium()
         editedHabitId?.let(::loadHabit)
     }
 
@@ -52,6 +57,14 @@ class HabitEditorViewModel @Inject constructor(
         viewModelScope.launch {
             getHabitTemplates().collect { templates ->
                 _uiState.update { it.copy(templates = templates) }
+            }
+        }
+    }
+
+    private fun observePremium() {
+        viewModelScope.launch {
+            observePremiumStatus().collect { isPremium ->
+                _uiState.update { it.copy(isPremium = isPremium) }
             }
         }
     }
@@ -155,6 +168,7 @@ class HabitEditorViewModel @Inject constructor(
                     hasEndDate = state.endDate != null
                 )
                 _uiState.update { it.copy(isSaved = true) }
+                routineWidgetScheduler.triggerImmediateUpdate()
             }
             is CreateHabitResult.LimitReached ->
                 _uiState.update { it.copy(error = HabitEditorError.LimitReached(result.max)) }
@@ -183,6 +197,7 @@ class HabitEditorViewModel @Inject constructor(
             is UpdateHabitResult.Success -> {
                 reminderScheduler.schedule(edited)
                 _uiState.update { it.copy(isSaved = true) }
+                routineWidgetScheduler.triggerImmediateUpdate()
             }
             UpdateHabitResult.BlankTitle ->
                 _uiState.update { it.copy(error = HabitEditorError.BlankTitle) }

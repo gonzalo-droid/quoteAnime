@@ -6,7 +6,8 @@ data class CatalogUiState(
     val selectedFilter: CatalogFilter? = null,   // null = Selector view
     val selectedQuote: Quote? = null,            // non-null = Detail view
     val quotes: List<Quote> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isPremium: Boolean = false
 ) {
     val isEmpty: Boolean get() = !isLoading && quotes.isEmpty()
 }

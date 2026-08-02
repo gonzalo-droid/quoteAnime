@@ -11,6 +11,7 @@ import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -54,6 +55,7 @@ class HabitDetailViewModelTest {
     private lateinit var unarchiveHabit: UnarchiveHabitUseCase
     private lateinit var deleteHabit: DeleteHabitUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
+    private lateinit var routineWidgetScheduler: RoutineWidgetScheduler
     private lateinit var analytics: RoutineAnalytics
     private val calculateStreak = CalculateStreakUseCase()
 
@@ -74,6 +76,7 @@ class HabitDetailViewModelTest {
         deleteHabit = deleteHabit,
         calculateStreak = calculateStreak,
         reminderScheduler = reminderScheduler,
+        routineWidgetScheduler = routineWidgetScheduler,
         analytics = analytics,
         clock = fixedClock
     )
@@ -86,6 +89,7 @@ class HabitDetailViewModelTest {
         unarchiveHabit = mockk()
         deleteHabit = mockk()
         reminderScheduler = mockk(relaxed = true)
+        routineWidgetScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
         coEvery { repository.getHabit("h1") } returns habit
         every { repository.getCompletions("h1") } returns flowOf(listOf(today, today.minusDays(1)))

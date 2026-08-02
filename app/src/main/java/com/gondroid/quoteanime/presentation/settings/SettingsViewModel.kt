@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
@@ -30,7 +31,8 @@ class SettingsViewModel @Inject constructor(
     private val getUserPreferences: GetUserPreferencesUseCase,
     private val updatePreferences: UpdateUserPreferencesUseCase,
     private val notificationScheduler: NotificationScheduler,
-    private val widgetScheduler: WidgetScheduler
+    private val widgetScheduler: WidgetScheduler,
+    private val observePremiumStatus: ObservePremiumStatusUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -38,7 +40,7 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(getCategories(), getUserPreferences()) { categories, prefs ->
+            combine(getCategories(), getUserPreferences(), observePremiumStatus()) { categories, prefs, isPremium ->
                 _uiState.value.copy(
                     categories              = categories,
                     selectedCategoryIds     = prefs.selectedCategoryIds,
@@ -50,7 +52,8 @@ class SettingsViewModel @Inject constructor(
                     notificationFrequency   = prefs.notificationFrequency,
                     widgetSize              = prefs.widgetSize,
                     widgetUpdateTimesPerDay = prefs.widgetUpdateTimesPerDay,
-                    isLoading               = false
+                    isLoading               = false,
+                    isPremium               = isPremium
                 )
             }.collect { _uiState.value = it }
         }

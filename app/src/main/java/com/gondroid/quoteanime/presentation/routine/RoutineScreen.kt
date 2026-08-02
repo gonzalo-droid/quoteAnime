@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,7 +55,8 @@ fun RoutineScreen(
     onNavigateBack: () -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (String) -> Unit,
-    onOpenHabitDetail: (String) -> Unit
+    onOpenHabitDetail: (String) -> Unit,
+    onNavigateToPaywall: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -73,7 +73,8 @@ fun RoutineScreen(
         onEditHabit = onEditHabit,
         onOpenHabitDetail = onOpenHabitDetail,
         onMessageShown = viewModel::onMessageShown,
-        onIntroDismissed = viewModel::onIntroDismissed
+        onIntroDismissed = viewModel::onIntroDismissed,
+        onNavigateToPaywall = onNavigateToPaywall
     )
 }
 
@@ -92,7 +93,8 @@ fun RoutineContent(
     onEditHabit: (String) -> Unit,
     onOpenHabitDetail: (String) -> Unit,
     onMessageShown: () -> Unit,
-    onIntroDismissed: () -> Unit
+    onIntroDismissed: () -> Unit,
+    onNavigateToPaywall: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val futureMessage = stringResource(R.string.routine_message_future_day)
@@ -125,39 +127,49 @@ fun RoutineContent(
                         )
                     }
                 },
+                actions = {
+                    if (state.filter == RoutineFilter.ACTIVE && state.canAddHabit) {
+                        IconButton(
+                            onClick = onAddHabit,
+                            modifier = Modifier.testTag("add_habit_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(R.string.routine_add_habit)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            if (state.filter == RoutineFilter.ACTIVE && state.canAddHabit) {
-                ExtendedFloatingActionButton(
-                    onClick = onAddHabit,
-                    modifier = Modifier.testTag("add_habit_fab"),
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.routine_add_habit)) }
-                )
-            }
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         when {
-            state.isEmpty && state.filter == RoutineFilter.ACTIVE -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Both empty branches pad to 16dp on every side, matching the populated
+            // LazyColumn's contentPadding below — otherwise the filter chips sit flush
+            // against the edge here but 16dp inset there, visibly shifting position
+            // whenever the tab's content goes from empty to populated (or back).
+            state.isEmpty && state.filter == RoutineFilter.ACTIVE -> Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
                 RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
                 EmptyRoutine(onAddHabit = onAddHabit, modifier = Modifier.fillMaxSize())
             }
 
-            state.isEmpty -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            state.isEmpty -> Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
                 RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.routine_archived_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(32.dp)
-                    )
-                }
+                EmptyArchivedRoutine(modifier = Modifier.fillMaxSize())
             }
 
             else -> LazyColumn(
@@ -167,9 +179,6 @@ fun RoutineContent(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                item {
-                    RoutineHeader(state = state)
-                }
                 item {
                     RoutineFilterRow(filter = state.filter, onFilterChanged = onFilterChanged)
                 }
@@ -187,12 +196,20 @@ fun RoutineContent(
                 }
                 if (state.filter == RoutineFilter.ACTIVE && !state.canAddHabit) {
                     item {
-                        Text(
-                            text = stringResource(R.string.routine_limit_reached, state.maxHabits),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = stringResource(R.string.routine_limit_reached, state.maxHabits),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            TextButton(onClick = onNavigateToPaywall) {
+                                Text(stringResource(R.string.routine_limit_reached_upgrade))
+                            }
+                        }
                     }
                 }
             }
@@ -265,24 +282,6 @@ private fun RoutineFilterRow(filter: RoutineFilter, onFilterChanged: (RoutineFil
 }
 
 @Composable
-private fun RoutineHeader(state: RoutineUiState) {
-    Column(modifier = Modifier.testTag("routine_header")) {
-        Text(
-            text = stringResource(R.string.routine_streak_days, state.globalStreak.current),
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Text(
-            text = stringResource(
-                R.string.routine_progress_today,
-                state.completedToday,
-                state.totalHabits
-            ),
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-@Composable
 private fun EmptyRoutine(onAddHabit: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Column(
@@ -311,33 +310,63 @@ private fun EmptyRoutine(onAddHabit: () -> Unit, modifier: Modifier = Modifier) 
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0C0C1E)
+/** Unlike [EmptyRoutine], this has no CTA — you land here after archiving something, not
+ *  before creating anything, so it explains what archiving does instead of prompting an
+ *  action. The subtext line ("Todavía no archivaste ninguno") is de-emphasized so it reads
+ *  as the actual empty-state confirmation rather than a continuation of the explainer. */
 @Composable
-private fun RoutineContentPreview() {
-    val today = LocalDate.now()
-    val habit = Habit(
-        id = "h1",
-        title = "Entrenar",
+private fun EmptyArchivedRoutine(modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.routine_archived_empty_title),
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                text = stringResource(R.string.routine_archived_empty_body),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            Text(
+                text = stringResource(R.string.routine_archived_empty_subtext),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+    }
+}
+
+private fun previewHabitWithProgress(
+    id: String,
+    title: String,
+    colorIndex: Int,
+    completedToday: Boolean,
+    today: LocalDate,
+    archived: Boolean = false
+): HabitWithProgress = HabitWithProgress(
+    habit = Habit(
+        id = id,
+        title = title,
         iconKey = "dumbbell",
-        colorIndex = 0,
-        startDate = today.minusMonths(2)
-    )
+        colorIndex = colorIndex,
+        startDate = today.minusMonths(2),
+        isArchived = archived
+    ),
+    completions = setOf(today, today.minusDays(1), today.minusDays(3)),
+    streak = StreakState(2, 11, today, completedToday),
+    completionRate = 0.62f
+)
+
+private fun previewRoutineContent(state: RoutineUiState, today: LocalDate) = @Composable {
     QuoteAnimeTheme {
         RoutineContent(
-            state = RoutineUiState(
-                habits = listOf(
-                    HabitWithProgress(
-                        habit = habit,
-                        completions = setOf(today, today.minusDays(1), today.minusDays(3)),
-                        streak = StreakState(2, 11, today, true),
-                        completionRate = 0.62f
-                    )
-                ),
-                activeCount = 1,
-                globalStreak = StreakState(2, 11, today, true),
-                isLoading = false,
-                maxHabits = 3
-            ),
+            state = state,
             today = today,
             onNavigateBack = {},
             onToggleToday = {},
@@ -349,7 +378,86 @@ private fun RoutineContentPreview() {
             onEditHabit = {},
             onOpenHabitDetail = {},
             onMessageShown = {},
-            onIntroDismissed = {}
+            onIntroDismissed = {},
+            onNavigateToPaywall = {}
         )
     }
+}
+
+@Preview(name = "Populated", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun RoutineContentPreview() {
+    val today = LocalDate.now()
+    previewRoutineContent(
+        state = RoutineUiState(
+            habits = listOf(
+                previewHabitWithProgress("h1", "Entrenar", 0, completedToday = true, today = today),
+                previewHabitWithProgress("h2", "Leer", 3, completedToday = false, today = today)
+            ),
+            activeCount = 2,
+            globalStreak = StreakState(2, 11, today, true),
+            isLoading = false,
+            maxHabits = 3
+        ),
+        today = today
+    )()
+}
+
+@Preview(name = "Empty, active tab", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun RoutineContentEmptyActivePreview() {
+    val today = LocalDate.now()
+    previewRoutineContent(
+        state = RoutineUiState(isLoading = false, maxHabits = 3, filter = RoutineFilter.ACTIVE),
+        today = today
+    )()
+}
+
+@Preview(name = "Empty, archived tab", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun RoutineContentEmptyArchivedPreview() {
+    val today = LocalDate.now()
+    previewRoutineContent(
+        state = RoutineUiState(isLoading = false, maxHabits = 3, filter = RoutineFilter.ARCHIVED),
+        today = today
+    )()
+}
+
+@Preview(name = "Limit reached", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun RoutineContentLimitReachedPreview() {
+    val today = LocalDate.now()
+    previewRoutineContent(
+        state = RoutineUiState(
+            habits = listOf(
+                previewHabitWithProgress("h1", "Entrenar", 0, completedToday = true, today = today),
+                previewHabitWithProgress("h2", "Leer", 3, completedToday = false, today = today),
+                previewHabitWithProgress("h3", "Meditar", 5, completedToday = true, today = today)
+            ),
+            activeCount = 3,
+            globalStreak = StreakState(2, 11, today, true),
+            isLoading = false,
+            maxHabits = 3
+        ),
+        today = today
+    )()
+}
+
+@Preview(name = "Archived tab, populated", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun RoutineContentArchivedPreview() {
+    val today = LocalDate.now()
+    previewRoutineContent(
+        state = RoutineUiState(
+            habits = listOf(
+                previewHabitWithProgress("h4", "Yoga", 2, completedToday = false, today = today, archived = true)
+            ),
+            activeCount = 0,
+            globalStreak = StreakState(0, 11, today, false),
+            isLoading = false,
+            maxHabits = 3,
+            filter = RoutineFilter.ARCHIVED
+        ),
+        today = today
+    )()
 }

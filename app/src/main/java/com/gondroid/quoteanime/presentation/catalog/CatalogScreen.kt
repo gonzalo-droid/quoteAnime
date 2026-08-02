@@ -182,7 +182,10 @@ fun CatalogScreen(
                         }
 
                         // Banner solo en el detalle de frase abierto desde el Catálogo — Home se mantiene limpio.
-                        BannerAd(modifier = Modifier.fillMaxWidth())
+                        // Premium hides it entirely, per the "no ads" benefit.
+                        if (!uiState.isPremium) {
+                            BannerAd(modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
             )

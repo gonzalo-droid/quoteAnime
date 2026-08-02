@@ -7,6 +7,7 @@ import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
@@ -56,6 +57,7 @@ class SettingsViewModelTest {
     private lateinit var updatePreferences: UpdateUserPreferencesUseCase
     private lateinit var notificationScheduler: NotificationScheduler
     private lateinit var widgetScheduler: WidgetScheduler
+    private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
 
     private val allCategories = listOf(
         Category(id = "Naruto", name = "Naruto"),
@@ -85,10 +87,12 @@ class SettingsViewModelTest {
         updatePreferences = mockk()
         notificationScheduler = mockk()
         widgetScheduler = mockk()
+        observePremiumStatus = mockk()
 
         // Default stubs
         every { getCategories() } returns flowOf(allCategories)
         every { getUserPreferences() } returns flowOf(defaultPrefs)
+        every { observePremiumStatus() } returns flowOf(false)
         coJustRun { updatePreferences.setCategories(any()) }
         coJustRun { updatePreferences.setNotificationsEnabled(any()) }
         coJustRun { updatePreferences.setNotificationTimeRange(any(), any(), any(), any()) }
@@ -102,7 +106,8 @@ class SettingsViewModelTest {
     }
 
     private fun buildViewModel() = SettingsViewModel(
-        context, getCategories, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler
+        context, getCategories, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler,
+        observePremiumStatus
     )
 
     // ── Initial state ─────────────────────────────────────────────────────────

@@ -13,11 +13,13 @@ import com.gondroid.quoteanime.domain.usecase.GetActiveHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetArchivedHabitsUseCase
 import com.gondroid.quoteanime.domain.usecase.GetGlobalStreakUseCase
 import com.gondroid.quoteanime.domain.usecase.IsRoutineIntroSeenUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.SetRoutineIntroSeenUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleCompletionResult
 import com.gondroid.quoteanime.domain.usecase.ToggleHabitCompletionUseCase
 import com.gondroid.quoteanime.domain.usecase.UnarchiveHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -62,8 +64,10 @@ class RoutineViewModelTest {
     private lateinit var isRoutineIntroSeen: IsRoutineIntroSeenUseCase
     private lateinit var setRoutineIntroSeen: SetRoutineIntroSeenUseCase
     private lateinit var reminderScheduler: HabitReminderScheduler
+    private lateinit var routineWidgetScheduler: RoutineWidgetScheduler
     private lateinit var analytics: RoutineAnalytics
     private lateinit var habitRepository: HabitRepository
+    private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private val calculateStreak = CalculateStreakUseCase()
     private val premiumGate = PremiumGate()
 
@@ -99,7 +103,9 @@ class RoutineViewModelTest {
         isRoutineIntroSeen = isRoutineIntroSeen,
         setRoutineIntroSeen = setRoutineIntroSeen,
         reminderScheduler = reminderScheduler,
+        routineWidgetScheduler = routineWidgetScheduler,
         premiumGate = premiumGate,
+        observePremiumStatus = observePremiumStatus,
         analytics = analytics,
         habitRepository = habitRepository,
         calculateStreak = calculateStreak,
@@ -117,12 +123,15 @@ class RoutineViewModelTest {
         isRoutineIntroSeen = mockk()
         setRoutineIntroSeen = mockk(relaxed = true)
         reminderScheduler = mockk(relaxed = true)
+        routineWidgetScheduler = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
         habitRepository = mockk()
+        observePremiumStatus = mockk()
         every { getGlobalStreak(any()) } returns flowOf(StreakState(current = 4, best = 9))
         every { isRoutineIntroSeen() } returns flowOf(true)
         every { habitRepository.getCompletions(any()) } returns flowOf(emptyList())
         every { getArchivedHabits(today) } returns flowOf(emptyList())
+        every { observePremiumStatus() } returns flowOf(false)
     }
 
     @Test

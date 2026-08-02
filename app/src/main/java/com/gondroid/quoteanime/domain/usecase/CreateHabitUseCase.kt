@@ -3,6 +3,7 @@ package com.gondroid.quoteanime.domain.usecase
 import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.repository.HabitRepository
+import kotlinx.coroutines.flow.first
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -18,7 +19,8 @@ sealed interface CreateHabitResult {
 
 class CreateHabitUseCase @Inject constructor(
     private val repository: HabitRepository,
-    private val premiumGate: PremiumGate
+    private val premiumGate: PremiumGate,
+    private val observePremiumStatus: ObservePremiumStatusUseCase
 ) {
     suspend operator fun invoke(
         title: String,
@@ -36,7 +38,7 @@ class CreateHabitUseCase @Inject constructor(
         if (cleanTitle.isEmpty()) return CreateHabitResult.BlankTitle
         if (endDate != null && endDate.isBefore(startDate)) return CreateHabitResult.InvalidDateRange
 
-        val max = premiumGate.maxActiveHabits
+        val max = premiumGate.maxActiveHabits(observePremiumStatus().first())
         if (repository.countActiveHabits() >= max) return CreateHabitResult.LimitReached(max)
 
         val habit = Habit(

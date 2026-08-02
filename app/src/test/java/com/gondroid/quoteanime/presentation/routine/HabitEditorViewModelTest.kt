@@ -8,9 +8,11 @@ import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.usecase.CreateHabitResult
 import com.gondroid.quoteanime.domain.usecase.CreateHabitUseCase
 import com.gondroid.quoteanime.domain.usecase.GetHabitTemplatesUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitResult
 import com.gondroid.quoteanime.domain.usecase.UpdateHabitUseCase
 import com.gondroid.quoteanime.notification.HabitReminderScheduler
+import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import com.gondroid.quoteanime.util.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -50,6 +52,8 @@ class HabitEditorViewModelTest {
     private lateinit var updateHabit: UpdateHabitUseCase
     private lateinit var repository: HabitRepository
     private lateinit var reminderScheduler: HabitReminderScheduler
+    private lateinit var routineWidgetScheduler: RoutineWidgetScheduler
+    private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private lateinit var analytics: RoutineAnalytics
 
     private val today = LocalDate.parse("2026-07-25")
@@ -66,6 +70,8 @@ class HabitEditorViewModelTest {
         updateHabit = updateHabit,
         repository = repository,
         reminderScheduler = reminderScheduler,
+        routineWidgetScheduler = routineWidgetScheduler,
+        observePremiumStatus = observePremiumStatus,
         analytics = analytics,
         clock = fixedClock
     )
@@ -77,8 +83,11 @@ class HabitEditorViewModelTest {
         updateHabit = mockk()
         repository = mockk()
         reminderScheduler = mockk(relaxed = true)
+        routineWidgetScheduler = mockk(relaxed = true)
+        observePremiumStatus = mockk()
         analytics = mockk(relaxed = true)
         every { getTemplates() } returns flowOf(DefaultHabitTemplates.ALL)
+        every { observePremiumStatus() } returns flowOf(false)
     }
 
     @Test

@@ -64,7 +64,8 @@ class RoutineContentUiTest {
                     onEditHabit = {},
                     onOpenHabitDetail = {},
                     onMessageShown = {},
-                    onIntroDismissed = {}
+                    onIntroDismissed = {},
+                    onNavigateToPaywall = {}
                 )
             }
         }
@@ -119,7 +120,7 @@ class RoutineContentUiTest {
             )
         )
 
-        // The FAB is not composed at all when the limit is reached, so the node must not exist
-        composeRule.onNodeWithTag("add_habit_fab").assertDoesNotExist()
+        // The button is not composed at all when the limit is reached, so the node must not exist
+        composeRule.onNodeWithTag("add_habit_button").assertDoesNotExist()
     }
 }

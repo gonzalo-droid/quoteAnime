@@ -29,7 +29,8 @@ data class HabitEditorUiState(
     val reminderTime: LocalTime = LocalTime.of(8, 0),
     val reminderDays: Set<DayOfWeek> = DayOfWeek.entries.toSet(),
     val error: HabitEditorError? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val isPremium: Boolean = false
 ) {
     val isEditing: Boolean get() = habitId != null
 }

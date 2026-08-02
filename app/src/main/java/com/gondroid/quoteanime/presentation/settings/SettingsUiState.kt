@@ -16,7 +16,8 @@ data class SettingsUiState(
     val widgetSize: WidgetSize = WidgetSize.MEDIUM,
     val widgetUpdateTimesPerDay: Int = 2,
     val isLoading: Boolean = true,
-    val permissionDeniedPermanently: Boolean = false
+    val permissionDeniedPermanently: Boolean = false,
+    val isPremium: Boolean = false
 ) {
     val allCategoriesSelected: Boolean get() = selectedCategoryIds.isEmpty()
 

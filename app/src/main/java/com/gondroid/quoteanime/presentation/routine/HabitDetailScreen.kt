@@ -54,12 +54,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.StreakState
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -459,5 +462,60 @@ private fun SquareIconButton(
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
     ) {
         Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(18.dp))
+    }
+}
+
+private fun previewDetailState(archived: Boolean = false): HabitDetailUiState {
+    val today = LocalDate.now()
+    return HabitDetailUiState(
+        habit = Habit(
+            id = "h1",
+            title = "Entrenar",
+            description = "20 minutos de cardio, todos los días.",
+            iconKey = "dumbbell",
+            colorIndex = 0,
+            startDate = today.minusMonths(3),
+            isArchived = archived
+        ),
+        completions = setOf(today, today.minusDays(1), today.minusDays(3), today.minusDays(4)),
+        streak = StreakState(current = 4, best = 14, lastCompletedDate = today, completedToday = true),
+        visibleMonth = java.time.YearMonth.from(today),
+        isLoading = false
+    )
+}
+
+@Preview(name = "Active habit", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitDetailContentActivePreview() {
+    QuoteAnimeTheme {
+        HabitDetailContent(
+            state = previewDetailState(),
+            onNavigateBack = {},
+            onEditHabit = {},
+            onDayClick = {},
+            onMonthChanged = {},
+            onArchive = {},
+            onUnarchive = {},
+            onDelete = {},
+            onMessageShown = {}
+        )
+    }
+}
+
+@Preview(name = "Archived habit", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitDetailContentArchivedPreview() {
+    QuoteAnimeTheme {
+        HabitDetailContent(
+            state = previewDetailState(archived = true),
+            onNavigateBack = {},
+            onEditHabit = {},
+            onDayClick = {},
+            onMonthChanged = {},
+            onArchive = {},
+            onUnarchive = {},
+            onDelete = {},
+            onMessageShown = {}
+        )
     }
 }

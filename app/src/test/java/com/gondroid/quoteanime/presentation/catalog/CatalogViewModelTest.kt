@@ -6,6 +6,7 @@ import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetFavoriteQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetQuotesByCategoryUseCase
+import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
 import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.navigation.Screen
@@ -60,6 +61,7 @@ class CatalogViewModelTest {
     private lateinit var getQuotesByCategory: GetQuotesByCategoryUseCase
     private lateinit var getFavoriteQuotes: GetFavoriteQuotesUseCase
     private lateinit var toggleFavorite: ToggleFavoriteUseCase
+    private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private lateinit var shareInterstitialManager: ShareInterstitialManager
 
     private val narutoQuotes = listOf(
@@ -82,11 +84,13 @@ class CatalogViewModelTest {
         getQuotesByCategory = mockk()
         getFavoriteQuotes = mockk()
         toggleFavorite = mockk()
+        observePremiumStatus = mockk()
         shareInterstitialManager = mockk(relaxed = true)
 
         every { getAllQuotes() } returns flowOf(emptyList())
         every { getQuotesByCategory(any()) } returns flowOf(emptyList())
         every { getFavoriteQuotes() } returns flowOf(favoriteQuotes)
+        every { observePremiumStatus() } returns flowOf(false)
     }
 
     private fun buildViewModel(initialCategoryId: String? = null): CatalogViewModel {
@@ -95,7 +99,7 @@ class CatalogViewModelTest {
         )
         return CatalogViewModel(
             savedStateHandle, getAllQuotes, getQuotesByCategory, getFavoriteQuotes, toggleFavorite,
-            shareInterstitialManager
+            observePremiumStatus, shareInterstitialManager
         )
     }
 

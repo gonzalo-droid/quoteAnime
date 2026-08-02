@@ -33,9 +33,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
+import com.gondroid.quoteanime.domain.model.StreakState
+import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -191,5 +195,73 @@ fun HabitCard(
             }
         }
         }
+    }
+}
+
+private fun previewProgress(completedToday: Boolean, archived: Boolean = false): HabitWithProgress {
+    val today = LocalDate.now()
+    return HabitWithProgress(
+        habit = Habit(
+            id = "h1",
+            title = "Entrenar",
+            iconKey = "dumbbell",
+            colorIndex = 0,
+            startDate = today.minusMonths(2),
+            isArchived = archived
+        ),
+        completions = setOf(today, today.minusDays(1), today.minusDays(3)),
+        streak = StreakState(current = 2, best = 11, lastCompletedDate = today, completedToday = completedToday),
+        completionRate = 0.62f
+    )
+}
+
+@Preview(name = "Not completed today", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitCardIncompletePreview() {
+    QuoteAnimeTheme {
+        HabitCard(
+            progress = previewProgress(completedToday = false),
+            today = LocalDate.now(),
+            onToggleToday = {},
+            onToggleDay = {},
+            onEdit = {},
+            onRequestArchive = {},
+            onUnarchive = {},
+            onOpenDetail = {}
+        )
+    }
+}
+
+@Preview(name = "Completed today", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitCardCompletePreview() {
+    QuoteAnimeTheme {
+        HabitCard(
+            progress = previewProgress(completedToday = true),
+            today = LocalDate.now(),
+            onToggleToday = {},
+            onToggleDay = {},
+            onEdit = {},
+            onRequestArchive = {},
+            onUnarchive = {},
+            onOpenDetail = {}
+        )
+    }
+}
+
+@Preview(name = "Archived", showBackground = true, backgroundColor = 0xFF0C0C1E)
+@Composable
+private fun HabitCardArchivedPreview() {
+    QuoteAnimeTheme {
+        HabitCard(
+            progress = previewProgress(completedToday = false, archived = true),
+            today = LocalDate.now(),
+            onToggleToday = {},
+            onToggleDay = {},
+            onEdit = {},
+            onRequestArchive = {},
+            onUnarchive = {},
+            onOpenDetail = {}
+        )
     }
 }

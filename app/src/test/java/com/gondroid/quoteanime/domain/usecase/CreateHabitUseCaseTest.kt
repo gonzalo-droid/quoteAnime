@@ -5,7 +5,9 @@ import com.gondroid.quoteanime.domain.repository.HabitRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coJustRun
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -26,6 +28,7 @@ import java.time.LocalTime
 class CreateHabitUseCaseTest {
 
     private lateinit var repository: HabitRepository
+    private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private lateinit var useCase: CreateHabitUseCase
     private val premiumGate = PremiumGate()
     private val today = LocalDate.parse("2026-07-25")
@@ -33,7 +36,9 @@ class CreateHabitUseCaseTest {
     @Before
     fun setup() {
         repository = mockk()
-        useCase = CreateHabitUseCase(repository, premiumGate)
+        observePremiumStatus = mockk()
+        every { observePremiumStatus() } returns flowOf(false)
+        useCase = CreateHabitUseCase(repository, premiumGate, observePremiumStatus)
     }
 
     private suspend fun create(
