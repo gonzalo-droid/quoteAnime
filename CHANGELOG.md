@@ -5,6 +5,95 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+Everything below shipped after 1.1.5 but hasn't been tagged with a new `versionName` yet —
+grouped by feature area since it's too large to read commit-by-commit. The single biggest
+addition is **Mi Rutina**, a full habit-tracker feature that didn't exist in any prior release.
+
+### Added — Mi Rutina (habit tracker)
+- **Hábitos**: crear, editar, archivar/restaurar y borrar (permanente, con cascada a los
+  cumplimientos) — todas las acciones destructivas piden confirmación primero
+- **Sugerencias 100% temáticas**: 5 plantillas basadas en anime (Camino ninja, Buscar el One
+  Piece, Sé un saiyan, Sé un maestro Pokémon, Sé el Rey Mago), cada una con imagen de portada,
+  color e ícono; la primera sugerencia disponible se auto-selecciona al crear un hábito nuevo
+- **Racha y heatmap**: racha actual + récord (`CalculateStreakUseCase`), heatmap estilo GitHub
+  de 17 semanas en la card compacta y de 26 semanas con etiquetas de día/mes en el detalle
+- **Calendario mensual**: vista alternativa de un mes completo con los mismos datos que el heatmap
+- **Filtro Activos/Archivados**: tabs en la lista, con estados vacíos que explican qué hace
+  archivar y qué pasa con el historial
+- **Recordatorios por hábito**: notificación programable con acción "Hecho" desde la propia
+  notificación, día(s) de la semana configurables
+- **Selector de íconos**: pantalla completa con 126 íconos en 13 categorías y buscador
+- **Editor**: 14 colores, campo de descripción, fecha con formato dd/mm/aaaa, tarjeta de
+  recordatorio, vista previa temática con imagen de portada
+- **Onboarding**: 4ta página para elegir el primer hábito, mismo estilo visual (fondo, dots,
+  botón) que las 3 páginas de frases — antes era un formulario plano sin continuidad visual
+- **Widget "Mi rutina" (resumen)**: todos los hábitos activos con racha y check de "hoy" en un
+  solo widget; toca para abrir la pantalla de Rutina
+- **Widget por hábito**: heatmap individual de 9 semanas; al agregarlo, una pantalla de
+  configuración nueva (la primera de este tipo en la app) deja elegir qué hábito seguir en esa
+  instancia — se pueden agregar varios, uno por hábito
+- Ambos widgets se refrescan al instante al marcar/crear/editar/archivar/borrar un hábito desde
+  la app, además de un refresco diario de respaldo
+- Medición de eventos con Firebase Analytics (`RoutineAnalytics`): apertura de tab, hábito
+  creado/completado/archivado, racha rota/hito alcanzado
+- Español e inglés en toda la feature
+
+### Added — Premium (suscripción)
+- **Paywall**: pantalla con 3 beneficios — hábitos ilimitados, sin anuncios, temas exclusivos —
+  y botón de "Suscribirme"
+- **Entitlement local**: flag booleano en DataStore (`ObservePremiumStatusUseCase` /
+  `SetPremiumStatusUseCase`) — pre-billing a propósito: cuando se integre Google Play Billing
+  real, solo cambia el call-site del botón "Suscribirme", ningún lector del flag
+- **Hábitos ilimitados**: el límite gratuito (3 hábitos activos) se levanta reactivamente al
+  activar premium, en toda la app
+- **Sin anuncios**: el banner del detalle de frase (Catálogo) se oculta si sos premium
+- **Temas exclusivos**: las sugerencias de Pokémon y Black Clover quedan bloqueadas para
+  usuarios gratuitos (con candado en el chip); tocarlas abre el paywall en vez de seleccionarlas
+- Puntos de entrada al paywall: fila en Ajustes, mensaje de "límite alcanzado" en Mi Rutina, y
+  tocar una sugerencia bloqueada (editor u onboarding)
+
+### Fixed
+- Menú de "Editar/Archivar" (⋮ en la card de hábito) se desplazaba lejos del ícono en vez de
+  anclarse debajo — el `DropdownMenu` no estaba envuelto junto a su `IconButton` en un `Box`
+  propio, que es el patrón que Compose necesita para anclarlo correctamente
+- Fondo de los grupos con borde redondeado del editor (fechas, recordatorio) mostraba un
+  parche de color distinto en las esquinas — `ListItem` usa `colorScheme.surface` por defecto,
+  que no coincide con el fondo del sheet; se corrigió con `clip()` + `ListItem` transparente
+- Los chips de filtro "Activos/Archivados" cambiaban de posición al pasar de una pestaña vacía
+  a una con hábitos (padding inconsistente entre el estado vacío y la lista poblada)
+- Condición de carrera en el auto-select del onboarding: el estado premium se leía de un flow
+  separado que podía no haber emitido todavía, así que un usuario premium a veces veía la
+  primera sugerencia bloqueada como si fuera gratis
+- Botón de cerrar del detalle de hábito quedaba fuera de pantalla por falta de `weight(1f)`
+  en la fila de ícono+título
+- Migración destructiva de Room acotada a esquemas pre-v4 únicamente (no borraba datos en
+  actualizaciones posteriores)
+- Fugas de accesibilidad: heatmap y selectores de ícono/color sin semántica para lectores de
+  pantalla
+
+### Changed
+- Botón "Añadir hábito" movido del FAB flotante a una acción en el `TopAppBar` de Mi Rutina
+- Todos los modales de Mi Rutina unificados: título a la izquierda, botón de cerrar a la
+  derecha; detalle de hábito ahora es un bottom sheet fullscreen deslizable en vez de una
+  pantalla con push/pop
+- Copys de estado vacío reescritos (Activos: más motivacional; Archivados: explica qué implica
+  archivar antes de decir "no tenés ninguno")
+- Navegación por barra inferior con tab de Mi Rutina; recordatorio de hábito y widgets abren
+  la app directo en esa pantalla
+
+### Technical
+- Room v5: `HabitEntity`, `HabitCompletionEntity` (con `ForeignKey CASCADE`), `HabitDao`,
+  `HabitCompletionDao`
+- 24 use cases en `domain/usecase/` (uno por clase), incluyendo los nuevos de Premium
+- `HabitTemplate.isPremiumOnly` + campo homónimo en el DTO remoto (`/habitTemplates`)
+- +130 tests unitarios nuevos (viewmodels, use cases, DAO) — 229 tests unitarios en total
+- Compose `@Preview` agregado a cada vista del paquete `routine/` (múltiples estados: vacío,
+  poblado, error, archivado, límite alcanzado)
+
+---
+
 ## [1.1.5] - 2026-04-23
 
 ### Added

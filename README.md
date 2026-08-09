@@ -4,13 +4,13 @@ Aplicación Android de frases motivacionales de anime. Experiencia inmersiva, di
 
 ## Screenshots
 
-> _Agregar capturas de HomeScreen, Onboarding, CatalogScreen y Widget_
+> _Agregar capturas de HomeScreen, Onboarding, CatalogScreen, Mi Rutina, Paywall y los 3 widgets_
 
 ---
 
 ## Descripción
 
-Quote Anime muestra frases de tus series favoritas con una experiencia de lectura inmersiva. Desliza verticalmente entre frases, guarda tus favoritas, recibe notificaciones en tu horario y coloca un widget en tu pantalla de inicio.
+Quote Anime muestra frases de tus series favoritas con una experiencia de lectura inmersiva. Desliza verticalmente entre frases, guarda tus favoritas, recibe notificaciones en tu horario y coloca un widget en tu pantalla de inicio. También incluye **Mi Rutina**, un habit tracker temático (heatmap tipo GitHub, rachas, recordatorios y sugerencias 100% basadas en anime) con un nivel **Premium** que desbloquea hábitos ilimitados, elimina anuncios y da acceso a temas exclusivos.
 
 ---
 
@@ -21,13 +21,16 @@ Quote Anime muestra frases de tus series favoritas con una experiencia de lectur
 | **Frases full-screen** | `VerticalPager` con gradientes únicos por página |
 | **Favoritos** | Guardado local en Room, accesible desde Catalog |
 | **Explorar** | Filtro por anime con scroll horizontal |
-| **Notificaciones** | Rango horario configurable, frecuencia 1–10×/día |
-| **Widget** | Responsive (Small/Medium/Large), se adapta al tamaño físico |
-| **Compartir** | Comparte cualquier frase con un toque |
-| **Onboarding** | 3 pantallas con imágenes, solo en el primer arranque |
+| **Notificaciones de frases** | Rango horario configurable, frecuencia 1–10×/día |
+| **Widget de frases** | Responsive (Small/Medium/Large), se adapta al tamaño físico |
+| **Compartir** | Comparte cualquier frase como imagen con un toque |
+| **Mi Rutina (habit tracker)** | Crear/editar hábitos con sugerencias temáticas (ninja, One Piece, saiyan, Pokémon, Black Clover), heatmap de 17 semanas, racha actual/récord, calendario mensual, archivar/restaurar/borrar con confirmación, recordatorios por hábito |
+| **Widgets de Mi Rutina** | Widget resumen (todos los hábitos activos) + widget individual por hábito (heatmap propio, se elige el hábito al agregarlo) |
+| **Premium** | Hábitos ilimitados, sin anuncios, temas exclusivos — paywall con activación local (pendiente de Google Play Billing real) |
+| **Onboarding** | 4 páginas (3 de frases + selección de primer hábito), solo en el primer arranque |
 | **Splash** | Logo animado + transición suave |
 | **Dark theme** | Siempre oscuro, sin dynamic color |
-| **AdMob** | Banner en HomeScreen |
+| **AdMob** | Banner + intersticial al compartir (ocultos si sos Premium) |
 
 ---
 
@@ -37,12 +40,12 @@ Quote Anime muestra frases de tus series favoritas con una experiencia de lectur
 - **UI**: Jetpack Compose + Material3
 - **Arquitectura**: Clean Architecture + MVVM
 - **DI**: Hilt
-- **Base de datos local**: Room (favoritos)
-- **Preferencias**: DataStore
-- **Remote**: Firebase Realtime Database
-- **Widget**: Glance API
-- **Notificaciones**: WorkManager + NotificationCompat
-- **Publicidad**: Google AdMob
+- **Base de datos local**: Room v5 (favoritos + hábitos/completions, con `ForeignKey CASCADE`)
+- **Preferencias**: DataStore (incluye el flag local de entitlement Premium)
+- **Remote**: Firebase Realtime Database (`/quotes`, `/imagenes`, `/habitTemplates`)
+- **Widgets**: Glance API — 3 widgets (frase, resumen de rutina, hábito individual)
+- **Notificaciones**: WorkManager + NotificationCompat (frases + recordatorios por hábito)
+- **Publicidad**: Google AdMob (banner + intersticial), gateado por Premium
 - **minSdk**: 24 | **targetSdk**: 36
 
 ---
@@ -53,26 +56,48 @@ Quote Anime muestra frases de tus series favoritas con una experiencia de lectur
 com.gondroid.quoteanime/
 ├── data/
 │   ├── local/
-│   │   ├── db/              # Room: FavoriteQuoteEntity, FavoriteQuoteDao, AppDatabase v2
-│   │   └── datastore/       # UserPreferencesDataStore
-│   ├── remote/              # QuoteRemoteDataSource (Firebase RTDB callbackFlow)
-│   └── repository/          # QuoteRepositoryImpl, UserPreferencesRepositoryImpl
+│   │   ├── db/                     # Room v5
+│   │   │   ├── dao/                #   FavoriteQuoteDao, HabitDao, HabitCompletionDao
+│   │   │   └── entity/              #   FavoriteQuoteEntity, HabitEntity, HabitCompletionEntity
+│   │   └── datastore/               # UserPreferencesDataStore (prefs + flag Premium local)
+│   ├── remote/                      # QuoteRemoteDataSource, HabitTemplateRemoteDataSource
+│   │                                 #   (Firebase RTDB callbackFlow) + dto/
+│   └── repository/                  # QuoteRepositoryImpl, UserPreferencesRepositoryImpl,
+│                                     #   HabitRepositoryImpl
 ├── domain/
-│   ├── model/               # Quote, Category, UserPreferences, WidgetSize
-│   ├── repository/          # Interfaces
-│   └── usecase/             # Un use case por clase
+│   ├── model/                       # Quote, Category, UserPreferences, WidgetSize,
+│   │                                 #   Habit, HabitTemplate, HabitWithProgress, StreakState
+│   ├── repository/                  # Interfaces (Quote/UserPreferences/Habit)
+│   └── usecase/                     # Un use case por clase (24): frases, hábitos
+│                                     #   (Create/Update/Archive/Unarchive/Delete/Toggle),
+│                                     #   rachas, plantillas, onboarding y Premium
+│                                     #   (ObservePremiumStatus/SetPremiumStatus)
 ├── presentation/
-│   ├── splash/              # SplashScreen + SplashViewModel
-│   ├── onboarding/          # OnboardingScreen + OnboardingViewModel
-│   ├── home/                # HomeScreen + HomeViewModel
-│   ├── catalog/             # CatalogScreen + CatalogViewModel
-│   ├── settings/            # SettingsScreen + SettingsViewModel
-│   ├── components/          # QuoteCard, BannerAd
-│   └── navigation/          # AppNavGraph, Screen sealed class
-├── worker/                  # QuoteNotificationWorker, UpdateQuoteWidgetWorker
-├── widget/                  # QuoteWidget (Glance), QuoteWidgetReceiver
-├── notification/            # NotificationHelper, NotificationScheduler, WidgetScheduler
-└── di/                      # AppModule, DatabaseModule, RepositoryModule
+│   ├── splash/                      # SplashScreen + SplashViewModel
+│   ├── onboarding/                  # OnboardingScreen (4 páginas) + OnboardingViewModel
+│   ├── home/                        # HomeScreen + HomeViewModel
+│   ├── catalog/                     # CatalogScreen + CatalogViewModel
+│   ├── settings/                    # SettingsScreen + SettingsViewModel (incluye fila Premium)
+│   ├── routine/                     # "Mi Rutina": RoutineScreen/ViewModel, HabitCard,
+│   │                                 #   HabitEditorSheet, HabitIconPicker, HabitDetailScreen
+│   │                                 #   (heatmap + calendario), HabitHeatmap/HeatmapGrid,
+│   │                                 #   HabitPalette/HabitIcons/HabitThemeImages
+│   ├── subscription/                # PaywallScreen + PaywallViewModel
+│   ├── widget/                      # HabitWidgetConfigureActivity — elige el hábito de
+│   │                                 #   una instancia del widget individual
+│   ├── components/                  # QuoteCard, BannerAd
+│   └── navigation/                  # AppNavGraph, Screen sealed class
+├── worker/                          # QuoteNotificationWorker, HabitReminderWorker,
+│                                     #   UpdateQuoteWidgetWorker, UpdateRoutineSummaryWidgetWorker,
+│                                     #   UpdateHabitWidgetWorker
+├── widget/                          # 3 widgets Glance:
+│                                     #   QuoteWidget, RoutineSummaryWidget, HabitWidget
+│                                     #   (+ sus *Receiver y *State)
+├── notification/                    # NotificationHelper, NotificationScheduler,
+│                                     #   HabitReminderScheduler, WidgetScheduler,
+│                                     #   RoutineWidgetScheduler, NextReminderCalculator
+├── analytics/                       # RoutineAnalytics (Firebase Analytics)
+└── di/                              # AppModule, DatabaseModule, RepositoryModule, PremiumGate
 ```
 
 ---
@@ -85,9 +110,17 @@ com.gondroid.quoteanime/
   ├── quote:  String
   ├── author: String
   └── anime:  String
+
+/habitTemplates/{id}          # opcional — sobreescribe DefaultHabitTemplates.ALL si existe
+  ├── title:            String   # clave de string-resource, ej. "template_theme_ninja"
+  ├── iconKey:           String
+  ├── order:             Int
+  ├── themeColorIndex:    Int?     # índice en HabitPalette.COLORS
+  ├── themeKey:           String?  # resuelve imagen + descripción vía HabitThemeImages
+  └── isPremiumOnly:      Boolean  # default false si el nodo no existe
 ```
 
-> Las categorías se derivan dinámicamente de los valores únicos del campo `anime`.
+> Las categorías de frases se derivan dinámicamente de los valores únicos del campo `anime`. Si `/habitTemplates` está vacío o no existe, el editor de hábitos cae en el fallback local `DefaultHabitTemplates.ALL` (5 temas: ninja, One Piece, saiyan, Pokémon, Black Clover — los últimos dos exclusivos Premium).
 
 ---
 
@@ -96,12 +129,19 @@ com.gondroid.quoteanime/
 ```
 App abre
  └── Splash (2s, logo animado)
-      ├── Primera vez → Onboarding (3 páginas) → Home
+      ├── Primera vez → Onboarding (3 páginas de frases + selección de primer hábito) → Home
       └── Ya visto    → Home
-           └── Catalog (filtro por anime o favoritos)
-           └── Settings (notificaciones, widget)
+           ├── Catalog (filtro por anime o favoritos)
+           ├── Settings (notificaciones, widget, fila Premium)
+           │    └── Paywall (beneficios + activación local, pre-billing)
+           └── Mi Rutina (lista de hábitos, tabs Activos/Archivados)
+                ├── Habit Editor (crear/editar, bottom sheet fullscreen)
+                ├── Habit Detail (heatmap grande + calendario, bottom sheet fullscreen)
+                └── Paywall (al tocar una sugerencia temática bloqueada)
 
-Widget tap → Home (scroll a la quote del widget)
+Widget de frase tap        → Home (scroll a la quote del widget)
+Widgets de Mi Rutina tap   → Mi Rutina
+Recordatorio de hábito tap → Mi Rutina
 ```
 
 ---
@@ -143,7 +183,7 @@ Estructura de datos mínima en RTDB:
 ./gradlew build                # Build completo
 ./gradlew assembleDebug        # APK debug
 ./gradlew assembleRelease      # APK release
-./gradlew test                 # Tests unitarios
+./gradlew test                 # Tests unitarios (229 tests)
 ./gradlew connectedAndroidTest # Tests instrumentados (requiere dispositivo/emulador)
 ```
 
@@ -167,8 +207,13 @@ El archivo `privacy-policy.html` en la raíz del proyecto contiene la política 
 
 ## Versiones
 
+Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
+
 | Versión | Descripción |
 |---|---|
+| Unreleased | Widgets de Mi Rutina (resumen + por hábito), suscripción Premium (paywall, hábitos ilimitados, sin anuncios, temas exclusivos), rediseño de onboarding |
+| 1.1.5 | Tipografía Google Fonts, compartir la app, redes sociales, términos y condiciones |
+| — | *(1.1.5 es la última versión publicada; **Mi Rutina** — habit tracker completo — se construyó después y todavía no tiene un `versionName` propio, ver Unreleased)* |
 | 1.0.0 | Lanzamiento inicial |
 
 ---
