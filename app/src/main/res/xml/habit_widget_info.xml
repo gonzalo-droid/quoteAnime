@@ -11,7 +11,8 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
-    android:previewLayout="@layout/habit_widget_preview" />
+    android:previewLayout="@layout/habit_widget_preview"
+    android:previewImage="@drawable/widget_preview_fallback" />
 <!--
     android:configure launches HabitWidgetConfigureActivity right after the widget is
     dropped on the home screen, so the user picks which habit THIS instance tracks —

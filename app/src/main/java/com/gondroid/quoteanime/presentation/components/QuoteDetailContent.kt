@@ -69,7 +69,7 @@ fun QuoteDetailContent(
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(
-                    quote.imageUrl.takeIf { !it.isNullOrBlank() }
+                    quote.imageUrl?.takeIf { it.isNotBlank() }?.optimizedForDisplay()
                         ?: R.drawable.onboarding_02
                 )
                 .crossfade(true)
@@ -77,6 +77,7 @@ fun QuoteDetailContent(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
+            placeholder = painterResource(R.drawable.onboarding_02),
             error = painterResource(R.drawable.onboarding_02),
             fallback = painterResource(R.drawable.onboarding_02)
         )

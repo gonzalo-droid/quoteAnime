@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    android:previewImage fallback for the widget picker. android:previewLayout (used by all
+    3 widget-info XMLs) only renders on API 31+, and even there several OEM launchers (MIUI
+    included) don't reliably honor it — previewImage is the older, more universally-supported
+    attribute, so every widget gets one as a safety net. Shared across the 3 widgets since a
+    real per-widget screenshot isn't available yet; swap in an actual screenshot per widget
+    once one can be captured from a device.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#2A1052"
+                android:centerColor="#150930"
+                android:endColor="#0A0614"
+                android:angle="270" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item
+        android:width="96dp"
+        android:height="96dp"
+        android:gravity="center">
+        <bitmap
+            android:src="@drawable/logo_quoteanime_white"
+            android:gravity="center" />
+    </item>
+</layer-list>

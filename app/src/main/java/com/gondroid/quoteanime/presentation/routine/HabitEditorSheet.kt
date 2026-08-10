@@ -45,6 +45,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
@@ -78,6 +79,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -737,20 +739,37 @@ private fun TimePickerModal(
         initialMinute = initialTime.minute,
         is24Hour = true
     )
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onTimeSelected(LocalTime.of(pickerState.hour, pickerState.minute))
-            }) { Text(stringResource(R.string.habit_editor_save)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.habit_editor_cancel))
+    // DatePickerDialog assumes a DatePicker's own built-in surface — reusing it to host a
+    // TimePicker (which brings no background of its own) left the dialog with no opaque
+    // card behind it, so the form underneath showed through. A plain Dialog + Surface is
+    // the pattern Material3's own TimePicker docs use for exactly this case.
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TimePicker(state = pickerState)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.habit_editor_cancel))
+                    }
+                    TextButton(onClick = {
+                        onTimeSelected(LocalTime.of(pickerState.hour, pickerState.minute))
+                    }) { Text(stringResource(R.string.habit_editor_save)) }
+                }
             }
         }
-    ) {
-        TimePicker(state = pickerState)
     }
 }
 
