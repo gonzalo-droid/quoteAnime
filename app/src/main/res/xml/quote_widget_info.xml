@@ -10,7 +10,8 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
-    android:previewLayout="@layout/widget_preview" />
+    android:previewLayout="@layout/widget_preview"
+    android:previewImage="@drawable/widget_preview_fallback" />
 <!--
     updatePeriodMillis="0" → Android no dispara actualizaciones automáticas.
     Todas las actualizaciones las gestiona WorkManager (UpdateQuoteWidgetWorker).

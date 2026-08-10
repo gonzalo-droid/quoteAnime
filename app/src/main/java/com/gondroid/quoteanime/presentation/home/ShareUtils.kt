@@ -12,10 +12,11 @@ import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import coil.ImageLoader
+import coil.imageLoader
 import coil.request.ImageRequest
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.presentation.components.optimizedForDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -42,12 +43,14 @@ suspend fun createShareBitmap(quote: Quote, context: Context): Bitmap {
 private suspend fun loadBackgroundBitmap(context: Context, imageUrl: String?): Bitmap? {
     if (imageUrl.isNullOrBlank()) return null
     return runCatching {
-        val loader = ImageLoader(context)
+        // Reuses Coil's singleton loader (same one QuoteDetailContent's AsyncImage uses)
+        // instead of a throwaway ImageLoader(context) — shares its disk cache, so sharing
+        // a quote right after viewing it doesn't re-download the image from Cloudinary.
         val request = ImageRequest.Builder(context)
-            .data(imageUrl)
+            .data(imageUrl.optimizedForDisplay())
             .allowHardware(false) // Required to manipulate the bitmap on canvas
             .build()
-        (loader.execute(request).drawable as? BitmapDrawable)?.bitmap
+        (context.imageLoader.execute(request).drawable as? BitmapDrawable)?.bitmap
     }.getOrNull()
 }
 

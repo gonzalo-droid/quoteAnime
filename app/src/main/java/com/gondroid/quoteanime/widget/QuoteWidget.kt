@@ -2,6 +2,8 @@ package com.gondroid.quoteanime.widget
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.Icon
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
@@ -75,6 +78,12 @@ class QuoteWidget : GlanceAppWidget() {
         val quoteAnime  = prefs[QuoteWidgetState.QUOTE_ANIME]  ?: ""
         val isLoading   = prefs[QuoteWidgetState.IS_LOADING]   ?: true
         val hasError    = prefs[QuoteWidgetState.HAS_ERROR]    ?: false
+        // Glance's ImageProvider has no direct Uri overload — Icon.createWithContentUri is
+        // the documented path for a content:// image (same one RemoteViews grants the
+        // launcher process read access to automatically, no manual permission grant needed).
+        val backgroundProvider = prefs[QuoteWidgetState.BACKGROUND_IMAGE_URI]?.let { uriString ->
+            runCatching { ImageProvider(Icon.createWithContentUri(Uri.parse(uriString))) }.getOrNull()
+        }
 
         // Physical size reported by the launcher
         val size = LocalSize.current
@@ -93,28 +102,49 @@ class QuoteWidget : GlanceAppWidget() {
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(ImageProvider(R.drawable.widget_bg))
                 .cornerRadius(20.dp)
                 .clickable(actionStartActivity(openIntent))
-                .padding(
-                    horizontal = if (isSmall) 12.dp else 16.dp,
-                    vertical   = if (isSmall) 10.dp else 14.dp
-                ),
-            contentAlignment = Alignment.Center
         ) {
-            when {
-                isLoading -> LoadingContent()
-                hasError  -> ErrorContent()
-                isLarge   -> LargeQuoteContent(
-                    text   = quoteText  ?: "",
-                    author = quoteAuthor ?: "",
-                    anime  = quoteAnime
+            // Background layer: the quote's own photo (cropped full-bleed, like the app's
+            // full-screen detail view) when one downloaded successfully, otherwise the
+            // plain gradient this widget always used.
+            if (backgroundProvider != null) {
+                Image(
+                    provider = backgroundProvider,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = GlanceModifier.fillMaxSize()
                 )
-                isSmall   -> SmallQuoteContent(text = quoteText ?: "")
-                else      -> MediumQuoteContent(
-                    text   = quoteText  ?: "",
-                    author = quoteAuthor ?: ""
-                )
+                // Dark scrim so the quote text stays legible over an arbitrary photo —
+                // mirrors QuoteDetailContent's own overlay treatment in the app.
+                Box(modifier = GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_photo_scrim))) {}
+            } else {
+                Box(modifier = GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_bg))) {}
+            }
+
+            Box(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = if (isSmall) 12.dp else 16.dp,
+                        vertical   = if (isSmall) 10.dp else 14.dp
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isLoading -> LoadingContent()
+                    hasError  -> ErrorContent()
+                    isLarge   -> LargeQuoteContent(
+                        text   = quoteText  ?: "",
+                        author = quoteAuthor ?: "",
+                        anime  = quoteAnime
+                    )
+                    isSmall   -> SmallQuoteContent(text = quoteText ?: "")
+                    else      -> MediumQuoteContent(
+                        text   = quoteText  ?: "",
+                        author = quoteAuthor ?: ""
+                    )
+                }
             }
         }
     }

@@ -143,8 +143,14 @@ private fun HomeContent(
                 // No navigationBarsPadding here on purpose: the background image is meant
                 // to run edge-to-edge behind the system bars, same as the very first version
                 // of this screen — only the floating controls below inset themselves.
+                //
+                // beyondViewportPageCount composes (and so starts loading the Cloudinary
+                // image for) the next/previous page ahead of time — Pager's default is 0,
+                // meaning a swipe used to only kick off that network fetch once the page
+                // became visible, reading as "the image takes forever" on every swipe.
                 VerticalPager(
                     state = pagerState,
+                    beyondViewportPageCount = 1,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     val quote = uiState.quotes[page]
