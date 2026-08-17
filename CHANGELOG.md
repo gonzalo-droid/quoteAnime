@@ -3,9 +3,9 @@
 All notable changes to Quote Anime are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
----
-
 ## [Unreleased]
+
+## [1.2.0]
 
 Everything below shipped after 1.1.5 but hasn't been tagged with a new `versionName` yet —
 grouped by feature area since it's too large to read commit-by-commit. The single biggest
