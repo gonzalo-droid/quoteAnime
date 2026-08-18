@@ -3,7 +3,23 @@
 All notable changes to Quote Anime are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.2.1]
+
+### Added — Google Play Billing real
+- **Integración de `billing-ktx` 9.1.0**: reemplaza el flag mock de Premium por una
+  suscripción real. `BillingRepositoryImpl` consulta `ProductDetails` para el producto
+  `premium_subscription` (todos los base plans/ofertas configurados en Play Console se leen
+  dinámicamente, nada hardcodeado del lado del cliente), lanza el flujo de compra, acknowledgea
+  la compra y actualiza el mismo flag de DataStore que ya leía cada feature gateada — ningún
+  call-site existente (`ObservePremiumStatusUseCase` y sus 6 consumidores) cambió
+- **Paywall con planes reales**: la pantalla ya no tiene un botón "Suscribirme" fijo — muestra
+  la lista de planes disponibles (precio, trial si existe) leída de Play, con selección y
+  feedback de compra pendiente/cancelada/error vía snackbar
+- **Sincronización al iniciar la app**: `RestorePurchasesUseCase` corre en cada arranque
+  (`QuoteAnimeApplication.onCreate`) para detectar una suscripción cancelada o expirada fuera
+  de la app — no hay backend propio, así que la verificación es 100% del lado del cliente
+  (`Purchase.isAcknowledged` + `PurchaseState.PURCHASED`), una limitación consciente
+- Botón "Quitar premium (solo pruebas)" se mantiene, ahora exclusivamente para QA
 
 ## [1.2.0]
 

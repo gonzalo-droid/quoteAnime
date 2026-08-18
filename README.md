@@ -26,7 +26,7 @@ Quote Anime muestra frases de tus series favoritas con una experiencia de lectur
 | **Compartir** | Comparte cualquier frase como imagen con un toque |
 | **Mi Rutina (habit tracker)** | Crear/editar hábitos con sugerencias temáticas (ninja, One Piece, saiyan, Pokémon, Black Clover), heatmap de 17 semanas, racha actual/récord, calendario mensual, archivar/restaurar/borrar con confirmación, recordatorios por hábito |
 | **Widgets de Mi Rutina** | Widget resumen (todos los hábitos activos) + widget individual por hábito (heatmap propio, se elige el hábito al agregarlo) |
-| **Premium** | Hábitos ilimitados, sin anuncios, temas exclusivos — paywall con activación local (pendiente de Google Play Billing real) |
+| **Premium** | Hábitos ilimitados, sin anuncios, temas exclusivos — suscripción real vía Google Play Billing, planes/ofertas leídos dinámicamente desde Play Console |
 | **Onboarding** | 4 páginas (3 de frases + selección de primer hábito), solo en el primer arranque |
 | **Splash** | Logo animado + transición suave |
 | **Dark theme** | Siempre oscuro, sin dynamic color |
@@ -41,8 +41,9 @@ Quote Anime muestra frases de tus series favoritas con una experiencia de lectur
 - **Arquitectura**: Clean Architecture + MVVM
 - **DI**: Hilt
 - **Base de datos local**: Room v5 (favoritos + hábitos/completions, con `ForeignKey CASCADE`)
-- **Preferencias**: DataStore (incluye el flag local de entitlement Premium)
+- **Preferencias**: DataStore (flag de entitlement Premium, sincronizado con Google Play Billing)
 - **Remote**: Firebase Realtime Database (`/quotes`, `/imagenes`, `/habitTemplates`)
+- **Pagos**: Google Play Billing (`billing-ktx` 9.1.0) — suscripción `premium_subscription`, planes/ofertas leídos dinámicamente desde Play Console
 - **Widgets**: Glance API — 3 widgets (frase, resumen de rutina, hábito individual)
 - **Notificaciones**: WorkManager + NotificationCompat (frases + recordatorios por hábito)
 - **Publicidad**: Google AdMob (banner + intersticial), gateado por Premium
@@ -63,15 +64,20 @@ com.gondroid.quoteanime/
 │   ├── remote/                      # QuoteRemoteDataSource, HabitTemplateRemoteDataSource
 │   │                                 #   (Firebase RTDB callbackFlow) + dto/
 │   └── repository/                  # QuoteRepositoryImpl, UserPreferencesRepositoryImpl,
-│                                     #   HabitRepositoryImpl
+│                                     #   HabitRepositoryImpl, BillingRepositoryImpl
+│                                     #   (wraps BillingClient — conexión, query de
+│                                     #   ProductDetails, purchase flow, acknowledge, sync)
 ├── domain/
 │   ├── model/                       # Quote, Category, UserPreferences, WidgetSize,
-│   │                                 #   Habit, HabitTemplate, HabitWithProgress, StreakState
-│   ├── repository/                  # Interfaces (Quote/UserPreferences/Habit)
-│   └── usecase/                     # Un use case por clase (24): frases, hábitos
+│   │                                 #   Habit, HabitTemplate, HabitWithProgress, StreakState,
+│   │                                 #   SubscriptionOffer, BillingPurchaseResult
+│   ├── repository/                  # Interfaces (Quote/UserPreferences/Habit/Billing)
+│   └── usecase/                     # Un use case por clase (28): frases, hábitos
 │                                     #   (Create/Update/Archive/Unarchive/Delete/Toggle),
-│                                     #   rachas, plantillas, onboarding y Premium
-│                                     #   (ObservePremiumStatus/SetPremiumStatus)
+│                                     #   rachas, plantillas, onboarding, Premium
+│                                     #   (ObservePremiumStatus/SetPremiumStatus) y Billing
+│                                     #   (GetSubscriptionOffers/LaunchSubscriptionPurchase/
+│                                     #   ObservePurchaseEvents/RestorePurchases)
 ├── presentation/
 │   ├── splash/                      # SplashScreen + SplashViewModel
 │   ├── onboarding/                  # OnboardingScreen (4 páginas) + OnboardingViewModel
@@ -133,7 +139,7 @@ App abre
       └── Ya visto    → Home
            ├── Catalog (filtro por anime o favoritos)
            ├── Settings (notificaciones, widget, fila Premium)
-           │    └── Paywall (beneficios + activación local, pre-billing)
+           │    └── Paywall (beneficios + planes reales de Google Play Billing)
            └── Mi Rutina (lista de hábitos, tabs Activos/Archivados)
                 ├── Habit Editor (crear/editar, bottom sheet fullscreen)
                 ├── Habit Detail (heatmap grande + calendario, bottom sheet fullscreen)
@@ -211,9 +217,9 @@ Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
 
 | Versión | Descripción |
 |---|---|
-| Unreleased | Widgets de Mi Rutina (resumen + por hábito), suscripción Premium (paywall, hábitos ilimitados, sin anuncios, temas exclusivos), rediseño de onboarding |
+| Unreleased | Integración real de Google Play Billing (`billing-ktx` 9.1.0) — paywall con planes dinámicos desde Play Console, sincronización de entitlement al iniciar la app |
+| 1.2.0 | Widgets de Mi Rutina (resumen + por hábito), suscripción Premium (paywall, hábitos ilimitados, sin anuncios, temas exclusivos, entitlement local pre-billing), rediseño de onboarding |
 | 1.1.5 | Tipografía Google Fonts, compartir la app, redes sociales, términos y condiciones |
-| — | *(1.1.5 es la última versión publicada; **Mi Rutina** — habit tracker completo — se construyó después y todavía no tiene un `versionName` propio, ver Unreleased)* |
 | 1.0.0 | Lanzamiento inicial |
 
 ---
