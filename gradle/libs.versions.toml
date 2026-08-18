@@ -23,6 +23,7 @@ playReview = "2.0.2"
 coil = "2.7.0"
 playUpdate = "2.1.0"
 coreSplashscreen = "1.0.1"
+billing = "9.1.0"
 
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -91,6 +92,7 @@ play-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", 
 play-update = { group = "com.google.android.play", name = "app-update", version.ref = "playUpdate" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

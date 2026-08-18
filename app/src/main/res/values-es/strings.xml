@@ -343,10 +343,15 @@
     <string name="paywall_benefit_themes_title">Temas exclusivos</string>
     <string name="paywall_benefit_themes_body">Accedé a colecciones temáticas exclusivas, como Pokémon y Black Clover.</string>
     <string name="paywall_subscribe">Suscribirme</string>
-    <string name="paywall_disclaimer">Activación de prueba — la suscripción real llega pronto.</string>
+    <string name="paywall_disclaimer">Cancelá cuando quieras desde Google Play.</string>
     <string name="paywall_already_premium">✨ Ya sos premium</string>
     <string name="paywall_remove_debug">Quitar premium (solo pruebas)</string>
     <string name="paywall_locked_template_cd">Sugerencia exclusiva para premium</string>
+    <string name="paywall_offers_unavailable">Los planes de suscripción no están disponibles en este momento. Probá de nuevo más tarde.</string>
+    <string name="paywall_free_trial">%1$d días de prueba gratis</string>
+    <string name="paywall_purchase_pending">Tu compra está pendiente — vamos a desbloquear premium apenas se complete.</string>
+    <string name="paywall_purchase_cancelled">Compra cancelada.</string>
+    <string name="paywall_purchase_error">Algo salió mal con la compra. Probá de nuevo.</string>
     <string name="settings_premium_title">Premium</string>
     <string name="settings_premium_subtitle_free">Hábitos ilimitados, sin anuncios y temas exclusivos</string>
     <string name="settings_premium_subtitle_active">Activo ✨</string>

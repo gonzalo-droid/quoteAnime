@@ -120,6 +120,9 @@ dependencies {
     // Coil (image loading)
     implementation(libs.coil.compose)
 
+    // Billing
+    implementation(libs.billing.ktx)
+
     // Test
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
