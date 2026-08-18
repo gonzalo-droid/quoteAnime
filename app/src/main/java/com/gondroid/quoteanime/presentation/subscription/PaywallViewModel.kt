@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.domain.model.BillingPurchaseResult
+import com.gondroid.quoteanime.domain.usecase.GetManageSubscriptionUrlUseCase
 import com.gondroid.quoteanime.domain.usecase.GetSubscriptionOffersUseCase
 import com.gondroid.quoteanime.domain.usecase.LaunchSubscriptionPurchaseUseCase
 import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
@@ -23,10 +24,13 @@ class PaywallViewModel @Inject constructor(
     private val setPremiumStatus: SetPremiumStatusUseCase,
     private val getSubscriptionOffers: GetSubscriptionOffersUseCase,
     private val launchSubscriptionPurchase: LaunchSubscriptionPurchaseUseCase,
-    private val observePurchaseEvents: ObservePurchaseEventsUseCase
+    private val observePurchaseEvents: ObservePurchaseEventsUseCase,
+    getManageSubscriptionUrl: GetManageSubscriptionUrlUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PaywallUiState())
+    private val _uiState = MutableStateFlow(
+        PaywallUiState(manageSubscriptionUrl = getManageSubscriptionUrl())
+    )
     val uiState: StateFlow<PaywallUiState> = _uiState.asStateFlow()
 
     init {
@@ -67,6 +71,11 @@ class PaywallViewModel @Inject constructor(
     fun onSubscribe(activity: Activity) {
         val offer = _uiState.value.selectedOffer ?: return
         launchSubscriptionPurchase(activity, offer)
+    }
+
+    /** No Play Store on the device (some emulators, sideloaded builds) — the deep link is dead. */
+    fun onManageSubscriptionUnavailable() {
+        _uiState.update { it.copy(message = PaywallMessage.MANAGE_UNAVAILABLE) }
     }
 
     fun onMessageShown() {

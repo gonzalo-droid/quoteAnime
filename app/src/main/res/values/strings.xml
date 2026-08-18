@@ -356,4 +356,16 @@
     <string name="settings_premium_subtitle_free">Unlimited habits, no ads, and exclusive themes</string>
     <string name="settings_premium_subtitle_active">Active ✨</string>
     <string name="routine_limit_reached_upgrade">Upgrade to premium</string>
+
+    <!-- Subscription management / retention -->
+    <string name="paywall_manage_subscription">Manage subscription</string>
+    <string name="paywall_manage_unavailable">Google Play isn\'t available on this device.</string>
+    <string name="cancel_sheet_title">Sure you want to cancel?</string>
+    <string name="cancel_sheet_intro">If you cancel, you\'ll lose these when your current period ends:</string>
+    <string name="cancel_sheet_loss_habits">You go back to the 3-active-habit limit.</string>
+    <string name="cancel_sheet_loss_ads">The banners come back to the catalog.</string>
+    <string name="cancel_sheet_loss_themes">Pokémon, Black Clover and the rest get locked again.</string>
+    <string name="cancel_sheet_reassurance">Relax — you keep everything until the end of the period you already paid for.</string>
+    <string name="cancel_sheet_keep">Stay premium</string>
+    <string name="cancel_sheet_confirm">Cancel anyway</string>
 </resources>

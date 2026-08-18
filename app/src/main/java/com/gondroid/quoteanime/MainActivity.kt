@@ -18,9 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.gondroid.quoteanime.notification.NotificationHelper
 import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
+import com.gondroid.quoteanime.domain.usecase.RestorePurchasesUseCase
 import com.gondroid.quoteanime.presentation.navigation.Screen
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -31,9 +33,13 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var restorePurchases: RestorePurchasesUseCase
 
     private lateinit var appUpdateManager: AppUpdateManager
 
@@ -144,6 +150,17 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         checkForUpdate()
+    }
+
+    /**
+     * `Application.onCreate` only runs once per process, so a subscription that expires (or is
+     * bought elsewhere) while the process stays alive in the background would never be noticed.
+     * Re-syncing here catches it; the repository throttles the actual Play query, so alt-tabbing
+     * costs nothing.
+     */
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch { restorePurchases() }
     }
 
     override fun onDestroy() {

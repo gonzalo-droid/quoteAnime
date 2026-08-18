@@ -67,6 +67,8 @@ import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.presentation.common.AppLinks
+import com.gondroid.quoteanime.presentation.web.openExternalLink
 import com.google.android.play.core.ktx.launchReview
 import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -74,8 +76,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
-private const val PRIVACY_POLICY_URL = "https://quote-anime-web.vercel.app/privacy-policy"
-private const val TERM_AND_CONDITIONS_URL = "https://quote-anime-web.vercel.app/terms-and-conditions"
 
 
 @Composable
@@ -83,6 +83,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToWidgetTutorial: () -> Unit = {},
     onNavigateToPaywall: () -> Unit = {},
+    onNavigateToWebView: (url: String, title: String) -> Unit = { _, _ -> },
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -193,16 +194,23 @@ fun SettingsScreen(
 
                 item { SectionDivider() }
 
+                // Hidden for now: the Instagram and Facebook accounts are blocked, so the
+                // links would dead-end. Restore this item (and its divider) once they're back.
+                /*
                 item {
                     SectionHeader(stringResource(R.string.follow_us))
-                    SocialSection()
+                    SocialSection(onNavigateToWebView)
                 }
 
                 item { SectionDivider() }
+                */
 
                 item {
                     SectionHeader(stringResource(R.string.version))
-                    InformationSection(versionName = versionName)
+                    InformationSection(
+                        versionName = versionName,
+                        onNavigateToWebView = onNavigateToWebView
+                    )
                 }
 
                 item { SectionDivider() }
@@ -708,13 +716,11 @@ private fun shareApp(context: android.content.Context) {
     context.startActivity(Intent.createChooser(intent, null))
 }
 
-private fun openUrl(context: android.content.Context, url: String) {
-    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
-}
-
 // ── Social ───────────────────────────────────────────────────────────────────
 @Composable
-private fun SocialSection() {
+private fun SocialSection(
+    onNavigateToWebView: (url: String, title: String) -> Unit = { _, _ -> }
+) {
     val context = LocalContext.current
 
     SocialItem(
@@ -722,7 +728,14 @@ private fun SocialSection() {
         name = stringResource(R.string.social_instagram),
         handle = stringResource(R.string.social_instagram_handle),
         iconTint = Color(0xFFE1306C),
-        onClick = { openUrl(context, "https://www.instagram.com/animequoteapp/") }
+        onClick = {
+            // Native app if it's installed, our own WebView otherwise —
+            // never an external browser.
+            val target = "https://www.instagram.com/animequoteapp/"
+            openExternalLink(context, target) {
+                onNavigateToWebView(target, context.getString(R.string.social_instagram))
+            }
+        }
     )
 
     HorizontalDivider(
@@ -735,7 +748,14 @@ private fun SocialSection() {
         name = stringResource(R.string.social_facebook),
         handle = stringResource(R.string.social_facebook_handle),
         iconTint = Color(0xFF1877F2),
-        onClick = { openUrl(context, "https://www.facebook.com/share/1Ay18mtNZh/?mibextid=wwXIfr") }
+        onClick = {
+            // Native app if it's installed, our own WebView otherwise —
+            // never an external browser.
+            val target = "https://www.facebook.com/share/1Ay18mtNZh/?mibextid=wwXIfr"
+            openExternalLink(context, target) {
+                onNavigateToWebView(target, context.getString(R.string.social_facebook))
+            }
+        }
     )
 
     /*
@@ -749,7 +769,14 @@ private fun SocialSection() {
         name = stringResource(R.string.social_tiktok),
         handle = stringResource(R.string.social_tiktok_handle),
         iconTint = Color.White,
-        onClick = { openUrl(context, "https://www.tiktok.com/@frasesanime") }
+        onClick = {
+            // Native app if it's installed, our own WebView otherwise —
+            // never an external browser.
+            val target = "https://www.tiktok.com/@frasesanime"
+            openExternalLink(context, target) {
+                onNavigateToWebView(target, context.getString(R.string.social_tiktok))
+            }
+        }
     )*/
 }
 
@@ -826,8 +853,13 @@ private fun TimePickerDialog(
 
 
 @Composable
-private fun InformationSection(versionName: String) {
+private fun InformationSection(
+    versionName: String,
+    onNavigateToWebView: (url: String, title: String) -> Unit = { _, _ -> }
+) {
     val context = LocalContext.current
+    val privacyTitle = stringResource(R.string.politics_privacy)
+    val termsTitle = stringResource(R.string.terms_and_conditions)
 
     ListItem(
         headlineContent = {
@@ -843,7 +875,9 @@ private fun InformationSection(versionName: String) {
                 tint = MaterialTheme.colorScheme.primary
             )
         },
-        modifier = Modifier.clickable { openUrl(context, PRIVACY_POLICY_URL) },
+        modifier = Modifier.clickable {
+            onNavigateToWebView(AppLinks.PRIVACY_POLICY_URL, privacyTitle)
+        },
         colors = listItemColors
     )
 
@@ -866,7 +900,9 @@ private fun InformationSection(versionName: String) {
                 tint = MaterialTheme.colorScheme.primary
             )
         },
-        modifier = Modifier.clickable { openUrl(context, TERM_AND_CONDITIONS_URL) },
+        modifier = Modifier.clickable {
+            onNavigateToWebView(AppLinks.TERMS_AND_CONDITIONS_URL, termsTitle)
+        },
         colors = listItemColors
     )
 

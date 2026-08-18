@@ -16,6 +16,22 @@ interface BillingRepository {
     fun launchPurchaseFlow(activity: Activity, offer: SubscriptionOffer)
 
     /** Re-checks Play for existing purchases and syncs the local entitlement flag. Call on
-     *  app start so a subscription cancelled/expired outside the app eventually gets caught. */
+     *  app start and on every return to the foreground, so a subscription cancelled/expired
+     *  outside the app gets caught. Throttled internally — calling it often is cheap. */
     suspend fun restorePurchases()
+
+    /**
+     * Acknowledges every purchase Play still reports as unacknowledged.
+     *
+     * Google auto-refunds and revokes any purchase not acknowledged within 72 h, so this is
+     * the retry path used by `AcknowledgePurchasesWorker` when the acknowledgement made right
+     * after the purchase failed.
+     *
+     * @return `false` when the work should be retried later.
+     */
+    suspend fun acknowledgePendingPurchases(): Boolean
+
+    companion object {
+        const val PREMIUM_PRODUCT_ID = "premium_subscription"
+    }
 }

@@ -2,6 +2,7 @@ package com.gondroid.quoteanime.presentation.subscription
 
 import android.app.Activity
 import com.gondroid.quoteanime.domain.model.SubscriptionOffer
+import com.gondroid.quoteanime.domain.usecase.GetManageSubscriptionUrlUseCase
 import com.gondroid.quoteanime.domain.usecase.GetSubscriptionOffersUseCase
 import com.gondroid.quoteanime.domain.usecase.LaunchSubscriptionPurchaseUseCase
 import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
@@ -40,13 +41,15 @@ class PaywallViewModelTest {
     private lateinit var getSubscriptionOffers: GetSubscriptionOffersUseCase
     private lateinit var launchSubscriptionPurchase: LaunchSubscriptionPurchaseUseCase
     private lateinit var observePurchaseEvents: ObservePurchaseEventsUseCase
+    private lateinit var getManageSubscriptionUrl: GetManageSubscriptionUrlUseCase
 
     private fun buildViewModel() = PaywallViewModel(
         observePremiumStatus,
         setPremiumStatus,
         getSubscriptionOffers,
         launchSubscriptionPurchase,
-        observePurchaseEvents
+        observePurchaseEvents,
+        getManageSubscriptionUrl
     )
 
     @Before
@@ -56,6 +59,8 @@ class PaywallViewModelTest {
         getSubscriptionOffers = mockk()
         launchSubscriptionPurchase = mockk()
         observePurchaseEvents = mockk()
+        getManageSubscriptionUrl = mockk()
+        every { getManageSubscriptionUrl() } returns MANAGE_URL
         coJustRun { setPremiumStatus(any()) }
         coEvery { getSubscriptionOffers() } returns emptyList()
         every { observePurchaseEvents() } returns MutableSharedFlow()
@@ -111,5 +116,9 @@ class PaywallViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { setPremiumStatus(false) }
+    }
+
+    private companion object {
+        const val MANAGE_URL = "https://play.google.com/store/account/subscriptions"
     }
 }

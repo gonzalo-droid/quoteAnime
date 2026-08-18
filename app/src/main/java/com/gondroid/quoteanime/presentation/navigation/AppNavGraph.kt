@@ -18,6 +18,7 @@ import com.gondroid.quoteanime.presentation.settings.SettingsScreen
 import com.gondroid.quoteanime.presentation.settings.WidgetTutorialScreen
 import com.gondroid.quoteanime.presentation.splash.SplashScreen
 import com.gondroid.quoteanime.presentation.subscription.PaywallScreen
+import com.gondroid.quoteanime.presentation.web.WebViewScreen
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
@@ -49,6 +50,17 @@ sealed class Screen(val route: String) {
         fun createRoute(habitId: String) = "habit_detail/$habitId"
     }
     data object Paywall : Screen("paywall")
+
+    /** In-app browser — see [com.gondroid.quoteanime.presentation.web.WebViewScreen]. */
+    data object WebView : Screen("webview") {
+        const val ARG_URL = "url"
+        const val ARG_TITLE = "title"
+        val routeWithArgs = "webview?$ARG_URL={$ARG_URL}&$ARG_TITLE={$ARG_TITLE}"
+
+        /** Both values are encoded: an un-escaped `://` or `&` would break the route match. */
+        fun createRoute(url: String, title: String) =
+            "webview?$ARG_URL=${android.net.Uri.encode(url)}&$ARG_TITLE=${android.net.Uri.encode(title)}"
+    }
 }
 
 @Composable
@@ -135,7 +147,10 @@ fun AppNavGraph(
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToWidgetTutorial = { navController.navigate(Screen.WidgetTutorial.route) },
-                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
+                onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) },
+                onNavigateToWebView = { url, title ->
+                    navController.navigate(Screen.WebView.createRoute(url, title))
+                }
             )
         }
 
@@ -144,7 +159,26 @@ fun AppNavGraph(
         }
 
         composable(Screen.Paywall.route) {
-            PaywallScreen(onNavigateBack = { navController.popBackStack() })
+            PaywallScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToWebView = { url, title ->
+                    navController.navigate(Screen.WebView.createRoute(url, title))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.WebView.routeWithArgs,
+            arguments = listOf(
+                navArgument(Screen.WebView.ARG_URL) { type = NavType.StringType },
+                navArgument(Screen.WebView.ARG_TITLE) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            WebViewScreen(
+                url = backStackEntry.arguments?.getString(Screen.WebView.ARG_URL).orEmpty(),
+                title = backStackEntry.arguments?.getString(Screen.WebView.ARG_TITLE).orEmpty(),
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Routine.route) {

@@ -1,6 +1,5 @@
 package com.gondroid.quoteanime.presentation.subscription
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,10 +41,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,24 +61,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.net.toUri
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.presentation.common.AppLinks
 import com.gondroid.quoteanime.domain.model.SubscriptionOffer
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 @Composable
 fun PaywallScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToWebView: (url: String, title: String) -> Unit = { _, _ -> },
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    // LocalContext can be a ContextWrapper, so casting it to Activity silently fails and the
+    // subscribe button does nothing; LocalActivity resolves the host Activity directly.
+    val activity = LocalActivity.current
     val context = LocalContext.current
     PaywallContent(
         state = state,
         onNavigateBack = onNavigateBack,
         onOfferSelected = viewModel::onOfferSelected,
-        onSubscribe = { (context as? Activity)?.let(viewModel::onSubscribe) },
+        onSubscribe = { activity?.let(viewModel::onSubscribe) },
         onMessageShown = viewModel::onMessageShown,
-        onRemovePremiumForTesting = viewModel::onRemovePremiumForTesting
+        onRemovePremiumForTesting = viewModel::onRemovePremiumForTesting,
+        onOpenLegalLink = onNavigateToWebView,
+        onManageSubscription = {
+            // Cancelling is only possible in Play's subscription centre; the Billing Library
+            // has no cancel API. Devices without the Play Store can't resolve this intent.
+            try {
+                context.startActivity(Intent(Intent.ACTION_VIEW, state.manageSubscriptionUrl.toUri()))
+            } catch (_: ActivityNotFoundException) {
+                viewModel.onManageSubscriptionUnavailable()
+            }
+        }
     )
 }
 
@@ -85,18 +106,23 @@ fun PaywallContent(
     onOfferSelected: (Int) -> Unit,
     onSubscribe: () -> Unit,
     onMessageShown: () -> Unit,
-    onRemovePremiumForTesting: () -> Unit
+    onRemovePremiumForTesting: () -> Unit,
+    onOpenLegalLink: (url: String, title: String) -> Unit,
+    onManageSubscription: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    var showCancelSheet by remember { mutableStateOf(false) }
     val pendingMessage = stringResource(R.string.paywall_purchase_pending)
     val cancelledMessage = stringResource(R.string.paywall_purchase_cancelled)
     val errorMessage = stringResource(R.string.paywall_purchase_error)
+    val manageUnavailableMessage = stringResource(R.string.paywall_manage_unavailable)
 
     LaunchedEffect(state.message) {
         val text = when (state.message) {
             PaywallMessage.PENDING -> pendingMessage
             PaywallMessage.USER_CANCELLED -> cancelledMessage
             PaywallMessage.ERROR -> errorMessage
+            PaywallMessage.MANAGE_UNAVAILABLE -> manageUnavailableMessage
             null -> null
         }
         if (text != null) {
@@ -197,11 +223,30 @@ fun PaywallContent(
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
+                OutlinedButton(
+                    onClick = { showCancelSheet = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .height(52.dp)
+                ) {
+                    Text(stringResource(R.string.paywall_manage_subscription))
+                }
                 TextButton(
                     onClick = onRemovePremiumForTesting,
                     modifier = Modifier.padding(top = 8.dp)
                 ) {
                     Text(stringResource(R.string.paywall_remove_debug))
+                }
+
+                if (showCancelSheet) {
+                    CancelSubscriptionSheet(
+                        onDismiss = { showCancelSheet = false },
+                        onConfirmCancel = {
+                            showCancelSheet = false
+                            onManageSubscription()
+                        }
+                    )
                 }
             } else {
                 PaywallOfferSection(
@@ -210,6 +255,44 @@ fun PaywallContent(
                     onSubscribe = onSubscribe
                 )
             }
+
+            PaywallLegalLinks(onOpenLegalLink = onOpenLegalLink)
+        }
+    }
+}
+
+/** Terms and privacy, reachable from the paywall itself — Play expects both on the screen
+ *  where the subscription is sold, not only buried in Settings. */
+@Composable
+private fun PaywallLegalLinks(onOpenLegalLink: (url: String, title: String) -> Unit) {
+    val termsTitle = stringResource(R.string.terms_and_conditions)
+    val privacyTitle = stringResource(R.string.politics_privacy)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextButton(onClick = { onOpenLegalLink(AppLinks.TERMS_AND_CONDITIONS_URL, termsTitle) }) {
+            Text(
+                text = termsTitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Text(
+            text = "·",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        TextButton(onClick = { onOpenLegalLink(AppLinks.PRIVACY_POLICY_URL, privacyTitle) }) {
+            Text(
+                text = privacyTitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -344,7 +427,9 @@ private fun PaywallContentFreePreview() {
             onOfferSelected = {},
             onSubscribe = {},
             onMessageShown = {},
-            onRemovePremiumForTesting = {}
+            onRemovePremiumForTesting = {},
+            onOpenLegalLink = { _, _ -> },
+            onManageSubscription = {}
         )
     }
 }
@@ -359,7 +444,9 @@ private fun PaywallContentPremiumPreview() {
             onOfferSelected = {},
             onSubscribe = {},
             onMessageShown = {},
-            onRemovePremiumForTesting = {}
+            onRemovePremiumForTesting = {},
+            onOpenLegalLink = { _, _ -> },
+            onManageSubscription = {}
         )
     }
 }
