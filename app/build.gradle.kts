@@ -18,7 +18,7 @@ android {
         applicationId = "com.gondroid.quoteanime"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
+        versionCode = 10
         versionName = "1.2.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,12 +30,21 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Google's public test units. Serving live ads to our own device is invalid
+            // traffic and gets AdMob accounts suspended.
+            buildConfigField("String", "AD_UNIT_BANNER", "\"ca-app-pub-3940256099942544/6300978111\"")
+            buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-3940256099942544/1033173712\"")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "AD_UNIT_BANNER", "\"ca-app-pub-1427341798923689/4873365993\"")
+            buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-1427341798923689/1127716194\"")
         }
     }
     compileOptions {
@@ -48,8 +57,9 @@ android {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-        buildFeatures {
+    buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -5,10 +5,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
+import com.gondroid.quoteanime.BuildConfig
 import com.google.android.gms.ads.AdView
 
 // Reemplaza con tu Ad Unit ID real cuando publiques la app
-private const val BANNER_AD_UNIT_ID = "ca-app-pub-1427341798923689/4873365993"
+/** Live unit in release, Google's public test unit in debug — see `app/build.gradle.kts`. */
+private val BANNER_AD_UNIT_ID = BuildConfig.AD_UNIT_BANNER
 
 @Composable
 fun BannerAd(modifier: Modifier = Modifier) {

@@ -368,4 +368,8 @@
     <string name="cancel_sheet_reassurance">Tranquilo: conservás todo hasta el final del periodo que ya pagaste.</string>
     <string name="cancel_sheet_keep">Seguir siendo premium</string>
     <string name="cancel_sheet_confirm">Cancelar de todos modos</string>
+
+    <string name="webview_error_title">No pudimos cargar la página</string>
+    <string name="webview_error_body">Revisá tu conexión e intentá de nuevo.</string>
+    <string name="webview_retry">Reintentar</string>
 </resources>

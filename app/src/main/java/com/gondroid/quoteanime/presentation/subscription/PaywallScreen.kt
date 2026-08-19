@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
+import com.gondroid.quoteanime.BuildConfig
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.presentation.common.AppLinks
 import com.gondroid.quoteanime.domain.model.SubscriptionOffer
@@ -232,11 +233,15 @@ fun PaywallContent(
                 ) {
                     Text(stringResource(R.string.paywall_manage_subscription))
                 }
-                TextButton(
-                    onClick = onRemovePremiumForTesting,
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text(stringResource(R.string.paywall_remove_debug))
+                // QA affordance only: there is no legitimate in-app way to drop a real
+                // subscription, so this must never reach a release build.
+                if (BuildConfig.DEBUG) {
+                    TextButton(
+                        onClick = onRemovePremiumForTesting,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(stringResource(R.string.paywall_remove_debug))
+                    }
                 }
 
                 if (showCancelSheet) {

@@ -5,15 +5,21 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,9 +34,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import com.gondroid.quoteanime.R
@@ -53,6 +62,7 @@ fun WebViewScreen(
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var canGoBack by remember { mutableStateOf(false) }
+    var hasError by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
 
     // In-page history first: the system back gesture should walk the site back before it
@@ -89,6 +99,17 @@ fun WebViewScreen(
             if (isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+            if (hasError) {
+                // Our own message instead of Chromium's error page, which shows a raw URL
+                // and a "webpage not available" chrome that looks nothing like the app.
+                WebViewErrorState(
+                    onRetry = {
+                        hasError = false
+                        webView?.reload()
+                    }
+                )
+                return@Column
+            }
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
@@ -101,6 +122,19 @@ fun WebViewScreen(
                             override fun onPageFinished(view: WebView, pageUrl: String?) {
                                 isLoading = false
                                 canGoBack = view.canGoBack()
+                            }
+
+                            /** Sub-resource failures (an image, a font) must not blank the
+                             *  page — only a failed main frame is a real dead end. */
+                            override fun onReceivedError(
+                                view: WebView,
+                                request: WebResourceRequest,
+                                error: WebResourceError
+                            ) {
+                                if (request.isForMainFrame) {
+                                    isLoading = false
+                                    hasError = true
+                                }
                             }
 
                             override fun shouldOverrideUrlLoading(
@@ -148,5 +182,43 @@ fun openExternalLink(
         context.startActivity(nativeApp)
     } catch (_: ActivityNotFoundException) {
         openInApp()
+    }
+}
+
+@Composable
+private fun WebViewErrorState(onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Filled.CloudOff,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(48.dp)
+            )
+            Text(
+                text = stringResource(R.string.webview_error_title),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+            Text(
+                text = stringResource(R.string.webview_error_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            Button(
+                onClick = onRetry,
+                modifier = Modifier.padding(top = 24.dp)
+            ) {
+                Text(stringResource(R.string.webview_retry))
+            }
+        }
     }
 }

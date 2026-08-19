@@ -1,5 +1,7 @@
 package com.gondroid.quoteanime.di
 
+import com.gondroid.quoteanime.data.remote.BillingClientFactory
+import com.gondroid.quoteanime.data.remote.PlayBillingClientFactory
 import com.gondroid.quoteanime.data.repository.BillingRepositoryImpl
 import com.gondroid.quoteanime.data.repository.HabitRepositoryImpl
 import com.gondroid.quoteanime.data.repository.QuoteRepositoryImpl
@@ -33,4 +35,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBillingRepository(impl: BillingRepositoryImpl): BillingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBillingClientFactory(impl: PlayBillingClientFactory): BillingClientFactory
 }

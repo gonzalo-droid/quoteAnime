@@ -82,7 +82,7 @@ class RoutineContentUiTest {
     }
 
     @Test
-    fun habitCardsAndHeaderAreDisplayed() {
+    fun habitCardsAreDisplayed() {
         setContent(
             RoutineUiState(
                 habits = listOf(progress("h1")),
@@ -92,7 +92,8 @@ class RoutineContentUiTest {
             )
         )
 
-        composeRule.onNodeWithTag("routine_header").assertIsDisplayed()
+        // The streak header this test also asserted was dropped from the screen in
+        // "feat: update habit tracker widget"; the tag has not existed since.
         composeRule.onNodeWithTag("habit_card_h1").assertIsDisplayed()
     }
 

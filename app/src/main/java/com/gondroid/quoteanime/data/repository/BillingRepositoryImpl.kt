@@ -1,14 +1,12 @@
 package com.gondroid.quoteanime.data.repository
 
 import android.app.Activity
-import android.content.Context
 import android.os.SystemClock
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
-import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
@@ -18,11 +16,11 @@ import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.gondroid.quoteanime.data.local.datastore.UserPreferencesDataStore
+import com.gondroid.quoteanime.data.remote.BillingClientFactory
 import com.gondroid.quoteanime.domain.model.BillingPurchaseResult
 import com.gondroid.quoteanime.domain.model.SubscriptionOffer
 import com.gondroid.quoteanime.domain.repository.BillingRepository
 import com.gondroid.quoteanime.worker.PurchaseAcknowledgementScheduler
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,7 +45,7 @@ import kotlin.coroutines.resume
  */
 @Singleton
 class BillingRepositoryImpl @Inject constructor(
-    @ApplicationContext context: Context,
+    billingClientFactory: BillingClientFactory,
     private val dataStore: UserPreferencesDataStore,
     private val acknowledgementScheduler: PurchaseAcknowledgementScheduler
 ) : BillingRepository {
@@ -61,20 +59,7 @@ class BillingRepositoryImpl @Inject constructor(
         scope.launch { handlePurchasesUpdated(billingResult, purchases) }
     }
 
-    /**
-     * [PendingPurchasesParams.Builder.build] throws unless one-time products are opted in —
-     * it's mandatory since Play Billing 8, even for a subscription-only catalogue like this one.
-     * Prepaid plans stay off because no offer in the Play Console uses them.
-     */
-    private val billingClient: BillingClient = BillingClient.newBuilder(context)
-        .setListener(purchasesUpdatedListener)
-        .enablePendingPurchases(
-            PendingPurchasesParams.newBuilder()
-                .enableOneTimeProducts()
-                .build()
-        )
-        .enableAutoServiceReconnection()
-        .build()
+    private val billingClient: BillingClient = billingClientFactory.create(purchasesUpdatedListener)
 
     /** Serialises `startConnection`, so the app-start restore and a paywall open don't race. */
     private val connectionMutex = Mutex()
