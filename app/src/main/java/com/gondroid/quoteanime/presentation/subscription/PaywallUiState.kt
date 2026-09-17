@@ -6,6 +6,8 @@ enum class PaywallMessage {
     PENDING,
     USER_CANCELLED,
     ERROR,
+    PLAY_UNAVAILABLE,
+    NETWORK,
     MANAGE_UNAVAILABLE
 }
 

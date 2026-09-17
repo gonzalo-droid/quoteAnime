@@ -117,12 +117,16 @@ fun PaywallContent(
     val cancelledMessage = stringResource(R.string.paywall_purchase_cancelled)
     val errorMessage = stringResource(R.string.paywall_purchase_error)
     val manageUnavailableMessage = stringResource(R.string.paywall_manage_unavailable)
+    val playUnavailableMessage = stringResource(R.string.paywall_error_play_unavailable)
+    val networkErrorMessage = stringResource(R.string.paywall_error_network)
 
     LaunchedEffect(state.message) {
         val text = when (state.message) {
             PaywallMessage.PENDING -> pendingMessage
             PaywallMessage.USER_CANCELLED -> cancelledMessage
             PaywallMessage.ERROR -> errorMessage
+            PaywallMessage.PLAY_UNAVAILABLE -> playUnavailableMessage
+            PaywallMessage.NETWORK -> networkErrorMessage
             PaywallMessage.MANAGE_UNAVAILABLE -> manageUnavailableMessage
             null -> null
         }

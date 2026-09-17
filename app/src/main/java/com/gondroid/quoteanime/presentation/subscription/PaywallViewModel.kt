@@ -3,6 +3,7 @@ package com.gondroid.quoteanime.presentation.subscription
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gondroid.quoteanime.domain.model.BillingErrorReason
 import com.gondroid.quoteanime.domain.model.BillingPurchaseResult
 import com.gondroid.quoteanime.domain.usecase.GetManageSubscriptionUrlUseCase
 import com.gondroid.quoteanime.domain.usecase.GetSubscriptionOffersUseCase
@@ -47,7 +48,13 @@ class PaywallViewModel @Inject constructor(
                             is BillingPurchaseResult.Success -> null
                             is BillingPurchaseResult.Pending -> PaywallMessage.PENDING
                             is BillingPurchaseResult.UserCancelled -> PaywallMessage.USER_CANCELLED
-                            is BillingPurchaseResult.Error -> PaywallMessage.ERROR
+                            // Play's own debugMessage never reaches the screen: it's English,
+                            // internal, and written for us. Only the reason is actionable.
+                            is BillingPurchaseResult.Error -> when (event.reason) {
+                                BillingErrorReason.PLAY_UNAVAILABLE -> PaywallMessage.PLAY_UNAVAILABLE
+                                BillingErrorReason.NETWORK -> PaywallMessage.NETWORK
+                                BillingErrorReason.UNKNOWN -> PaywallMessage.ERROR
+                            }
                         }
                     )
                 }

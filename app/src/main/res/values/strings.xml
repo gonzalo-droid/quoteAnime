@@ -372,4 +372,7 @@
     <string name="webview_error_title">We couldn\'t load the page</string>
     <string name="webview_error_body">Check your connection and try again.</string>
     <string name="webview_retry">Retry</string>
+
+    <string name="paywall_error_play_unavailable">Google Play isn\'t available right now. Please try again later.</string>
+    <string name="paywall_error_network">No connection. Check your network and try again.</string>
 </resources>
