@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "additionalDirectories": [
+      "/Volumes/Neko/apps_ios/quoteAnime"
+    ],
     "allow": [
       "Bash(./gradlew assembleDebug)",
       "Bash(wait)",
