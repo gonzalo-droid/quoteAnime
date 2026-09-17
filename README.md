@@ -1,109 +1,105 @@
 # Quote Anime
 
-Aplicación Android de frases motivacionales de anime. Experiencia inmersiva, diseño oscuro minimalista y tipografía elegante.
+![Version](https://img.shields.io/badge/version-1.2.1-blue)
+![minSdk](https://img.shields.io/badge/minSdk-24-brightgreen)
+![License](https://img.shields.io/badge/license-Proprietary-lightgrey)
+
+[Google Play](https://play.google.com/store/apps/details?id=com.gondroid.quoteanime)
+
+Quote Anime shows motivational quotes from the anime you already love, one per screen,
+read the way you read a feed: swipe up for the next one. Save the ones that stick, filter
+them by series, share any of them as an image, and get one pushed to you on the schedule
+you choose.
+
+It also ships **Mi Rutina**, an anime-themed habit tracker — pick habits from themed
+templates, mark them done, and watch a GitHub-style heatmap and a streak counter fill in.
+A **Premium** subscription lifts the habit limit, removes the ads and unlocks the
+exclusive themes.
+
+---
 
 ## Screenshots
 
-> _Agregar capturas de HomeScreen, Onboarding, CatalogScreen, Mi Rutina, Paywall y los 3 widgets_
+> Pending. Screens to capture, in flow order: Onboarding · Quote feed · Catalog ·
+> Mi Rutina · Settings · Widgets
+
+<!-- TODO: capturar y reemplazar por la tabla de imágenes (ver docs/screenshots/flow.yml) -->
 
 ---
 
-## Descripción
+## Features
 
-Quote Anime muestra frases de tus series favoritas con una experiencia de lectura inmersiva. Desliza verticalmente entre frases, guarda tus favoritas, recibe notificaciones en tu horario y coloca un widget en tu pantalla de inicio. También incluye **Mi Rutina**, un habit tracker temático (heatmap tipo GitHub, rachas, recordatorios y sugerencias 100% basadas en anime) con un nivel **Premium** que desbloquea hábitos ilimitados, elimina anuncios y da acceso a temas exclusivos.
-
----
-
-## Características
-
-| Feature | Detalle |
+| Feature | Detail |
 |---|---|
-| **Frases full-screen** | `VerticalPager` con gradientes únicos por página |
-| **Favoritos** | Guardado local en Room, accesible desde Catalog |
-| **Explorar** | Filtro por anime con scroll horizontal |
-| **Notificaciones de frases** | Rango horario configurable, frecuencia 1–10×/día |
-| **Widget de frases** | Responsive (Small/Medium/Large), se adapta al tamaño físico |
-| **Compartir** | Comparte cualquier frase como imagen con un toque |
-| **Mi Rutina (habit tracker)** | Crear/editar hábitos con sugerencias temáticas (ninja, One Piece, saiyan, Pokémon, Black Clover), heatmap de 17 semanas, racha actual/récord, calendario mensual, archivar/restaurar/borrar con confirmación, recordatorios por hábito |
-| **Widgets de Mi Rutina** | Widget resumen (todos los hábitos activos) + widget individual por hábito (heatmap propio, se elige el hábito al agregarlo) |
-| **Premium** | Hábitos ilimitados, sin anuncios, temas exclusivos — suscripción real vía Google Play Billing, planes/ofertas leídos dinámicamente desde Play Console |
-| **Onboarding** | 4 páginas (3 de frases + selección de primer hábito), solo en el primer arranque |
-| **Splash** | Logo animado + transición suave |
-| **Dark theme** | Siempre oscuro, sin dynamic color |
-| **AdMob** | Banner + intersticial al compartir (ocultos si sos Premium) |
+| **Full-screen quote feed** | `VerticalPager`, one quote per page, a different gradient on each |
+| **Favorites** | Saved locally in Room, available offline and reachable from the Catalog |
+| **Catalog** | Filter by anime series or by favorites, horizontal chip row |
+| **Share as image** | Any quote renders to a bitmap and goes out through the system share sheet |
+| **Quote notifications** | Configurable time window, 1–10 deliveries per day, scheduled with WorkManager |
+| **Quote widget** | Glance widget that adapts its layout to the size you drop it at; tapping it opens the feed on that quote |
+| **Mi Rutina (habit tracker)** | Create and edit habits from themed templates (ninja, One Piece, saiyan, Pokémon, Black Clover), 17-week heatmap, current and record streak, month calendar, archive / restore / delete with confirmation, per-habit reminders |
+| **Routine widgets** | A summary widget for all active habits, plus a per-habit widget whose habit is chosen in a configuration activity when you drop it on the home screen |
+| **Premium subscription** | Unlimited habits, no ads, exclusive themes — real Google Play Billing, with plans and offers read from Play Console at runtime and the entitlement re-synced on every app start |
+| **Onboarding** | Four pages on first launch — three quote pages plus picking a first habit |
+| **Dark theme** | Always dark, no dynamic color |
+| **Ads** | AdMob banner plus an interstitial after sharing, both hidden for Premium users |
 
 ---
 
-## Stack tecnológico
+## Tech Stack
 
-- **Lenguaje**: Kotlin
+- **Language**: Kotlin 2.3.20
 - **UI**: Jetpack Compose + Material3
-- **Arquitectura**: Clean Architecture + MVVM
-- **DI**: Hilt
-- **Base de datos local**: Room v5 (favoritos + hábitos/completions, con `ForeignKey CASCADE`)
-- **Preferencias**: DataStore (flag de entitlement Premium, sincronizado con Google Play Billing)
+- **Architecture**: Clean Architecture + MVVM
+- **DI**: Hilt 2.58
+- **Local database**: Room 2.7.1 — schema version 6 (favorites, habits, habit completions,
+  with `ForeignKey CASCADE`)
+- **Preferences**: DataStore — holds the local Premium entitlement flag, kept in sync with
+  Google Play Billing
 - **Remote**: Firebase Realtime Database (`/quotes`, `/imagenes`, `/habitTemplates`)
-- **Pagos**: Google Play Billing (`billing-ktx` 9.1.0) — suscripción `premium_subscription`, planes/ofertas leídos dinámicamente desde Play Console
-- **Widgets**: Glance API — 3 widgets (frase, resumen de rutina, hábito individual)
-- **Notificaciones**: WorkManager + NotificationCompat (frases + recordatorios por hábito)
-- **Publicidad**: Google AdMob (banner + intersticial), gateado por Premium
-- **minSdk**: 24 | **targetSdk**: 36
+- **Billing**: Google Play Billing `billing-ktx` 9.1.0 — `premium_subscription`, plans and
+  offers read dynamically from Play Console
+- **Widgets**: Glance 1.1.1 — three widgets (quote, routine summary, single habit)
+- **Notifications**: WorkManager + NotificationCompat (quotes and per-habit reminders)
+- **Ads**: Google AdMob (banner + interstitial), gated by Premium
+- **Images**: Coil 2.7.0
+- **Build**: AGP 8.10.0, KSP, Gradle version catalog
+- **minSdk** 24 · **targetSdk** 36 · **compileSdk** 36
 
 ---
 
-## Arquitectura
+## Architecture
 
 ```
 com.gondroid.quoteanime/
 ├── data/
 │   ├── local/
-│   │   ├── db/                     # Room v5
-│   │   │   ├── dao/                #   FavoriteQuoteDao, HabitDao, HabitCompletionDao
-│   │   │   └── entity/              #   FavoriteQuoteEntity, HabitEntity, HabitCompletionEntity
-│   │   └── datastore/               # UserPreferencesDataStore (prefs + flag Premium local)
-│   ├── remote/                      # QuoteRemoteDataSource, HabitTemplateRemoteDataSource
-│   │                                 #   (Firebase RTDB callbackFlow) + dto/
-│   └── repository/                  # QuoteRepositoryImpl, UserPreferencesRepositoryImpl,
-│                                     #   HabitRepositoryImpl, BillingRepositoryImpl
-│                                     #   (wraps BillingClient — conexión, query de
-│                                     #   ProductDetails, purchase flow, acknowledge, sync)
+│   │   ├── db/                  # Room v6 — dao/ (FavoriteQuote, Habit, HabitCompletion)
+│   │   │                        #   + entity/
+│   │   └── datastore/           # UserPreferencesDataStore (prefs + local Premium flag)
+│   ├── remote/                  # QuoteRemoteDataSource, HabitTemplateRemoteDataSource
+│   │                            #   (Firebase RTDB callbackFlow), BillingClientFactory, dto/
+│   └── repository/              # Quote, UserPreferences, Habit and Billing implementations
 ├── domain/
-│   ├── model/                       # Quote, Category, UserPreferences, WidgetSize,
-│   │                                 #   Habit, HabitTemplate, HabitWithProgress, StreakState,
-│   │                                 #   SubscriptionOffer, BillingPurchaseResult
-│   ├── repository/                  # Interfaces (Quote/UserPreferences/Habit/Billing)
-│   └── usecase/                     # Un use case por clase (28): frases, hábitos
-│                                     #   (Create/Update/Archive/Unarchive/Delete/Toggle),
-│                                     #   rachas, plantillas, onboarding, Premium
-│                                     #   (ObservePremiumStatus/SetPremiumStatus) y Billing
-│                                     #   (GetSubscriptionOffers/LaunchSubscriptionPurchase/
-│                                     #   ObservePurchaseEvents/RestorePurchases)
+│   ├── model/                   # Quote, Category, Habit, HabitWithProgress, StreakState,
+│   │                            #   SubscriptionOffer, UserPreferences, WidgetSize…
+│   ├── repository/              # Repository interfaces
+│   └── usecase/                 # 32 use case classes across 25 files
 ├── presentation/
-│   ├── splash/                      # SplashScreen + SplashViewModel
-│   ├── onboarding/                  # OnboardingScreen (4 páginas) + OnboardingViewModel
-│   ├── home/                        # HomeScreen + HomeViewModel
-│   ├── catalog/                     # CatalogScreen + CatalogViewModel
-│   ├── settings/                    # SettingsScreen + SettingsViewModel (incluye fila Premium)
-│   ├── routine/                     # "Mi Rutina": RoutineScreen/ViewModel, HabitCard,
-│   │                                 #   HabitEditorSheet, HabitIconPicker, HabitDetailScreen
-│   │                                 #   (heatmap + calendario), HabitHeatmap/HeatmapGrid,
-│   │                                 #   HabitPalette/HabitIcons/HabitThemeImages
-│   ├── subscription/                # PaywallScreen + PaywallViewModel
-│   ├── widget/                      # HabitWidgetConfigureActivity — elige el hábito de
-│   │                                 #   una instancia del widget individual
-│   ├── components/                  # QuoteCard, BannerAd
-│   └── navigation/                  # AppNavGraph, Screen sealed class
-├── worker/                          # QuoteNotificationWorker, HabitReminderWorker,
-│                                     #   UpdateQuoteWidgetWorker, UpdateRoutineSummaryWidgetWorker,
-│                                     #   UpdateHabitWidgetWorker
-├── widget/                          # 3 widgets Glance:
-│                                     #   QuoteWidget, RoutineSummaryWidget, HabitWidget
-│                                     #   (+ sus *Receiver y *State)
-├── notification/                    # NotificationHelper, NotificationScheduler,
-│                                     #   HabitReminderScheduler, WidgetScheduler,
-│                                     #   RoutineWidgetScheduler, NextReminderCalculator
-├── analytics/                       # RoutineAnalytics (Firebase Analytics)
-└── di/                              # AppModule, DatabaseModule, RepositoryModule, PremiumGate
+│   ├── splash/ onboarding/ home/ catalog/ settings/   # Core screens
+│   ├── routine/                 # Mi Rutina: list, editor, detail, heatmap, calendar, palette
+│   ├── subscription/            # PaywallScreen + PaywallViewModel
+│   ├── widget/                  # HabitWidgetConfigureActivity (per-habit widget setup)
+│   ├── ads/ components/ common/ web/                  # Shared UI, AppLinks, in-app WebView
+│   └── navigation/              # AppNavGraph, Screen sealed class
+├── widget/                      # Glance: QuoteWidget, RoutineSummaryWidget, HabitWidget
+│                                #   (+ their *Receiver and *State)
+├── worker/                      # Quote notification, habit reminder, the three widget
+│                                #   updaters, purchase acknowledgement
+├── notification/                # NotificationHelper + schedulers + NextReminderCalculator
+├── analytics/                   # RoutineAnalytics (Firebase Analytics)
+├── ui/theme/                    # Colors, typography, theme
+└── di/                          # AppModule, DatabaseModule, RepositoryModule, PremiumGate
 ```
 
 ---
@@ -117,51 +113,63 @@ com.gondroid.quoteanime/
   ├── author: String
   └── anime:  String
 
-/habitTemplates/{id}          # opcional — sobreescribe DefaultHabitTemplates.ALL si existe
-  ├── title:            String   # clave de string-resource, ej. "template_theme_ninja"
-  ├── iconKey:           String
-  ├── order:             Int
-  ├── themeColorIndex:    Int?     # índice en HabitPalette.COLORS
-  ├── themeKey:           String?  # resuelve imagen + descripción vía HabitThemeImages
-  └── isPremiumOnly:      Boolean  # default false si el nodo no existe
+/habitTemplates/{id}          # optional — overrides DefaultHabitTemplates.ALL when present
+  ├── title:            String   # string-resource key, e.g. "template_theme_ninja"
+  ├── iconKey:          String
+  ├── order:            Int
+  ├── themeColorIndex:  Int?     # index into HabitPalette.COLORS
+  ├── themeKey:         String?  # resolves image + description through HabitThemeImages
+  └── isPremiumOnly:    Boolean  # defaults to false when the node is missing
 ```
 
-> Las categorías de frases se derivan dinámicamente de los valores únicos del campo `anime`. Si `/habitTemplates` está vacío o no existe, el editor de hábitos cae en el fallback local `DefaultHabitTemplates.ALL` (5 temas: ninja, One Piece, saiyan, Pokémon, Black Clover — los últimos dos exclusivos Premium).
+> Quote categories are derived dynamically from the distinct values of the `anime` field.
+> If `/habitTemplates` is empty or missing, the habit editor falls back to the local
+> `DefaultHabitTemplates.ALL` (five themes: ninja, One Piece, saiyan, Pokémon, Black
+> Clover — the last two Premium-only).
 
 ---
 
-## Flujo de navegación
+## Navigation Flow
 
 ```
-App abre
- └── Splash (2s, logo animado)
-      ├── Primera vez → Onboarding (3 páginas de frases + selección de primer hábito) → Home
-      └── Ya visto    → Home
-           ├── Catalog (filtro por anime o favoritos)
-           ├── Settings (notificaciones, widget, fila Premium)
-           │    └── Paywall (beneficios + planes reales de Google Play Billing)
-           └── Mi Rutina (lista de hábitos, tabs Activos/Archivados)
-                ├── Habit Editor (crear/editar, bottom sheet fullscreen)
-                ├── Habit Detail (heatmap grande + calendario, bottom sheet fullscreen)
-                └── Paywall (al tocar una sugerencia temática bloqueada)
+App launch
+ └── Splash (2s, animated logo)
+      ├── First run → Onboarding (3 quote pages + first habit) → Home
+      └── Seen      → Home
+           ├── Catalog (filter by anime or favorites)
+           ├── Settings (notifications, widget, Premium row)
+           │    └── Paywall (benefits + real Google Play Billing plans)
+           └── Mi Rutina (habit list, Active / Archived tabs)
+                ├── Habit editor (create/edit, full-screen bottom sheet)
+                ├── Habit detail (large heatmap + calendar, full-screen bottom sheet)
+                └── Paywall (tapping a locked themed suggestion)
 
-Widget de frase tap        → Home (scroll a la quote del widget)
-Widgets de Mi Rutina tap   → Mi Rutina
-Recordatorio de hábito tap → Mi Rutina
+Quote widget tap    → Home (scrolled to the widget's quote)
+Routine widget tap  → Mi Rutina
+Habit reminder tap  → Mi Rutina
 ```
 
 ---
 
-## Configuración inicial
+## Requirements & Setup
+
+| Tool | Version |
+|---|---|
+| Android Studio | Narwhal or newer (AGP 8.10.0) |
+| JDK | 17 |
+| Android SDK | compileSdk 36 |
+| Gradle | wrapper included (`./gradlew`) |
 
 ### 1. Firebase
 
-1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com)
-2. Agrega una app Android con el package `com.gondroid.quoteanime`
-3. Descarga `google-services.json` y colócalo en `app/`
-4. Habilita **Realtime Database** en modo lectura pública (o con reglas según tu caso)
+`app/src/google-services.json` is currently committed to this repository, so a clean
+checkout builds as-is. To point the app at your own Firebase project instead:
 
-Estructura de datos mínima en RTDB:
+1. Create a project in the [Firebase Console](https://console.firebase.google.com).
+2. Add an Android app with the package `com.gondroid.quoteanime`.
+3. Download `google-services.json` and replace the one in `app/src/`.
+4. Enable **Realtime Database** and seed at least the `/quotes` node:
+
 ```json
 {
   "quotes": [
@@ -172,58 +180,69 @@ Estructura de datos mínima en RTDB:
 
 ### 2. AdMob
 
-1. Crea una cuenta en [AdMob](https://admob.google.com)
-2. Registra la app y crea un bloque de anuncios tipo Banner
-3. Reemplaza los IDs en:
+Ad unit IDs are `buildConfigField` entries in `app/build.gradle.kts`, read through
+`BuildConfig.AD_UNIT_BANNER` / `BuildConfig.AD_UNIT_INTERSTITIAL`. The AdMob application
+ID is a `meta-data` entry in `AndroidManifest.xml`.
 
-| Archivo | Campo | ID de prueba actual |
-|---|---|---|
-| `AndroidManifest.xml` | `APPLICATION_ID` meta-data | `ca-app-pub-3940256099942544~3347511713` |
-| `presentation/components/BannerAd.kt` | `BANNER_AD_UNIT_ID` | `ca-app-pub-3940256099942544/9214589741` |
+The **debug** build type already uses Google's public test units. The **release** build
+type carries this project's production IDs — replace them with your own before publishing.
+Serving live ads to your own device is invalid traffic and gets AdMob accounts suspended.
 
----
+### 3. Play Billing
 
-## Comandos de build
+The `premium_subscription` product must exist in Play Console with at least one base plan,
+otherwise the paywall renders with an empty plan list.
+
+### Build commands
 
 ```bash
-./gradlew build                # Build completo
-./gradlew assembleDebug        # APK debug
-./gradlew assembleRelease      # APK release
-./gradlew test                 # Tests unitarios (229 tests)
-./gradlew connectedAndroidTest # Tests instrumentados (requiere dispositivo/emulador)
+./gradlew build                # Full build
+./gradlew assembleDebug        # Debug APK
+./gradlew assembleRelease      # Release APK
+./gradlew test                 # Unit tests (210 tests)
+./gradlew connectedAndroidTest # Instrumented tests (22, requires a device/emulator)
 ```
 
 ---
 
-## Permisos
+## Permissions
 
-| Permiso | Motivo |
+| Permission | Why |
 |---|---|
-| `INTERNET` | Firebase RTDB + AdMob |
-| `POST_NOTIFICATIONS` | Notificaciones motivacionales (Android 13+) |
-| `RECEIVE_BOOT_COMPLETED` | WorkManager reprograma workers tras reinicio |
+| `POST_NOTIFICATIONS` | Motivational notifications and habit reminders (Android 13+) |
+| `RECEIVE_BOOT_COMPLETED` | WorkManager reschedules periodic work after a reboot |
+
+`INTERNET` is not declared in the app manifest; it is merged in from the Firebase and
+AdMob libraries.
 
 ---
 
-## Política de privacidad
+## Privacy Policy
 
-El archivo `privacy-policy.html` en la raíz del proyecto contiene la política de privacidad lista para publicar. Súbela a GitHub Pages, Netlify o cualquier hosting estático y usa esa URL en Google Play Console.
+The published privacy policy and terms of service are declared in
+`presentation/common/AppLinks.kt` and open inside the app's WebView:
 
----
-
-## Versiones
-
-Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
-
-| Versión | Descripción |
-|---|---|
-| Unreleased | Integración real de Google Play Billing (`billing-ktx` 9.1.0) — paywall con planes dinámicos desde Play Console, sincronización de entitlement al iniciar la app |
-| 1.2.0 | Widgets de Mi Rutina (resumen + por hábito), suscripción Premium (paywall, hábitos ilimitados, sin anuncios, temas exclusivos, entitlement local pre-billing), rediseño de onboarding |
-| 1.1.5 | Tipografía Google Fonts, compartir la app, redes sociales, términos y condiciones |
-| 1.0.0 | Lanzamiento inicial |
+- https://www.animequote.app/privacy-policy
+- https://www.animequote.app/terms-and-conditions
 
 ---
 
-## Licencia
+## Versioning
 
-Uso privado. Todos los derechos reservados © 2025 Gondroid.
+Current release: **1.2.1** (versionCode 10)
+
+This project follows [Semantic Versioning](https://semver.org/). The full release history
+lives in [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## License
+
+Copyright © 2026 Gondroid. All rights reserved.
+
+This source code is proprietary. It may be viewed for reference, but it may not be
+copied, modified, redistributed, or published to any app store without written
+permission.
+
+Quotes, characters, and artwork belong to their respective rights holders. The license
+above covers this application's source code only, not third-party content.

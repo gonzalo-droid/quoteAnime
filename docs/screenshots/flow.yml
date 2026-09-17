@@ -1,0 +1,47 @@
+# Guion de capturas para el README. Lo ejecuta la skill readme-format.
+platform: android
+appId: com.gondroid.quoteanime
+launch: com.gondroid.quoteanime/.MainActivity
+locale: en_US
+reset: true
+width: 240
+
+screens:
+  - id: 01-onboarding
+    caption: Onboarding
+    needs: clean
+    steps:
+      - wait: 2500          # splash (2s) + transicion
+
+  - id: 02-home
+    caption: Quote feed
+    needs: clean
+    steps:
+      - manual: true        # completar onboarding: 3 paginas + elegir primer habito
+
+  - id: 03-catalog
+    caption: Catalog
+    needs: clean
+    steps:
+      - tap: { id: "nav_catalog" }
+      - wait: 600
+
+  - id: 04-routine
+    caption: Mi Rutina
+    needs: populated        # necesita habitos marcados para que el heatmap muestre algo
+    steps:
+      - tap: { id: "nav_routine" }
+      - wait: 600
+
+  - id: 05-settings
+    caption: Settings
+    needs: clean
+    steps:
+      - tap: { id: "nav_settings" }
+      - wait: 600
+
+  - id: 06-widgets
+    caption: Widgets
+    needs: populated
+    steps:
+      - manual: true        # agregar los 3 widgets a la home del launcher
