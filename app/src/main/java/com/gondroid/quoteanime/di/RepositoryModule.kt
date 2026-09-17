@@ -1,5 +1,7 @@
 package com.gondroid.quoteanime.di
 
+import com.gondroid.quoteanime.data.analytics.CrashReporter
+import com.gondroid.quoteanime.data.analytics.FirebaseCrashReporter
 import com.gondroid.quoteanime.data.remote.BillingClientFactory
 import com.gondroid.quoteanime.data.remote.PlayBillingClientFactory
 import com.gondroid.quoteanime.data.repository.BillingRepositoryImpl
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBillingClientFactory(impl: PlayBillingClientFactory): BillingClientFactory
+
+    @Binds
+    @Singleton
+    abstract fun bindCrashReporter(impl: FirebaseCrashReporter): CrashReporter
 }

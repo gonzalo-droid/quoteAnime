@@ -9,6 +9,7 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryPurchasesAsync
 import com.gondroid.quoteanime.data.local.datastore.UserPreferencesDataStore
+import com.gondroid.quoteanime.data.analytics.CrashReporter
 import com.gondroid.quoteanime.data.remote.BillingClientFactory
 import com.gondroid.quoteanime.worker.PurchaseAcknowledgementScheduler
 import io.mockk.coEvery
@@ -37,11 +38,12 @@ class BillingRepositoryImplTest {
     private val billingClient = mockk<BillingClient>(relaxed = true)
     private val dataStore = mockk<UserPreferencesDataStore>(relaxed = true)
     private val scheduler = mockk<PurchaseAcknowledgementScheduler>(relaxed = true)
+    private val crashReporter = mockk<CrashReporter>(relaxed = true)
 
     private fun buildRepository(): BillingRepositoryImpl {
         val factory = mockk<BillingClientFactory>()
         every { factory.create(any()) } returns billingClient
-        return BillingRepositoryImpl(factory, dataStore, scheduler)
+        return BillingRepositoryImpl(factory, dataStore, scheduler, crashReporter)
     }
 
     private fun result(code: Int): BillingResult =
@@ -125,6 +127,39 @@ class BillingRepositoryImplTest {
 
         assertTrue(buildRepository().acknowledgePendingPurchases())
         verify(exactly = 0) { scheduler.scheduleRetry() }
+    }
+
+    /**
+     * The throttle exists to make foregrounding cheap, not to blind the app: a query that failed
+     * taught us nothing about the entitlement, so it must not buy 15 minutes of silence.
+     */
+    /** Billing failures are not crashes, so without this they leave no trace whatsoever. */
+    @Test
+    fun `a failed query is reported as a non-fatal`() = runTest {
+        coEvery { billingClient.queryPurchasesAsync(any<QueryPurchasesParams>()) } returns
+                PurchasesResult(
+                    result(BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE),
+                    emptyList()
+                )
+
+        buildRepository().restorePurchases()
+
+        verify { crashReporter.recordNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `a failed query does not start the throttle window`() = runTest {
+        coEvery { billingClient.queryPurchasesAsync(any<QueryPurchasesParams>()) } returns
+                PurchasesResult(
+                    result(BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE),
+                    emptyList()
+                )
+
+        val repository = buildRepository()
+        repository.restorePurchases()
+        repository.restorePurchases()
+
+        coVerify(exactly = 2) { billingClient.queryPurchasesAsync(any<QueryPurchasesParams>()) }
     }
 
     @Test

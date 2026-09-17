@@ -15,8 +15,11 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.gondroid.quoteanime.data.analytics.BillingFailure
+import com.gondroid.quoteanime.data.analytics.CrashReporter
 import com.gondroid.quoteanime.data.local.datastore.UserPreferencesDataStore
 import com.gondroid.quoteanime.data.remote.BillingClientFactory
+import com.gondroid.quoteanime.domain.model.BillingErrorReason
 import com.gondroid.quoteanime.domain.model.BillingPurchaseResult
 import com.gondroid.quoteanime.domain.model.SubscriptionOffer
 import com.gondroid.quoteanime.domain.repository.BillingRepository
@@ -47,7 +50,8 @@ import kotlin.coroutines.resume
 class BillingRepositoryImpl @Inject constructor(
     billingClientFactory: BillingClientFactory,
     private val dataStore: UserPreferencesDataStore,
-    private val acknowledgementScheduler: PurchaseAcknowledgementScheduler
+    private val acknowledgementScheduler: PurchaseAcknowledgementScheduler,
+    private val crashReporter: CrashReporter
 ) : BillingRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -63,6 +67,16 @@ class BillingRepositoryImpl @Inject constructor(
 
     /** Serialises `startConnection`, so the app-start restore and a paywall open don't race. */
     private val connectionMutex = Mutex()
+
+    /**
+     * Serialises every read-then-write of the entitlement. The query has to be inside the lock,
+     * not just the write: otherwise a sync that queried Play *before* a purchase completed can
+     * still land its stale `false` on top of the listener's `true`, and a user who just paid
+     * sees the app go back to free until the next sync.
+     *
+     * Always taken before [connectionMutex], never the other way round.
+     */
+    private val entitlementMutex = Mutex()
     private var cachedProductDetails: ProductDetails? = null
 
     /** Last [restorePurchases] that actually hit Play, for the throttle described there. */
@@ -82,7 +96,10 @@ class BillingRepositoryImpl @Inject constructor(
             .build()
 
         val result = billingClient.queryProductDetails(params)
-        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) return emptyList()
+        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            report("query_offers", result.billingResult)
+            return emptyList()
+        }
         val productDetails = result.productDetailsList?.firstOrNull() ?: return emptyList()
         cachedProductDetails = productDetails
 
@@ -102,7 +119,7 @@ class BillingRepositoryImpl @Inject constructor(
 
     override fun launchPurchaseFlow(activity: Activity, offer: SubscriptionOffer) {
         val productDetails = cachedProductDetails ?: run {
-            _purchaseEvents.tryEmit(BillingPurchaseResult.Error("No hay detalles del producto"))
+            emitError("launch_purchase", "no cached product details", BillingErrorReason.UNKNOWN)
             return
         }
         val params = BillingFlowParams.newBuilder()
@@ -117,7 +134,7 @@ class BillingRepositoryImpl @Inject constructor(
             .build()
         val result = billingClient.launchBillingFlow(activity, params)
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-            _purchaseEvents.tryEmit(BillingPurchaseResult.Error(result.debugMessage))
+            emitError("launch_purchase", result)
         }
     }
 
@@ -126,17 +143,19 @@ class BillingRepositoryImpl @Inject constructor(
      * process: an entitlement can only change on Play's side, so re-querying on each alt-tab
      * would cost network for nothing.
      */
-    override suspend fun restorePurchases() {
+    override suspend fun restorePurchases() = entitlementMutex.withLock {
         val now = SystemClock.elapsedRealtime()
         lastSyncElapsedMs?.let { if (now - it < MIN_SYNC_INTERVAL_MS) return }
         if (!ensureConnected()) return
-        syncPurchases()
-        lastSyncElapsedMs = now
+        // Only a query that actually answered starts the window. Stamping after a failure would
+        // buy 15 minutes of silence on the one path where nothing was learned — so a user who
+        // regains connection right after a failed check would keep a stale entitlement.
+        if (syncPurchases() != null) lastSyncElapsedMs = now
     }
 
-    override suspend fun acknowledgePendingPurchases(): Boolean {
-        if (!ensureConnected()) return false
-        return syncPurchases()?.allAcknowledged == true
+    override suspend fun acknowledgePendingPurchases(): Boolean = entitlementMutex.withLock {
+        if (!ensureConnected()) return@withLock false
+        syncPurchases()?.allAcknowledged == true
     }
 
     // MARK: - Private
@@ -170,7 +189,10 @@ class BillingRepositoryImpl @Inject constructor(
             .setProductType(BillingClient.ProductType.SUBS)
             .build()
         val result = billingClient.queryPurchasesAsync(params)
-        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) return null
+        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            report("query_purchases", result.billingResult)
+            return null
+        }
         val purchases = result.purchasesList
         val hasActiveEntitlement = purchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED }
 
@@ -183,13 +205,16 @@ class BillingRepositoryImpl @Inject constructor(
         return SyncResult(hasActiveEntitlement, allAcknowledged)
     }
 
-    private suspend fun handlePurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
+    private suspend fun handlePurchasesUpdated(
+        billingResult: BillingResult,
+        purchases: List<Purchase>?
+    ) = entitlementMutex.withLock {
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
                 val purchased = purchases.orEmpty()
                 if (purchased.isEmpty()) {
-                    _purchaseEvents.tryEmit(BillingPurchaseResult.Error("No se recibió la compra"))
-                    return
+                    emitError("purchase_update", "OK with an empty purchase list", BillingErrorReason.UNKNOWN)
+                    return@withLock
                 }
                 purchased.forEach { purchase ->
                     when (purchase.purchaseState) {
@@ -207,12 +232,12 @@ class BillingRepositoryImpl @Inject constructor(
                 _purchaseEvents.tryEmit(BillingPurchaseResult.UserCancelled)
             // Already subscribed (e.g. bought on another device): re-sync instead of erroring out.
             BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ->
-                _purchaseEvents.tryEmit(
-                    if (syncPurchases()?.hasEntitlement == true) BillingPurchaseResult.Success
-                    else BillingPurchaseResult.Error(billingResult.debugMessage)
-                )
-            else ->
-                _purchaseEvents.tryEmit(BillingPurchaseResult.Error(billingResult.debugMessage))
+                if (syncPurchases()?.hasEntitlement == true) {
+                    _purchaseEvents.tryEmit(BillingPurchaseResult.Success)
+                } else {
+                    emitError("already_owned_resync", billingResult)
+                }
+            else -> emitError("purchase_update", billingResult)
         }
     }
 
@@ -229,16 +254,60 @@ class BillingRepositoryImpl @Inject constructor(
             .setPurchaseToken(purchase.purchaseToken)
             .build()
 
+        var lastResult: BillingResult? = null
         for (attempt in 0 until ACK_MAX_ATTEMPTS) {
-            val responseCode = billingClient.acknowledgePurchase(params).responseCode
-            if (responseCode == BillingClient.BillingResponseCode.OK) return true
+            val result = billingClient.acknowledgePurchase(params)
+            lastResult = result
+            if (result.responseCode == BillingClient.BillingResponseCode.OK) return true
             // A permanent rejection (already refunded, developer error) won't fix itself.
-            if (responseCode !in RETRYABLE_RESPONSE_CODES) break
+            if (result.responseCode !in RETRYABLE_RESPONSE_CODES) break
             if (attempt < ACK_MAX_ATTEMPTS - 1) delay(ACK_BASE_DELAY_MS shl attempt)
         }
 
+        // The one failure worth waking up for: unacknowledged for 72 h means Play refunds a
+        // user who never asked for a refund, and nothing else in the app would ever say so.
+        lastResult?.let { report("acknowledge", it) }
         acknowledgementScheduler.scheduleRetry()
         return false
+    }
+
+    /** Maps Play's response codes onto the few distinctions a user can act on. */
+    private fun reasonFor(responseCode: Int): BillingErrorReason = when (responseCode) {
+        BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+        BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
+        BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> BillingErrorReason.PLAY_UNAVAILABLE
+        BillingClient.BillingResponseCode.NETWORK_ERROR -> BillingErrorReason.NETWORK
+        else -> BillingErrorReason.UNKNOWN
+    }
+
+    private fun report(stage: String, result: BillingResult) {
+        crashReporter.recordNonFatal(
+            BillingFailure("$stage failed with code ${result.responseCode}"),
+            mapOf(
+                "billing_stage" to stage,
+                "billing_response_code" to result.responseCode.toString(),
+                "billing_debug_message" to result.debugMessage
+            )
+        )
+    }
+
+    private fun emitError(stage: String, result: BillingResult) {
+        report(stage, result)
+        _purchaseEvents.tryEmit(
+            BillingPurchaseResult.Error(
+                reason = reasonFor(result.responseCode),
+                diagnostic = "$stage: ${result.debugMessage}"
+            )
+        )
+    }
+
+    /** For failures that never reached Play, so there is no response code to map. */
+    private fun emitError(stage: String, diagnostic: String, reason: BillingErrorReason) {
+        crashReporter.recordNonFatal(
+            BillingFailure("$stage: $diagnostic"),
+            mapOf("billing_stage" to stage)
+        )
+        _purchaseEvents.tryEmit(BillingPurchaseResult.Error(reason, "$stage: $diagnostic"))
     }
 
     /** Trial phases are billed at zero for one period — e.g. "P7D" → 7, "P1M" → 30 (approx). */
