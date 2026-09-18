@@ -375,4 +375,10 @@
 
     <string name="paywall_error_play_unavailable">Google Play no está disponible ahora. Inténtalo más tarde.</string>
     <string name="paywall_error_network">Sin conexión. Revisa tu red e intenta de nuevo.</string>
+
+    <!-- Ajustes: selección de animes (inicio, notificaciones y widget) -->
+    <string name="settings_animes_title">Animes</string>
+    <string name="settings_animes_description">Elige de qué animes quieres ver frases en el inicio y recibir por notificación. Si no eliges ninguno, se muestran todos.</string>
+    <string name="settings_animes_all">Todos los animes</string>
+    <string name="settings_animes_empty">Todavía no hay animes disponibles.</string>
 </resources>

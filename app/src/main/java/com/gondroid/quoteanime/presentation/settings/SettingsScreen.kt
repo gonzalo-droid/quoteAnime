@@ -14,20 +14,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +69,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.domain.model.Category
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
@@ -149,6 +157,19 @@ fun SettingsScreen(
                     PremiumSettingsRow(
                         isPremium = uiState.isPremium,
                         onClick = onNavigateToPaywall
+                    )
+                }
+
+                item { SectionDivider() }
+
+                item {
+                    SectionHeader(stringResource(R.string.settings_animes_title))
+                    AnimeSelectionSection(
+                        categories = uiState.categories,
+                        selectedIds = uiState.selectedCategoryIds,
+                        isLoading = uiState.categoriesLoading,
+                        onSelectAll = viewModel::onSelectAllCategories,
+                        onToggle = viewModel::onCategoryToggled
                     )
                 }
 
@@ -289,6 +310,89 @@ private fun PremiumSettingsRow(isPremium: Boolean, onClick: () -> Unit) {
         },
         colors = listItemColors,
         modifier = Modifier.clickable(onClick = onClick)
+    )
+}
+
+/**
+ * Which animes the feed, the notifications and the quote widget draw from. **Nothing selected
+ * means every anime**, so "All anime" is on exactly when the set is empty, and unchecking the
+ * last anime is the same as choosing it. Every tap is saved at once — there is no "save".
+ *
+ * Chips in a [FlowRow], not a list: the catalogue is ~20 short names, which wrap into a few
+ * lines instead of a screen of rows (iOS, with its own idiom, uses a pushed checkmark list).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun AnimeSelectionSection(
+    categories: List<Category>,
+    selectedIds: Set<String>,
+    isLoading: Boolean,
+    onSelectAll: () -> Unit,
+    onToggle: (categoryId: String) -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            stringResource(R.string.settings_animes_description),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(Modifier.height(12.dp))
+        when {
+            isLoading -> Box(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            categories.isEmpty() -> Text(
+                stringResource(R.string.settings_animes_empty),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            else -> FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.testTag(ANIME_CHIPS_TEST_TAG)
+            ) {
+                AnimeChip(
+                    label = stringResource(R.string.settings_animes_all),
+                    selected = selectedIds.isEmpty(),
+                    onClick = onSelectAll
+                )
+                categories.forEach { category ->
+                    AnimeChip(
+                        label = category.name,
+                        selected = category.id in selectedIds,
+                        onClick = { onToggle(category.id) }
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+internal const val ANIME_CHIPS_TEST_TAG = "settings_anime_chips"
+
+@Composable
+private fun AnimeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        leadingIcon = if (selected) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else null
     )
 }
 

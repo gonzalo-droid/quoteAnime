@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -125,11 +126,20 @@ private fun HomeContent(
                     color = TextSecondary,
                     modifier = Modifier.align(Alignment.Center)
                 )
+                // Settings stays reachable: an anime selection that matches nothing would
+                // otherwise leave the user with an empty feed and no way to change it.
+                SettingsButton(onNavigateToSettings, Modifier.align(Alignment.TopEnd))
             }
 
             else -> {
-                val pagerState = rememberPagerState(pageCount = { uiState.quotes.size })
-                val currentQuote = uiState.quotes[pagerState.currentPage]
+                // A new anime selection is a new feed: start it at the top instead of keeping
+                // a page index that belonged to the previous list (and may not exist in it).
+                val pagerState = key(uiState.appliedCategoryIds) {
+                    rememberPagerState(pageCount = { uiState.quotes.size })
+                }
+                val currentQuote = uiState.quotes[
+                    pagerState.currentPage.coerceIn(0, uiState.quotes.lastIndex)
+                ]
 
                 // Scroll to widget quote when launched from widget tap
                 LaunchedEffect(uiState.scrollToPage) {
@@ -163,20 +173,7 @@ private fun HomeContent(
                     )
                 }
 
-                IconButton(
-                    onClick = onNavigateToSettings,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .statusBarsPadding()
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = stringResource(R.string.settings),
-                        tint = TextSecondary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+                SettingsButton(onNavigateToSettings, Modifier.align(Alignment.TopEnd))
 
                 BottomActions(
                     quote = currentQuote,
@@ -192,6 +189,23 @@ private fun HomeContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .statusBarsPadding()
+            .padding(8.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Settings,
+            contentDescription = stringResource(R.string.settings),
+            tint = TextSecondary,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
