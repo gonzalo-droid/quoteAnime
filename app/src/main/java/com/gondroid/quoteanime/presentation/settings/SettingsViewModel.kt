@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.gondroid.quoteanime.domain.model.Category
 import com.gondroid.quoteanime.domain.model.WidgetSize
-import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
+import com.gondroid.quoteanime.domain.usecase.GetAnimesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
 import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
+import com.gondroid.quoteanime.domain.usecase.ReconcileAnimeSelectionUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
@@ -31,12 +31,13 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val getCategories: GetCategoriesUseCase,
+    private val getAnimes: GetAnimesUseCase,
     private val getUserPreferences: GetUserPreferencesUseCase,
     private val updatePreferences: UpdateUserPreferencesUseCase,
     private val notificationScheduler: NotificationScheduler,
     private val widgetScheduler: WidgetScheduler,
-    private val observePremiumStatus: ObservePremiumStatusUseCase
+    private val observePremiumStatus: ObservePremiumStatusUseCase,
+    private val reconcileAnimeSelection: ReconcileAnimeSelectionUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -46,19 +47,22 @@ class SettingsViewModel @Inject constructor(
         // The anime list must not hold the whole screen hostage: it comes from the Realtime
         // Database, whose listener never answers offline without a cache. Until it does (or if it
         // fails) the rest of Settings is usable and only the anime section shows its own state.
-        val categories = getCategories()
-            .map<List<Category>, List<Category>?> { it }
+        val animes = getAnimes()
+            .map<List<String>, List<String>?> { it }
             .onStart { emit(null) }
             // A failed read shows the section's empty state; it must not cancel the combine
             // below and take the notification and widget settings down with it.
             .catch { emit(emptyList()) }
 
         viewModelScope.launch {
-            combine(categories, getUserPreferences(), observePremiumStatus()) { categories, prefs, isPremium ->
+            combine(animes, getUserPreferences(), observePremiumStatus()) { animes, prefs, isPremium ->
+                // Drops saved values that name no anime (emotions saved by the build that listed
+                // them here) and saves the cleaned selection. Untouched until the list arrives.
+                val selected = reconcileAnimeSelection(prefs.selectedCategoryIds, animes.orEmpty())
                 _uiState.value.copy(
-                    categories              = categories.orEmpty(),
-                    categoriesLoading       = categories == null,
-                    selectedCategoryIds     = prefs.selectedCategoryIds,
+                    animes                  = animes.orEmpty(),
+                    animesLoading           = animes == null,
+                    selectedAnimes          = selected,
                     notificationsEnabled    = prefs.notificationsEnabled,
                     notificationStartHour   = prefs.notificationStartHour,
                     notificationStartMinute = prefs.notificationStartMinute,
@@ -74,23 +78,23 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    // ── Categories ────────────────────────────────────────────────────────────
+    // ── Animes ────────────────────────────────────────────────────────────────
     // Both update the state right away instead of waiting for DataStore to echo the write: the
     // chips react on the same frame, and a second quick tap toggles on top of the first.
-    fun onCategoryToggled(categoryId: String) {
-        val newIds = _uiState.value.selectedCategoryIds.toggle(categoryId)
-        _uiState.update { it.copy(selectedCategoryIds = newIds) }
+    fun onAnimeToggled(anime: String) {
+        val newSelection = _uiState.value.selectedAnimes.toggle(anime)
+        _uiState.update { it.copy(selectedAnimes = newSelection) }
         viewModelScope.launch {
-            updatePreferences.setCategories(newIds)
-            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedCategoryIds = newIds))
+            updatePreferences.setSelectedAnimes(newSelection)
+            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedAnimes = newSelection))
         }
     }
 
-    fun onSelectAllCategories() {
-        _uiState.update { it.copy(selectedCategoryIds = emptySet()) }
+    fun onSelectAllAnimes() {
+        _uiState.update { it.copy(selectedAnimes = emptySet()) }
         viewModelScope.launch {
-            updatePreferences.setCategories(emptySet())
-            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedCategoryIds = emptySet()))
+            updatePreferences.setSelectedAnimes(emptySet())
+            rescheduleNotificationIfEnabled(_uiState.value.copy(selectedAnimes = emptySet()))
         }
     }
 

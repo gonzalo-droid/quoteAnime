@@ -13,6 +13,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   volver a Inicio
 
 ### Fixed
+- **La sección "Animes" de Ajustes mostraba emociones**: en lugar de nombres de anime
+  listaba "motivación", "reflexión" y demás, y el feed, las notificaciones y el widget
+  filtraban por emoción. Ahora ves los animes (ordenados alfabéticamente, como en iOS) y lo que
+  eliges filtra por anime. Si habías marcado emociones, al abrir la app se descartan: si no
+  queda ningún anime marcado vuelves a ver todos, nunca un feed vacío. Los filtros por emoción
+  del Catálogo siguen igual
 - **Ajustes sin conexión**: la pantalla de Ajustes ya no se queda cargando para siempre si
   abres la app sin red; solo la lista de animes espera a que vuelva la conexión
 - **Frase del widget en Inicio**: después de abrir una frase desde el widget, marcar otra como

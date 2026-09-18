@@ -378,7 +378,7 @@
 
     <!-- Settings: anime selection (feed, notifications and widget) -->
     <string name="settings_animes_title">Anime</string>
-    <string name="settings_animes_description">Choose which anime you want to see quotes from on the home screen and in notifications. If you don\'t choose any, all of them are shown.</string>
+    <string name="settings_animes_description">Choose which anime you want to see quotes from in the feed, in notifications and in the widget. If you don\'t choose any, all of them are shown.</string>
     <string name="settings_animes_all">All anime</string>
     <string name="settings_animes_empty">No anime available yet.</string>
 
