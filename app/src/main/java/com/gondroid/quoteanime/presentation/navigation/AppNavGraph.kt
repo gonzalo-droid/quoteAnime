@@ -34,16 +34,18 @@ sealed class Screen(val route: String) {
     data object Home : Screen("home") {
         const val ARG_QUOTE_ID = "quoteId"
         val routeWithArg = "home?$ARG_QUOTE_ID={$ARG_QUOTE_ID}"
+        /** The id is encoded (see [encodeRouteArg]); Home reads it back already decoded. */
         fun createRoute(quoteId: String?) =
-            if (quoteId != null) "home?$ARG_QUOTE_ID=$quoteId" else "home"
+            if (quoteId != null) "home?$ARG_QUOTE_ID=${encodeRouteArg(quoteId)}" else "home"
     }
     data object Settings : Screen("settings")
     data object WidgetTutorial : Screen("widget_tutorial")
     data object Catalog : Screen("catalog") {
         const val ARG = "categoryId"
         val routeWithArg = "catalog?$ARG={$ARG}"
+        /** Category ids are anime names — free text — so they're encoded like the quote id. */
         fun createRoute(categoryId: String?) =
-            if (categoryId != null) "catalog?$ARG=$categoryId" else "catalog"
+            if (categoryId != null) "catalog?$ARG=${encodeRouteArg(categoryId)}" else "catalog"
     }
     data object Routine : Screen("routine")
     data object HabitEditor : Screen("habit_editor") {
