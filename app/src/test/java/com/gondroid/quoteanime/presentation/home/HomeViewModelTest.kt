@@ -41,6 +41,7 @@ import org.junit.Test
  *  - Anime selection change: the feed follows it without reopening Home
  *  - Widget focus is applied once: later emissions (a favorite toggle) don't scroll back to it
  *  - Widget quote outside the selection: Home stays at the top
+ *  - An id with route delimiters arrives decoded by Navigation and is used as is
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -341,5 +342,19 @@ class HomeViewModelTest {
 
         assertNull(viewModel.uiState.value.scrollToPage)
         assertEquals(listOf("1"), viewModel.uiState.value.quotes.map { it.id })
+    }
+
+    @Test
+    fun `given an id with route delimiters, when Navigation hands it over decoded, then it is found as is`() {
+        runTest {
+            val odd = Quote(id = "a&b?c=%41", quote = "q", author = "a", anime = "Naruto")
+            every { getAllQuotes() } returns flowOf(sampleQuotes + odd)
+
+            // Screen.Home.createRoute encodes it; Navigation decodes it into the SavedStateHandle.
+            val viewModel = buildViewModel(widgetQuoteId = "a&b?c=%41")
+            advanceUntilIdle()
+
+            assertEquals(3, viewModel.uiState.value.scrollToPage)
+        }
     }
 }

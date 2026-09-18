@@ -69,7 +69,9 @@ class MainActivity : ComponentActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.registerListener(installStateListener)
 
-        // Read on every onCreate, including the re-creation that CLEAR_TOP taps cause.
+        // Only a fresh start: after a configuration change or process death the router below
+        // restores its own pending link, and a relaunch from Recents carries none (see
+        // AppDeepLink.fromLaunch). Taps while the activity is alive arrive via onNewIntent.
         val initialDeepLink = intent.toAppDeepLink()
 
         setContent {
@@ -181,7 +183,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun Intent.toAppDeepLink(): AppDeepLink? = AppDeepLink.from(
+private fun Intent.toAppDeepLink(): AppDeepLink? = AppDeepLink.fromLaunch(
     quoteId = getStringExtra(AppDeepLink.EXTRA_QUOTE_ID),
-    openRoutine = getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)
+    openRoutine = getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false),
+    intentFlags = flags
 )

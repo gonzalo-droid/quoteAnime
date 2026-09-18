@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.saveable.Saver
 
 /**
@@ -13,6 +14,31 @@ sealed interface AppDeepLink {
     companion object {
         /** Intent extra the quote widget uses to ask for a specific quote. */
         const val EXTRA_QUOTE_ID = "widget_quote_id"
+
+        /**
+         * Flags for every intent that opens [com.gondroid.quoteanime.MainActivity] from outside
+         * (widgets, notifications). `CLEAR_TOP` alone — with the activity in the default
+         * `standard` mode — finishes the running instance and creates a new one: the app
+         * restarted from the splash on every tap. With `SINGLE_TOP` (and `launchMode="singleTop"`
+         * in the manifest, for any caller that forgets it) the running activity is reused and
+         * the link arrives through `onNewIntent`, where [DeepLinkRouter] applies it.
+         * Never `CLEAR_TASK`: it destroys the task and whatever the user had open.
+         */
+        const val LAUNCH_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK or
+            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+            Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+        /**
+         * The link an intent that started the activity asks for, from its extras and flags.
+         *
+         * Reopening the app from Recents re-delivers the intent that first created the task,
+         * extras included, flagged `FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY`. Honouring it would
+         * repeat an old widget or reminder tap — Mi Rutina or a quote the user left long ago —
+         * so such an intent carries no link.
+         */
+        fun fromLaunch(quoteId: String?, openRoutine: Boolean, intentFlags: Int): AppDeepLink? =
+            if ((intentFlags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) null
+            else from(quoteId, openRoutine)
 
         /**
          * Reads the two intent extras that can open a destination; a quote wins over Mi Rutina.

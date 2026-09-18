@@ -96,7 +96,7 @@ class QuoteWidget : GlanceAppWidget() {
             // Loading or error: no quote to open, so the tap just opens the app. An empty id
             // used to be sent and navigated to, clearing the whole back stack.
             if (quoteId.isNotBlank()) putExtra(AppDeepLink.EXTRA_QUOTE_ID, quoteId)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = AppDeepLink.LAUNCH_FLAGS
         }
 
         val isSmall  = size.width < SIZE_MEDIUM.width

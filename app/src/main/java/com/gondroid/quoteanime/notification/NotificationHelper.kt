@@ -11,6 +11,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.gondroid.quoteanime.MainActivity
+import com.gondroid.quoteanime.presentation.navigation.AppDeepLink
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -68,7 +69,9 @@ class NotificationHelper @Inject constructor(
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun showQuoteNotification(quote: Quote) {
         val tapIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            // Opens the app where the user left it; CLEAR_TASK used to wipe the task and
+            // restart from the splash.
+            flags = AppDeepLink.LAUNCH_FLAGS
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
@@ -123,7 +126,7 @@ class NotificationHelper @Inject constructor(
             contentRequestCode,
             Intent(context, MainActivity::class.java).apply {
                 putExtra(EXTRA_OPEN_ROUTINE, true)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                flags = AppDeepLink.LAUNCH_FLAGS
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

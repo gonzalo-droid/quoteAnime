@@ -85,6 +85,7 @@ com.gondroid.quoteanime/
 - **Repository binding**: `RepositoryModule` uses `@Binds` (abstract module) — keep it abstract, not `object`.
 - **Startup** (`QuoteAnimeApplication.onCreate`): `MobileAds.initialize()` (synchronous, main thread), widget update scheduling, routine widget daily refresh, then `syncPremiumEntitlement()` → `RestorePurchasesUseCase`. The Premium entitlement is re-synced from Play on **every** start.
 - **Startup routing**: `SplashViewModel` reads `GetOnboardingCompletedUseCase` and routes to `Onboarding` or `Home`.
+- **Deep links (widgets, notifications)**: `MainActivity` is `launchMode="singleTop"` and every intent to it uses `AppDeepLink.LAUNCH_FLAGS` (`NEW_TASK | CLEAR_TOP | SINGLE_TOP`, never `CLEAR_TASK`) — a tap with the app open arrives via `onNewIntent` → `DeepLinkRouter`. `AppDeepLink.fromLaunch` ignores intents flagged `FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY` (reopen from Recents). Free-text route args go through `encodeRouteArg`; Navigation decodes them, so destinations must **not** decode again. `MainActivityLaunchTest` pins the manifest and the flags.
 - **Premium gating**: `PremiumGate.maxActiveHabits(isPremium)` — `FREE_HABIT_LIMIT = 3`. The entitlement flag is `IS_PREMIUM` in DataStore; ads are hidden when it is set.
 
 ## HomeScreen & CatalogScreen
