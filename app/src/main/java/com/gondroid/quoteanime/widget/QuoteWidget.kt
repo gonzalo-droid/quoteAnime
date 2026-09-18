@@ -40,6 +40,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gondroid.quoteanime.MainActivity
+import com.gondroid.quoteanime.presentation.navigation.AppDeepLink
 import com.gondroid.quoteanime.R
 
 // ── Colors (hardcoded for Glance — no MaterialTheme available) ───────────────
@@ -92,7 +93,9 @@ class QuoteWidget : GlanceAppWidget() {
         val openIntent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_MAIN
             addCategory(Intent.CATEGORY_LAUNCHER)
-            putExtra("widget_quote_id", quoteId)
+            // Loading or error: no quote to open, so the tap just opens the app. An empty id
+            // used to be sent and navigated to, clearing the whole back stack.
+            if (quoteId.isNotBlank()) putExtra(AppDeepLink.EXTRA_QUOTE_ID, quoteId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 

@@ -140,6 +140,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.domain.model.HabitTemplateTitles
 import com.gondroid.quoteanime.R
 
 /** One group of related icons shown together in the full-screen picker. */
@@ -522,8 +523,9 @@ object HabitIcons {
  * Bundled templates' title keys (see [com.gondroid.quoteanime.domain.model.DefaultHabitTemplates])
  * mapped at compile time so [resolveTemplateTitle] never needs reflection — R8/resource
  * shrinking can't see a `getIdentifier()` lookup and may strip the referenced strings.
+ * Its keys must be exactly [HabitTemplateTitles.KNOWN_KEYS] (pinned by a unit test).
  */
-private val TEMPLATE_TITLE_RES_BY_KEY: Map<String, Int> = mapOf(
+internal val TEMPLATE_TITLE_RES_BY_KEY: Map<String, Int> = mapOf(
     "template_train" to R.string.template_train,
     "template_read" to R.string.template_read,
     "template_meditate" to R.string.template_meditate,
@@ -566,14 +568,19 @@ fun describeIcon(key: String): String {
 
 /**
  * Bundled templates carry a string-resource key (e.g. "template_train") as their title;
- * remote/custom ones carry literal text. Resolve the key to localized display text here,
+ * remote/custom ones may carry literal text. Resolve the key to localized display text here,
  * shared by both the onboarding habit picker and the habit editor's template chips.
+ * Templates whose key this build doesn't know never get here: [HabitTemplateTitles] has
+ * GetHabitTemplatesUseCase drop them so a raw `template_…` id is never shown.
  */
 @Composable
-fun resolveTemplateTitle(title: String): String {
-    val resId = TEMPLATE_TITLE_RES_BY_KEY[title]
-    return if (resId != null) stringResource(resId) else title
-}
+fun resolveTemplateTitle(title: String): String =
+    when (val parsed = HabitTemplateTitles.parse(title)) {
+        is HabitTemplateTitles.Title.Key ->
+            TEMPLATE_TITLE_RES_BY_KEY[parsed.key]?.let { stringResource(it) } ?: parsed.key
+        is HabitTemplateTitles.Title.Literal -> parsed.text
+        null -> title.trim()
+    }
 
 /**
  * A template chip that's aware of premium locking, shared by the habit editor and the

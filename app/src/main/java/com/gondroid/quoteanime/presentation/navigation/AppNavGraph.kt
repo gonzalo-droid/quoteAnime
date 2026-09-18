@@ -1,6 +1,8 @@
 package com.gondroid.quoteanime.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,7 +23,13 @@ import com.gondroid.quoteanime.presentation.subscription.PaywallScreen
 import com.gondroid.quoteanime.presentation.web.WebViewScreen
 
 sealed class Screen(val route: String) {
-    data object Splash : Screen("splash")
+    data object Splash : Screen("splash") {
+        /** Set when a deep link is waiting: the user asked for a destination, so the intro is skipped. */
+        const val ARG_SKIP_INTRO = "skipIntro"
+        val routeWithArg = "splash?$ARG_SKIP_INTRO={$ARG_SKIP_INTRO}"
+        fun createRoute(skipIntro: Boolean) =
+            if (skipIntro) "splash?$ARG_SKIP_INTRO=true" else "splash"
+    }
     data object Onboarding : Screen("onboarding")
     data object Home : Screen("home") {
         const val ARG_QUOTE_ID = "quoteId"
@@ -66,15 +74,15 @@ sealed class Screen(val route: String) {
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
-    startQuoteId: String? = null,
-    openRoutine: Boolean = false
+    deepLinkRouter: DeepLinkRouter = remember { DeepLinkRouter() }
 ) {
-    // If app was opened via widget tap or habit reminder tap, skip splash/onboarding
-    // and go directly to the relevant destination.
-    val start = when {
-        startQuoteId != null -> Screen.Home.createRoute(startQuoteId)
-        openRoutine -> Screen.Routine.route
-        else -> Screen.Splash.route
+    // Every launch goes through the splash, which checks the onboarding: a widget or reminder
+    // tap never skips an onboarding that isn't complete. Its destination waits in
+    // [deepLinkRouter] and is applied when the app reaches Home (see [enterMain]); with one
+    // waiting, the splash skips its intro animation. Saveable so a configuration change
+    // doesn't swap the graph's start destination.
+    val start = rememberSaveable {
+        Screen.Splash.createRoute(skipIntro = deepLinkRouter.pending != null)
     }
 
     // No outer Scaffold/bottom bar: Frases, Catálogo and Mi rutina are reached via normal
@@ -85,16 +93,22 @@ fun AppNavGraph(
         navController = navController,
         startDestination = start
     ) {
-        composable(Screen.Splash.route) {
+        composable(
+            route = Screen.Splash.routeWithArg,
+            arguments = listOf(
+                navArgument(Screen.Splash.ARG_SKIP_INTRO) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) {
             SplashScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
+                    navController.enterMain(deepLinkRouter.enterMain(), leaving = Screen.Splash.routeWithArg)
                 },
                 onNavigateToOnboarding = {
                     navController.navigate(Screen.Onboarding.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                        popUpTo(Screen.Splash.routeWithArg) { inclusive = true }
                     }
                 }
             )
@@ -103,9 +117,7 @@ fun AppNavGraph(
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinished = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
+                    navController.enterMain(deepLinkRouter.enterMain(), leaving = Screen.Onboarding.route)
                 },
                 onNavigateToPaywall = { navController.navigate(Screen.Paywall.route) }
             )
@@ -225,4 +237,43 @@ fun AppNavGraph(
             )
         }
     }
+}
+
+/**
+ * Replaces the splash or the onboarding ([leaving]) with [routes], bottom first — Home, plus
+ * whatever a pending deep link asked for on top of it.
+ */
+private fun NavHostController.enterMain(routes: List<String>, leaving: String) {
+    routes.forEachIndexed { index, route ->
+        navigate(route) {
+            if (index == 0) popUpTo(leaving) { inclusive = true }
+        }
+    }
+}
+
+/** True once Home is on the back stack, i.e. the splash and the onboarding are behind us. */
+fun NavHostController.isInMainContent(): Boolean =
+    currentBackStack.value.any { it.destination.route == Screen.Home.routeWithArg }
+
+/**
+ * Shows a deep link's [routes] (see [mainBackStack]) while the app is already in its main
+ * content: everything above Home is dropped, so "back" from the destination returns to Home.
+ * The Home already on the stack is kept (with its pager position) unless the link asks for a
+ * specific quote, which needs a Home positioned on it.
+ */
+fun NavHostController.showMainBackStack(routes: List<String>) {
+    val home = routes.first()
+    val above = routes.drop(1)
+    if (home == Screen.Home.route) {
+        val currentAboveHome = currentBackStack.value
+            .map { it.destination.route }
+            .dropWhile { it != Screen.Home.routeWithArg }
+            .drop(1)
+        // Already showing exactly this (e.g. Mi Rutina with nothing on top): leave it alone.
+        if (currentAboveHome == above) return
+        popBackStack(Screen.Home.routeWithArg, inclusive = false)
+    } else {
+        navigate(home) { popUpTo(Screen.Home.routeWithArg) { inclusive = true } }
+    }
+    above.forEach { navigate(it) }
 }
