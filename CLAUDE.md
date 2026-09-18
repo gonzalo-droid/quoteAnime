@@ -27,12 +27,17 @@ Motivational anime quotes Android app. Quotes come from **Firebase Realtime Data
 ## Realtime Database Schema
 
 ```
-/quotes/{index}        → id: Long, quote: String, author: String, anime: String
+/quotes/{index}        → id: Long, quote: String, author: String, anime: String, categories: [String] (emociones), animeSlug?
 /habitTemplates/{id}   → title (string-resource key), iconKey, order, themeColorIndex?, themeKey?, isPremiumOnly
 /imagenes              → fetched once by QuoteRemoteDataSource
 ```
 
-Quote categories are **derived** from the distinct `anime` values — there is no `/categories` node. If `/habitTemplates` is empty or missing, the habit editor falls back to the local `DefaultHabitTemplates.ALL`.
+A quote is classified two ways, and they must not be mixed (a build did, and the Settings "Animes" selector listed emotions):
+
+- **Anime** (`anime`): the Settings anime list is **derived** from the distinct `anime` values (`GetAnimesUseCase`, sorted like iOS) — there is no `/animes` or `/categories` node. The selection (`UserPreferences.selectedCategoryIds`, a legacy name kept for the DataStore key and iOS parity) holds **anime names** and filters Home, notifications and the widget via `Quote.isFromAnimes` / `pickRandomFromAnimes` (`domain/model/AnimeSelection.kt`). Saved values that name no anime are dropped and saved back (`ReconcileAnimeSelectionUseCase`); if none survive, the selection becomes empty = every anime.
+- **Emotion** (`categories`): every production quote carries a list like `["motivación", "reflexión"]` (Spanish RTDB ids). Only the Catalogue's `ByEmotion` filter reads it (`GetQuotesByCategoryUseCase` → `Quote.hasEmotion`); the emotion chips are a fixed list in `CatalogScreen`.
+
+If `/habitTemplates` is empty or missing, the habit editor falls back to the local `DefaultHabitTemplates.ALL`.
 
 ## Architecture
 
@@ -66,19 +71,20 @@ com.gondroid.quoteanime/
 
 | Use Case | Description |
 |---|---|
-| `GetCategoriesUseCase` | Flow of categories, derived from the `anime` field in RTDB |
-| `GetQuotesByCategoryUseCase` | Flow of quotes for a category, with `isFavorite` merged from Room |
-| `GetRandomQuoteUseCase` | Suspend — used by WorkManager & Widget |
+| `GetAnimesUseCase` | Flow of distinct anime names (`anime` field), sorted — the Settings selector |
+| `ReconcileAnimeSelectionUseCase` | Drops saved selection values that name no anime and saves the result (Home and Settings) |
+| `GetQuotesByCategoryUseCase` | Flow of quotes tagged with an **emotion** (`categories`), with `isFavorite` merged from Room — Catalogue |
+| `GetRandomQuoteUseCase` | Suspend — random quote of the anime selection (stale selection = all); used by the notification and widget workers |
 | `GetFavoriteQuotesUseCase` | Flow of locally saved favorites |
 | `ToggleFavoriteUseCase` | Adds or removes favorite based on `quote.isFavorite` |
 | `GetAllQuotesUseCase` | Flow of every quote, `isFavorite` merged from Room — feeds Home |
-| `UpdateUserPreferencesUseCase` | Writes categories, time window, frequency, enabled flag, widget settings to DataStore |
+| `UpdateUserPreferencesUseCase` | Writes the anime selection (`setSelectedAnimes`), time window, frequency, enabled flag, widget settings to DataStore |
 
-32 use cases in total. Beyond quotes: habits (`Create/Update/Archive/Unarchive/Delete`, `ToggleHabitCompletion`, `CalculateStreak`, `GetGlobalStreak`, `GetHabitTemplates`), billing (`GetSubscriptionOffers`, `LaunchSubscriptionPurchase`, `ObservePurchaseEvents`, `RestorePurchases`, `AcknowledgePendingPurchases`, `GetManageSubscriptionUrl`), premium (`Observe/SetPremiumStatus`) and flags (`Get/SetOnboardingCompleted`, `IsRoutineIntroSeen`/`SetRoutineIntroSeen`).
+33 use cases in total. Beyond quotes: habits (`Create/Update/Archive/Unarchive/Delete`, `ToggleHabitCompletion`, `CalculateStreak`, `GetGlobalStreak`, `GetHabitTemplates`), billing (`GetSubscriptionOffers`, `LaunchSubscriptionPurchase`, `ObservePurchaseEvents`, `RestorePurchases`, `AcknowledgePendingPurchases`, `GetManageSubscriptionUrl`), premium (`Observe/SetPremiumStatus`) and flags (`Get/SetOnboardingCompleted`, `IsRoutineIntroSeen`/`SetRoutineIntroSeen`).
 
 ## Key Wiring
 
-- **`isFavorite` merging**: `QuoteRepositoryImpl.getQuotesByCategory` and `getAllQuotes` use `combine()` to merge the RTDB Flow with `FavoriteQuoteDao.getFavoriteIds()`, so the UI always has an up-to-date favorite state without extra calls.
+- **`isFavorite` merging**: `QuoteRepositoryImpl.getAllQuotes` uses `combine()` (and `getQuotesByCategory` filters its output by emotion) to merge the RTDB Flow with `FavoriteQuoteDao.getFavoriteIds()`, so the UI always has an up-to-date favorite state without extra calls.
 - **Application class**: `QuoteAnimeApplication` — `@HiltAndroidApp`, implements `Configuration.Provider` to inject `HiltWorkerFactory` into WorkManager (manual init). The `WorkManagerInitializer` startup provider is removed in the manifest to avoid double-init.
 - **Hilt + WorkManager**: Workers must use `@HiltWorker` + `@AssistedInject`.
 - **Navigation**: `AppNavGraph` uses a `sealed class Screen(route)` pattern. Screens receive navigation lambdas, not the NavController directly.
@@ -91,7 +97,7 @@ com.gondroid.quoteanime/
 ## HomeScreen & CatalogScreen
 
 ### HomeScreen
-- Feed full-screen con `VerticalPager`, una frase por página, alimentado por `GetAllQuotesUseCase` (con `isFavorite` ya mergeado desde Room) y **filtrado por los animes elegidos en Ajustes** (`selectedCategoryIds`, vacío = todos; regla `Quote.isInCategories`, igual que iOS). El pager se reinicia al cambiar la selección
+- Feed full-screen con `VerticalPager`, una frase por página, alimentado por `GetAllQuotesUseCase` (con `isFavorite` ya mergeado desde Room) y **filtrado por los animes elegidos en Ajustes** (`selectedCategoryIds` = nombres de anime, vacío = todos; regla `Quote.isFromAnimes` sobre el campo `anime`, igual que iOS; valores guardados que no son un anime se descartan con `ReconcileAnimeSelectionUseCase`). El pager se reinicia al cambiar la selección
 - El toggle de favorito usa `ToggleFavoriteUseCase`; Room emite y el flow lo propaga al UI sin setState manual
 - `Screen.Home` acepta `home?quoteId={quoteId}`: el widget de frase abre el feed posicionado en esa frase
 - Recibe `onNavigateToCatalog: (categoryId: String?) -> Unit` (no el NavController)
@@ -113,14 +119,14 @@ com.gondroid.quoteanime/
 
 ## Settings Screen (Personalización)
 
-**Estado**: `SettingsUiState` — data class con todas las preferencias + `toUserPreferences()` helper + `allCategoriesSelected` computed property.
+**Estado**: `SettingsUiState` — data class con todas las preferencias + `toUserPreferences()` helper + `allAnimesSelected` computed property.
 
-**ViewModel** (`SettingsViewModel`): combina `GetCategoriesUseCase` + `GetUserPreferencesUseCase` + `ObservePremiumStatusUseCase` con `combine()`. Cada acción escribe en DataStore **y** reprograma el scheduler con el estado nuevo (no espera al flow reactivo para evitar race conditions).
+**ViewModel** (`SettingsViewModel`): combina `GetAnimesUseCase` + `GetUserPreferencesUseCase` + `ObservePremiumStatusUseCase` con `combine()` y limpia la selección guardada con `ReconcileAnimeSelectionUseCase` cuando llega la lista. Cada acción escribe en DataStore **y** reprograma el scheduler con el estado nuevo (no espera al flow reactivo para evitar race conditions).
 
 | Acción ViewModel | Comportamiento |
 |---|---|
-| `onCategoryToggled(id)` | Toggle en `selectedCategoryIds`, reschedula si notificaciones ON |
-| `onSelectAllCategories()` | Vacía `selectedCategoryIds` (= todas) |
+| `onAnimeToggled(anime)` | Toggle en `selectedAnimes` (se guarda como `selectedCategoryIds`), reschedula si notificaciones ON |
+| `onSelectAllAnimes()` | Vacía la selección (= todos los animes) |
 | `onNotificationsEnabled()` | Persiste + schedula — llamado desde la Screen tras confirmar el permiso |
 | `onNotificationsDisabled()` | Persiste + cancela worker |
 | `onTimeRangeChanged(startH, startM, endH, endM)` | Persiste la ventana horaria + reschedula |
@@ -133,7 +139,7 @@ com.gondroid.quoteanime/
 **Flujo de permiso `POST_NOTIFICATIONS` (API 33+)**: la Screen gestiona el `rememberLauncherForActivityResult` y solo llama a `viewModel.onNotificationsEnabled()` si el permiso es concedido. Si es denegado definitivamente, muestra un `Snackbar` con acción que abre los ajustes del sistema.
 
 **UI**:
-- Animes: `FilterChip`s en un `FlowRow` con "Todos los animes"; selección múltiple, vacía = todas (`allCategoriesSelected`). Afecta feed de Inicio, notificaciones y widget. La lista carga aparte (`categoriesLoading`): el resto de Ajustes no la espera (sin red el listener de RTDB no responde)
+- Animes: `FilterChip`s en un `FlowRow` con "Todos los animes"; selección múltiple de **nombres de anime** (campo `anime`, nunca las emociones de `categories`), vacía = todos (`allAnimesSelected`). Afecta feed de Inicio, notificaciones y widget. La lista carga aparte (`animesLoading`): el resto de Ajustes no la espera (sin red el listener de RTDB no responde)
 - Notificaciones: `Switch` en `ListItem`; cuando ON aparecen ventana horaria y frecuencia
 - Ventana horaria: inicio y fin, cada uno con Material3 `TimePicker`
 - Frecuencia: `Slider` de 1 a 10 (veces por día). Refrescos del widget: `Slider` de 1 a 8
@@ -146,7 +152,7 @@ com.gondroid.quoteanime/
 | `QuoteWidget` | `GlanceAppWidget` — UI declarativa con Glance Composables; lee estado de `PreferencesGlanceStateDefinition`; 3 estados: loading / error / quote |
 | `QuoteWidgetReceiver` | `GlanceAppWidgetReceiver` — recibe `APPWIDGET_UPDATE` del sistema; encola `UpdateQuoteWidgetWorker` |
 | `RefreshQuoteAction` | `ActionCallback` — ejecutado al tocar el botón refresh; muestra loading y encola el worker |
-| `UpdateQuoteWidgetWorker` | `CoroutineWorker + @HiltWorker` — obtiene frase con `GetRandomQuoteUseCase` (RTDB); actualiza estado de **todas** las instancias del widget; marca error si falla |
+| `UpdateQuoteWidgetWorker` | `CoroutineWorker + @HiltWorker` — obtiene frase con `GetRandomQuoteUseCase` (RTDB, filtrada por la selección de animes); actualiza estado de **todas** las instancias del widget; marca error si falla |
 | `QuoteWidgetState` | Claves `Preferences`: `QUOTE_TEXT`, `QUOTE_AUTHOR`, `QUOTE_ID`, `QUOTE_ANIME`, `IS_LOADING`, `HAS_ERROR`, `BACKGROUND_IMAGE_URI` |
 
 **Flujo de actualización**: `onUpdate / RefreshQuoteAction` → `UpdateQuoteWidgetWorker` → `updateAppWidgetState()` → `QuoteWidget().update()` → recomposición de Glance
