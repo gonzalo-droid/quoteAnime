@@ -10,26 +10,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew assembleRelease        # Release APK
 ./gradlew test                   # Unit tests
 ./gradlew connectedAndroidTest   # Instrumented tests (requires device/emulator)
-./gradlew test --tests "com.gondroid.tokensclaude.ExampleUnitTest"  # Single test class
+./gradlew test --tests "com.gondroid.quoteanime.data.repository.QuoteRepositoryImplTest"  # Single test class
 ```
 
 ## Project Overview
 
-Motivational quotes Android app. Quotes and categories come from **Firebase Firestore** (remote). Users can save quotes to **favorites**, stored locally in **Room**. Notification scheduling via WorkManager. Home/lock-screen widget via Glance API.
+Motivational anime quotes Android app. Quotes come from **Firebase Realtime Database** (not Firestore). Users save quotes to **favorites**, stored locally in **Room**. It also ships **Mi Rutina**, a habit tracker (Room), and a **Premium** subscription sold through Google Play Billing. Notifications via WorkManager, three home-screen widgets via Glance, ads via AdMob.
 
 - **Language**: Kotlin | **UI**: Jetpack Compose + Material3
-- **minSdk**: 24, **targetSdk**: 36
+- **minSdk**: 24, **targetSdk**: 36, **compileSdk**: 36
 - **Package**: `com.gondroid.quoteanime`
-- **DI**: Hilt | **DB**: Room (favorites only) | **Remote**: Firestore | **Preferences**: DataStore | **Widget**: Glance API
+- **DI**: Hilt | **DB**: Room v6 (favorites + habits) | **Remote**: Firebase RTDB | **Preferences**: DataStore | **Widgets**: Glance | **Billing**: `billing-ktx` 9.1.0 | **Ads**: AdMob
 
-> **Firebase setup required**: add `google-services.json` to `app/` after registering the app in the Firebase console. Enable Firestore in the project.
+> **Firebase**: `google-services.json` lives in `app/src/` (not `app/`) and **is committed**. Realtime Database must be enabled in the Firebase project.
 
-## Firestore Schema
+## Realtime Database Schema
 
 ```
-/categories/{id}   → name: String, imageUrl: String
-/quotes/{id}       → text: String, author: String, categoryId: String
+/quotes/{index}        → id: Long, quote: String, author: String, anime: String
+/habitTemplates/{id}   → title (string-resource key), iconKey, order, themeColorIndex?, themeKey?, isPremiumOnly
+/imagenes              → fetched once by QuoteRemoteDataSource
 ```
+
+Quote categories are **derived** from the distinct `anime` values — there is no `/categories` node. If `/habitTemplates` is empty or missing, the habit editor falls back to the local `DefaultHabitTemplates.ALL`.
 
 ## Architecture
 
@@ -38,60 +41,64 @@ Single-module, Clean Architecture with MVVM in the presentation layer.
 ```
 com.gondroid.quoteanime/
 ├── data/
-│   ├── local/
-│   │   ├── db/                    # Room: AppDatabase, FavoriteQuoteDao, FavoriteQuoteEntity
-│   │   └── datastore/             # UserPreferencesDataStore (DataStore<Preferences>)
-│   ├── remote/
-│   │   ├── QuoteRemoteDataSource  # Firestore access (callbackFlow + suspend)
-│   │   └── dto/                   # QuoteDto, CategoryDto + DocumentSnapshot mappers
-│   └── repository/                # QuoteRepositoryImpl, UserPreferencesRepositoryImpl
-├── domain/
-│   ├── model/                     # Quote, Category, UserPreferences, NotificationFrequency
-│   ├── repository/                # QuoteRepository, UserPreferencesRepository (interfaces)
-│   └── usecase/                   # One class per use case (see list below)
+│   ├── local/db/                  # Room v6: dao/ (FavoriteQuote, Habit, HabitCompletion), entity/, migrations
+│   ├── local/datastore/           # UserPreferencesDataStore — prefs, onboarding flags, IS_PREMIUM
+│   ├── remote/                    # Quote + HabitTemplate RTDB sources (callbackFlow), BillingClientFactory, dto/
+│   └── repository/                # Quote, UserPreferences, Habit, Billing implementations
+├── domain/                        # model/, repository/ (interfaces), usecase/
 ├── presentation/
 │   ├── navigation/                # AppNavGraph, Screen sealed class
-│   ├── home/                      # HomeScreen + HomeViewModel
-│   ├── catalog/                   # CatalogScreen + CatalogViewModel
-│   └── settings/                  # SettingsScreen + SettingsViewModel
-├── worker/                        # QuoteNotificationWorker (HiltWorker)
-├── widget/                        # QuoteWidget (Glance), QuoteWidgetReceiver
-├── notification/                  # NotificationHelper
-└── di/                            # AppModule, DatabaseModule, RepositoryModule
+│   ├── splash/ onboarding/ home/ catalog/ settings/
+│   ├── routine/                   # Mi Rutina
+│   ├── subscription/              # Paywall
+│   ├── widget/                    # HabitWidgetConfigureActivity
+│   └── ads/ components/ common/ web/
+├── worker/                        # 6 workers — see Notification & Widget sections
+├── widget/                        # 3 Glance widgets
+├── notification/                  # NotificationHelper, schedulers, HabitReminderReceiver
+├── analytics/                     # RoutineAnalytics (Firebase Analytics)
+└── di/                            # AppModule, DatabaseModule, RepositoryModule, PremiumGate
 ```
+
+`PremiumGate` lives in `di/`, not `domain/` — it holds the plan limits.
 
 ## Domain Use Cases
 
 | Use Case | Description |
 |---|---|
-| `GetCategoriesUseCase` | Flow of categories from Firestore |
+| `GetCategoriesUseCase` | Flow of categories, derived from the `anime` field in RTDB |
 | `GetQuotesByCategoryUseCase` | Flow of quotes for a category, with `isFavorite` merged from Room |
 | `GetRandomQuoteUseCase` | Suspend — used by WorkManager & Widget |
 | `GetFavoriteQuotesUseCase` | Flow of locally saved favorites |
 | `ToggleFavoriteUseCase` | Adds or removes favorite based on `quote.isFavorite` |
-| `UpdateUserPreferencesUseCase` | Writes categories, time, frequency, enabled flag to DataStore |
+| `GetAllQuotesUseCase` | Flow of every quote, `isFavorite` merged from Room — feeds Home |
+| `UpdateUserPreferencesUseCase` | Writes categories, time window, frequency, enabled flag, widget settings to DataStore |
+
+32 use cases in total. Beyond quotes: habits (`Create/Update/Archive/Unarchive/Delete`, `ToggleHabitCompletion`, `CalculateStreak`, `GetGlobalStreak`, `GetHabitTemplates`), billing (`GetSubscriptionOffers`, `LaunchSubscriptionPurchase`, `ObservePurchaseEvents`, `RestorePurchases`, `AcknowledgePendingPurchases`, `GetManageSubscriptionUrl`), premium (`Observe/SetPremiumStatus`) and flags (`Get/SetOnboardingCompleted`, `IsRoutineIntroSeen`/`SetRoutineIntroSeen`).
 
 ## Key Wiring
 
-- **`isFavorite` merging**: `QuoteRepositoryImpl.getQuotesByCategory` uses `combine()` to merge the Firestore Flow with `FavoriteQuoteDao.getFavoriteIds()`, so the UI always has an up-to-date favorite state without extra calls.
+- **`isFavorite` merging**: `QuoteRepositoryImpl.getQuotesByCategory` and `getAllQuotes` use `combine()` to merge the RTDB Flow with `FavoriteQuoteDao.getFavoriteIds()`, so the UI always has an up-to-date favorite state without extra calls.
 - **Application class**: `QuoteAnimeApplication` — `@HiltAndroidApp`, implements `Configuration.Provider` to inject `HiltWorkerFactory` into WorkManager (manual init). The `WorkManagerInitializer` startup provider is removed in the manifest to avoid double-init.
 - **Hilt + WorkManager**: Workers must use `@HiltWorker` + `@AssistedInject`.
 - **Navigation**: `AppNavGraph` uses a `sealed class Screen(route)` pattern. Screens receive navigation lambdas, not the NavController directly.
 - **Repository binding**: `RepositoryModule` uses `@Binds` (abstract module) — keep it abstract, not `object`.
-- **Firestore `whereIn` limit**: `getRandomQuote()` uses `whereIn("categoryId", ...)` — Firestore caps this at 30 values. If categories can exceed 30, split into multiple queries.
+- **Startup** (`QuoteAnimeApplication.onCreate`): `MobileAds.initialize()` (synchronous, main thread), widget update scheduling, routine widget daily refresh, then `syncPremiumEntitlement()` → `RestorePurchasesUseCase`. The Premium entitlement is re-synced from Play on **every** start.
+- **Startup routing**: `SplashViewModel` reads `GetOnboardingCompletedUseCase` and routes to `Onboarding` or `Home`.
+- **Premium gating**: `PremiumGate.maxActiveHabits(isPremium)` — `FREE_HABIT_LIMIT = 3`. The entitlement flag is `IS_PREMIUM` in DataStore; ads are hidden when it is set.
 
 ## HomeScreen & CatalogScreen
 
 ### HomeScreen
-- Muestra una frase destacada aleatoria basada en categorías del usuario (`GetRandomQuoteUseCase`)
-- Los chips de categoría navegan a `CatalogScreen` con `categoryId` preseleccionado; "Mis favoritos" navega con `categoryId = null`
-- El estado `isFavorite` de la frase destacada se observa reactivamente desde Room via `ObserveFavoriteStatusUseCase` — se cancela y reabre el job cada vez que se carga una nueva frase
-- "Refresh" carga una nueva frase aleatoria; el toggle de favorito actualiza Room y el flow lo propaga al UI sin setState manual
+- Feed full-screen con `VerticalPager`, una frase por página, alimentado por `GetAllQuotesUseCase` (con `isFavorite` ya mergeado desde Room)
+- El toggle de favorito usa `ToggleFavoriteUseCase`; Room emite y el flow lo propaga al UI sin setState manual
+- `Screen.Home` acepta `home?quoteId={quoteId}`: el widget de frase abre el feed posicionado en esa frase
+- Recibe `onNavigateToCatalog: (categoryId: String?) -> Unit` (no el NavController)
 
 ### CatalogScreen
-- Filtros: `FilterChip` "Favoritos" (tab null) + un chip por categoría en scroll horizontal
-- `CatalogViewModel` usa `flatMapLatest` sobre `_selectedCategoryId`: si es `null` → `getFavoriteQuotes()` (Room); si es `categoryId` → `getQuotesByCategory()` (Firestore). El cambio de tab es instantáneo porque Kotlin Flows cancelan el anterior automáticamente
-- El `selectedCategoryId` inicial viene de `SavedStateHandle` — permite navegar desde Home con categoría preseleccionada
+- Filtros: `CatalogFilter` sealed class — `Favorites`, `All`, `ByEmotion(categoryId)`
+- `CatalogViewModel` usa `flatMapLatest` sobre `_selectedFilter: CatalogFilter?`: `Favorites` → `getFavoriteQuotes()` (Room), `All` → `getAllQuotes()`, `ByEmotion` → `getQuotesByCategory()` (RTDB), y `null` → **lista vacía** (ya no significa "favoritos"). El cambio de filtro es instantáneo porque Kotlin Flows cancelan el anterior
+- El filtro inicial viene de `SavedStateHandle` — permite navegar desde Home con categoría preseleccionada
 - `key = { it.id }` en `LazyColumn` evita recomposiciones innecesarias al hacer toggle de favorito
 
 ### Componentes compartidos
@@ -99,13 +106,15 @@ com.gondroid.quoteanime/
 
 ### Navegación actualizada
 - `Screen.Catalog` tiene `routeWithArg = "catalog?categoryId={categoryId}"` con argumento nullable
+- `Screen.Home` tiene `routeWithArg = "home?quoteId={quoteId}"` (deep link desde el widget)
+- Destinos: `Splash`, `Onboarding`, `Home`, `Catalog`, `Settings`, `WidgetTutorial`, `Routine`, `HabitEditor`, `HabitDetail`, `Paywall`, `WebView`
 - `HomeScreen` recibe `onNavigateToCatalog: (categoryId: String?) -> Unit` (no el NavController directamente)
 
 ## Settings Screen (Personalización)
 
 **Estado**: `SettingsUiState` — data class con todas las preferencias + `toUserPreferences()` helper + `allCategoriesSelected` computed property.
 
-**ViewModel** (`SettingsViewModel`): combina `GetCategoriesUseCase` + `GetUserPreferencesUseCase` con `combine()`. Cada acción escribe en DataStore **y** reprograma el scheduler con el estado nuevo (no espera al flow reactivo para evitar race conditions).
+**ViewModel** (`SettingsViewModel`): combina `GetCategoriesUseCase` + `GetUserPreferencesUseCase` + `ObservePremiumStatusUseCase` con `combine()`. Cada acción escribe en DataStore **y** reprograma el scheduler con el estado nuevo (no espera al flow reactivo para evitar race conditions).
 
 | Acción ViewModel | Comportamiento |
 |---|---|
@@ -113,17 +122,21 @@ com.gondroid.quoteanime/
 | `onSelectAllCategories()` | Vacía `selectedCategoryIds` (= todas) |
 | `onNotificationsEnabled()` | Persiste + schedula — llamado desde la Screen tras confirmar el permiso |
 | `onNotificationsDisabled()` | Persiste + cancela worker |
-| `onTimeChanged(h, m)` | Persiste + reschedula con nueva hora |
-| `onFrequencyChanged(f)` | Persiste + reschedula con nueva frecuencia |
+| `onTimeRangeChanged(startH, startM, endH, endM)` | Persiste la ventana horaria + reschedula |
+| `onFrequencyChanged(timesPerDay)` | Persiste + reschedula con nueva frecuencia (1–10 por día) |
+| `onWidgetSizeChanged(size)` | Persiste + `widgetScheduler.triggerImmediateUpdate()` |
+| `onWidgetUpdateTimesChanged(times)` | Persiste + `widgetScheduler.schedule(times)` |
+| `onTestNotification()` | Encola `QuoteNotificationWorker` una vez. Ninguna pantalla lo llama hoy |
 | `onPermissionDeniedPermanently()` | Marca flag en UiState para deshabilitar el switch |
 
 **Flujo de permiso `POST_NOTIFICATIONS` (API 33+)**: la Screen gestiona el `rememberLauncherForActivityResult` y solo llama a `viewModel.onNotificationsEnabled()` si el permiso es concedido. Si es denegado definitivamente, muestra un `Snackbar` con acción que abre los ajustes del sistema.
 
 **UI**:
-- Categorías: `FlowRow` + `FilterChip` (incluye chip "Todas" que vacía la selección)
-- Notificaciones: `Switch` en `ListItem`; cuando ON aparecen hora y frecuencia
-- Hora: `ListItem` clickable → `AlertDialog` con Material3 `TimePicker` (formato 24h)
-- Frecuencia: `SingleChoiceSegmentedButtonRow` con los 3 valores de `NotificationFrequency`
+- Categorías: selección múltiple; selección vacía = todas (`allCategoriesSelected`)
+- Notificaciones: `Switch` en `ListItem`; cuando ON aparecen ventana horaria y frecuencia
+- Ventana horaria: inicio y fin, cada uno con Material3 `TimePicker`
+- Frecuencia: `Slider` de 1 a 10 (veces por día). Refrescos del widget: `Slider` de 1 a 8
+- El enum `NotificationFrequency` (3 valores) es **código muerto**: nada lo usa, la preferencia es un `Int`
 
 ## Widget (Glance API)
 
@@ -132,24 +145,30 @@ com.gondroid.quoteanime/
 | `QuoteWidget` | `GlanceAppWidget` — UI declarativa con Glance Composables; lee estado de `PreferencesGlanceStateDefinition`; 3 estados: loading / error / quote |
 | `QuoteWidgetReceiver` | `GlanceAppWidgetReceiver` — recibe `APPWIDGET_UPDATE` del sistema; encola `UpdateQuoteWidgetWorker` |
 | `RefreshQuoteAction` | `ActionCallback` — ejecutado al tocar el botón refresh; muestra loading y encola el worker |
-| `UpdateQuoteWidgetWorker` | `CoroutineWorker + @HiltWorker` — obtiene frase de Firestore; actualiza estado de **todas** las instancias del widget; marca error si falla |
-| `QuoteWidgetState` | Claves `Preferences` para el estado del widget (`QUOTE_TEXT`, `QUOTE_AUTHOR`, `IS_LOADING`, `HAS_ERROR`) |
+| `UpdateQuoteWidgetWorker` | `CoroutineWorker + @HiltWorker` — obtiene frase con `GetRandomQuoteUseCase` (RTDB); actualiza estado de **todas** las instancias del widget; marca error si falla |
+| `QuoteWidgetState` | Claves `Preferences`: `QUOTE_TEXT`, `QUOTE_AUTHOR`, `QUOTE_ID`, `QUOTE_ANIME`, `IS_LOADING`, `HAS_ERROR`, `BACKGROUND_IMAGE_URI` |
 
 **Flujo de actualización**: `onUpdate / RefreshQuoteAction` → `UpdateQuoteWidgetWorker` → `updateAppWidgetState()` → `QuoteWidget().update()` → recomposición de Glance
 
 **Múltiples instancias**: `UpdateQuoteWidgetWorker` itera sobre todos los `glanceIds` de `GlanceAppWidgetManager` para actualizar cada widget independientemente.
 
-**Nota sobre lock screen**: Los widgets de pantalla de bloqueo fueron eliminados en Android 5.0 (API 21). Con minSdk 24, no son posibles. Las notificaciones del Paso 3 cubren ese caso de uso. `widgetCategory="home_screen"` en el XML es correcto.
+**Nota sobre lock screen**: Los widgets de pantalla de bloqueo fueron eliminados en Android 5.0 (API 21). Con minSdk 24, no son posibles. Las notificaciones cubren ese caso de uso. `widgetCategory="home_screen"` en el XML es correcto.
+
+**Widgets de Mi Rutina**: `RoutineSummaryWidget` (todos los hábitos activos) y `HabitWidget` (uno por instancia). El hábito de cada `HabitWidget` se elige en `HabitWidgetConfigureActivity` al agregarlo — la única Activity de configuración de widget de la app. Se actualizan con `UpdateRoutineSummaryWidgetWorker` y `UpdateHabitWidgetWorker`; `RoutineWidgetScheduler` agenda el refresco diario.
 
 ## Notification & WorkManager System
 
 | Clase | Responsabilidad |
 |---|---|
-| `NotificationHelper` | Crea el canal (`quote_notifications`), construye y muestra la notificación con `BigTextStyle` |
-| `NotificationScheduler` | Envuelve WorkManager: `schedule(UserPreferences)` calcula el delay inicial hasta la hora elegida y encola `PeriodicWorkRequest`; `cancel()` cancela por nombre único |
+| `NotificationHelper` | Crea los canales (`quote_notifications`, `habit_reminders`), construye y muestra la notificación con `BigTextStyle` |
+| `NotificationScheduler` | Envuelve WorkManager: `schedule(UserPreferences)` calcula el delay inicial hasta el inicio de la ventana y encola `PeriodicWorkRequest` cada `24 / frecuencia` horas, con red requerida; `cancel()` cancela por nombre único |
+| `HabitReminderScheduler` | Un `OneTimeWorkRequest` único por hábito (`ExistingWorkPolicy.REPLACE`) → `HabitReminderWorker`; `NextReminderCalculator` calcula el próximo disparo |
+| `HabitReminderReceiver` | Maneja la acción "Done" de la notificación de recordatorio |
 | `QuoteNotificationWorker` | `CoroutineWorker` + `@HiltWorker`; lee prefs, llama `GetRandomQuoteUseCase`, muestra notificación; reintenta hasta 3 veces en error de red |
 
 **Flujo de scheduling**: `SettingsViewModel` → `NotificationScheduler.schedule(prefs)` → `WorkManager.enqueueUniquePeriodicWork(UPDATE)` → `QuoteNotificationWorker.doWork()` → `NotificationHelper.showQuoteNotification()`
+
+**Gotcha — la frecuencia real no es la elegida**: el intervalo es `24L / notificationFrequency`, **división entera**. Elegir 5 da 4 h (6 por día), elegir 7 da 3 h (8 por día). Además `QuoteNotificationWorker` descarta los disparos fuera de la ventana horaria, así que con la ventana por defecto (8–22) llegan menos de las elegidas.
 
 **Por qué NO se usa `SCHEDULE_EXACT_ALARM`**: `PeriodicWorkRequest` usa `JobScheduler`/`AlarmManager` internamente gestionado por WorkManager. Para frases motivacionales la ventana de ±30 min es aceptable y evita el diálogo de permiso especial de Android 12+.
 
@@ -161,3 +180,30 @@ com.gondroid.quoteanime/
 |---|---|
 | `POST_NOTIFICATIONS` | Requerido en API 33+ para mostrar notificaciones |
 | `RECEIVE_BOOT_COMPLETED` | WorkManager lo usa internamente para reprogramar tras reinicio |
+
+## Mi Rutina (habit tracker)
+
+- Room: `HabitEntity` + `HabitCompletionEntity`; las completions tienen `ForeignKey` a hábitos con `onDelete = CASCADE` — borrar un hábito borra su historial
+- Hábitos archivables y restaurables; los activos están limitados por `PremiumGate` (3 en plan gratis)
+- Plantillas temáticas desde `/habitTemplates` en RTDB, con fallback local `DefaultHabitTemplates.ALL`; algunas son `isPremiumOnly` y abren el Paywall
+- Rachas: `CalculateStreakUseCase` (por hábito) y `GetGlobalStreakUseCase`
+
+## Premium & Billing
+
+- Producto de suscripción: `premium_subscription` (declarado en `BillingRepository`). Debe existir en Play Console con al menos un base plan, si no el paywall queda sin planes
+- `BillingRepositoryImpl` envuelve `BillingClient` (creado por `BillingClientFactory`): conexión, `ProductDetails`, purchase flow, acknowledge
+- `AcknowledgePurchasesWorker` reconoce compras pendientes — Play las reembolsa si no se reconocen en 3 días
+- El entitlement se guarda en DataStore (`IS_PREMIUM`) y se re-sincroniza con Play en cada arranque
+
+## Zonas peligrosas
+
+- **Migraciones de Room**: la DB es v6 con `exportSchema = true` (schemas en `app/schemas/`). `DatabaseModule` registra `MIGRATION_4_5` y `MIGRATION_5_6`, y solo permite reset destructivo desde las versiones 1–3. **Subir la versión exige escribir `MIGRATION_6_7`**: sin ella, los usuarios en v6 no tienen camino y la app crashea al abrir la DB. La 4→5 existe para no borrar los favoritos de usuarios reales.
+- **AdMob**: los ad unit IDs son `buildConfigField` por build type en `app/build.gradle.kts` (debug = IDs de prueba de Google, release = producción). El application ID es `meta-data` en el manifest.
+
+## Convenciones
+
+- Commits: Conventional Commits con ámbito cuando aplica (`feat(routine):`, `fix(billing):`, `docs:`)
+- `CHANGELOG.md` es el historial de versiones; el README solo enlaza a él
+- Versión en `app/build.gradle.kts` (`versionName` / `versionCode`)
+
+<!-- project-memory: rev=caff5b2 date=2026-09-18 -->
