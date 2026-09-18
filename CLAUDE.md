@@ -90,7 +90,7 @@ com.gondroid.quoteanime/
 ## HomeScreen & CatalogScreen
 
 ### HomeScreen
-- Feed full-screen con `VerticalPager`, una frase por página, alimentado por `GetAllQuotesUseCase` (con `isFavorite` ya mergeado desde Room)
+- Feed full-screen con `VerticalPager`, una frase por página, alimentado por `GetAllQuotesUseCase` (con `isFavorite` ya mergeado desde Room) y **filtrado por los animes elegidos en Ajustes** (`selectedCategoryIds`, vacío = todos; regla `Quote.isInCategories`, igual que iOS). El pager se reinicia al cambiar la selección
 - El toggle de favorito usa `ToggleFavoriteUseCase`; Room emite y el flow lo propaga al UI sin setState manual
 - `Screen.Home` acepta `home?quoteId={quoteId}`: el widget de frase abre el feed posicionado en esa frase
 - Recibe `onNavigateToCatalog: (categoryId: String?) -> Unit` (no el NavController)
@@ -132,7 +132,7 @@ com.gondroid.quoteanime/
 **Flujo de permiso `POST_NOTIFICATIONS` (API 33+)**: la Screen gestiona el `rememberLauncherForActivityResult` y solo llama a `viewModel.onNotificationsEnabled()` si el permiso es concedido. Si es denegado definitivamente, muestra un `Snackbar` con acción que abre los ajustes del sistema.
 
 **UI**:
-- Categorías: selección múltiple; selección vacía = todas (`allCategoriesSelected`)
+- Animes: `FilterChip`s en un `FlowRow` con "Todos los animes"; selección múltiple, vacía = todas (`allCategoriesSelected`). Afecta feed de Inicio, notificaciones y widget. La lista carga aparte (`categoriesLoading`): el resto de Ajustes no la espera (sin red el listener de RTDB no responde)
 - Notificaciones: `Switch` en `ListItem`; cuando ON aparecen ventana horaria y frecuencia
 - Ventana horaria: inicio y fin, cada uno con Material3 `TimePicker`
 - Frecuencia: `Slider` de 1 a 10 (veces por día). Refrescos del widget: `Slider` de 1 a 8
