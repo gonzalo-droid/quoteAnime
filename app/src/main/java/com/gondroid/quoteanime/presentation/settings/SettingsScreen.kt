@@ -618,11 +618,11 @@ private fun WidgetSection(
 ) {
     ListItem(
         headlineContent = {
-            Text("Cómo agregar el widget", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.widget_tutorial_title), color = MaterialTheme.colorScheme.onBackground)
         },
         supportingContent = {
             Text(
-                "Tutorial paso a paso para añadirlo a tu pantalla de inicio",
+                stringResource(R.string.settings_widget_tutorial_subtitle),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -645,11 +645,11 @@ private fun WidgetSection(
 
     ListItem(
         headlineContent = {
-            Text("Tamaño del widget", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.settings_widget_size_title), color = MaterialTheme.colorScheme.onBackground)
         },
         supportingContent = {
             Text(
-                "Mantén presionado el widget en tu pantalla de inicio y arrastra las esquinas para ajustar el tamaño. El contenido se adapta automáticamente.",
+                stringResource(R.string.settings_widget_size_body),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -664,7 +664,7 @@ private fun WidgetSection(
 
     ListItem(
         headlineContent = {
-            Text("Actualizaciones del widget", color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.settings_widget_updates_title), color = MaterialTheme.colorScheme.onBackground)
         },
         supportingContent = {
             Column {
@@ -755,17 +755,17 @@ private fun PreviewSettingsOff() {
             ) {
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Notificaciones")
+                    SectionHeader(stringResource(R.string.notifications))
                     NotificationSection(uiState = uiState, onToggle = {}, onTimeRangeChanged = { _, _, _, _ -> }, onFrequencyChanged = {})
                 }
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Apóyanos")
+                    SectionHeader(stringResource(R.string.rating))
                     RatingSection()
                 }
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Síguenos")
+                    SectionHeader(stringResource(R.string.follow_us))
                     SocialSection()
                 }
                 item { SectionDivider() }
@@ -799,22 +799,22 @@ private fun PreviewSettingsOn() {
             ) {
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Notificaciones")
+                    SectionHeader(stringResource(R.string.notifications))
                     NotificationSection(uiState = uiState, onToggle = {}, onTimeRangeChanged = { _, _, _, _ -> }, onFrequencyChanged = {})
                 }
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Calificación")
+                    SectionHeader(stringResource(R.string.rating))
                     RatingSection()
                 }
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Síguenos")
+                    SectionHeader(stringResource(R.string.follow_us))
                     SocialSection()
                 }
                 item { SectionDivider() }
                 item {
-                    SectionHeader("Información")
+                    SectionHeader(stringResource(R.string.version))
                     InformationSection(versionName = "1.2.0")
                 }
             }

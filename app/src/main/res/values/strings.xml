@@ -6,7 +6,7 @@
     <string name="widget_description">Shows a motivational quote on your home screen</string>
     <string name="widget_refresh">Refresh quote</string>
     <string name="widget_loading">Loading quote…</string>
-    <string name="widget_error">Couldn\'t load the quote. Tap to retry.</string>
+    <string name="widget_error">Couldn\'t load the quote.</string>
     <string name="routine_widget_description">Track your habits from the home screen</string>
     <string name="routine_widget_title">My routine</string>
     <string name="routine_widget_progress">%1$d/%2$d today</string>
@@ -381,4 +381,33 @@
     <string name="settings_animes_description">Choose which anime you want to see quotes from on the home screen and in notifications. If you don\'t choose any, all of them are shown.</string>
     <string name="settings_animes_all">All anime</string>
     <string name="settings_animes_empty">No anime available yet.</string>
+
+    <!-- Texts that used to be hardcoded in Spanish in the code -->
+    <string name="home_error">Couldn\'t load the quotes.</string>
+    <string name="home_empty">No quotes available.</string>
+    <string name="splash_tagline">quotes that shaped our lives</string>
+    <string name="settings_widget_tutorial_subtitle">Step-by-step guide to add it to your home screen</string>
+    <string name="settings_widget_size_title">Widget size</string>
+    <string name="settings_widget_size_body">Touch and hold the widget on your home screen and drag its corners to resize it. The content adapts automatically.</string>
+    <string name="settings_widget_updates_title">Widget updates</string>
+    <string name="widget_tutorial_title">How to add the widget</string>
+    <string name="widget_tutorial_step_counter">Step %1$d of %2$d</string>
+    <string name="widget_tutorial_step1_title">Touch and hold</string>
+    <string name="widget_tutorial_step1_body">Touch and hold any empty area of your home screen until the options menu appears.</string>
+    <string name="widget_tutorial_step2_title">Tap \"Widgets\"</string>
+    <string name="widget_tutorial_step2_body">In the menu that appears at the bottom, select Widgets to open the gallery.</string>
+    <string name="widget_tutorial_step3_title">Search for Quote Anime</string>
+    <string name="widget_tutorial_step3_body">Scroll through the list until you find Quote Anime, then touch and hold the widget.</string>
+    <string name="widget_tutorial_step4_title">Drag and drop</string>
+    <string name="widget_tutorial_step4_body">Drag the widget to wherever you like on your home screen and let go.</string>
+    <string name="emotion_motivation">Motivation</string>
+    <string name="emotion_fight">Fight</string>
+    <string name="emotion_sadness">Sadness</string>
+    <string name="emotion_love">Love</string>
+    <string name="emotion_friendship">Friendship</string>
+    <string name="emotion_reflection">Reflection</string>
+    <string name="emotion_loneliness">Loneliness</string>
+    <string name="emotion_sacrifice">Sacrifice</string>
+    <string name="emotion_hope">Hope</string>
+    <string name="emotion_pride">Pride</string>
 </resources>

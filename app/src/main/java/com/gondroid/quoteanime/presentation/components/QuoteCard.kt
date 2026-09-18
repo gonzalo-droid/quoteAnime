@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import com.gondroid.quoteanime.ui.theme.Didot
 import com.gondroid.quoteanime.ui.theme.Georgia
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.ui.theme.HeartRed
 import androidx.compose.ui.tooling.preview.Preview
@@ -110,8 +112,9 @@ fun QuoteCard(
                 Icon(
                     imageVector = if (quote.isFavorite) Icons.Default.Favorite
                                   else Icons.Default.FavoriteBorder,
-                    contentDescription = if (quote.isFavorite) "Quitar de favoritos"
-                                         else "Añadir a favoritos",
+                    contentDescription = stringResource(
+                        if (quote.isFavorite) R.string.remove_favorite else R.string.add_favorite
+                    ),
                     tint = heartTint,
                     modifier = Modifier
                         .size(22.dp)

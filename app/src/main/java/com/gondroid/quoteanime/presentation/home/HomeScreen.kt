@@ -121,8 +121,9 @@ private fun HomeContent(
 
             uiState.error != null || uiState.quotes.isEmpty() -> {
                 Text(
-                    text = if (uiState.error != null) "No se pudo cargar las frases."
-                    else "Sin frases disponibles.",
+                    text = stringResource(
+                        if (uiState.error != null) R.string.home_error else R.string.home_empty
+                    ),
                     color = TextSecondary,
                     modifier = Modifier.align(Alignment.Center)
                 )
