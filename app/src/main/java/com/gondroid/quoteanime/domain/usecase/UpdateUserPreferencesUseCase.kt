@@ -7,8 +7,9 @@ import javax.inject.Inject
 class UpdateUserPreferencesUseCase @Inject constructor(
     private val repository: UserPreferencesRepository
 ) {
-    suspend fun setCategories(categoryIds: Set<String>) =
-        repository.updateSelectedCategories(categoryIds)
+    /** Saves the anime selection (anime names; empty = every anime). */
+    suspend fun setSelectedAnimes(animes: Set<String>) =
+        repository.updateSelectedCategories(animes)
 
     suspend fun setNotificationsEnabled(enabled: Boolean) =
         repository.updateNotificationsEnabled(enabled)

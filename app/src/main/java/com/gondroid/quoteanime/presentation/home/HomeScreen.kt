@@ -135,7 +135,7 @@ private fun HomeContent(
             else -> {
                 // A new anime selection is a new feed: start it at the top instead of keeping
                 // a page index that belonged to the previous list (and may not exist in it).
-                val pagerState = key(uiState.appliedCategoryIds) {
+                val pagerState = key(uiState.appliedAnimes) {
                     rememberPagerState(pageCount = { uiState.quotes.size })
                 }
                 val currentQuote = uiState.quotes[

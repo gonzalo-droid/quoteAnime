@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gondroid.quoteanime.domain.model.Quote
-import com.gondroid.quoteanime.domain.model.filterByCategories
+import com.gondroid.quoteanime.domain.model.animeNames
+import com.gondroid.quoteanime.domain.model.filterByAnimes
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
+import com.gondroid.quoteanime.domain.usecase.ReconcileAnimeSelectionUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
 import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.presentation.navigation.Screen
@@ -27,6 +29,7 @@ class HomeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAllQuotes: GetAllQuotesUseCase,
     private val getUserPreferences: GetUserPreferencesUseCase,
+    private val reconcileAnimeSelection: ReconcileAnimeSelectionUseCase,
     private val toggleFavorite: ToggleFavoriteUseCase,
     val shareInterstitialManager: ShareInterstitialManager
 ) : ViewModel() {
@@ -49,8 +52,13 @@ class HomeViewModel @Inject constructor(
 
     /**
      * The feed shows only the animes chosen in Settings (empty selection = all), like iOS: "if
-     * I picked three animes, I want to see those three". The selection is observed, so coming
+     * I picked three animes, I want to see those three". The selection holds anime names and is
+     * matched against `Quote.anime`, never the emotion `categories`. It is observed, so coming
      * back from Settings already shows the new feed.
+     *
+     * Saved values that name no anime (an emotion saved by the build that listed emotions as
+     * animes) are dropped and the cleaned selection is saved — an all-stale selection shows
+     * every anime instead of an empty feed.
      */
     private fun loadQuotes() {
         val selection = getUserPreferences()
@@ -58,13 +66,14 @@ class HomeViewModel @Inject constructor(
             .distinctUntilChanged()
 
         viewModelScope.launch {
-            combine(getAllQuotes(), selection) { quotes, categoryIds ->
-                quotes.filterByCategories(categoryIds) to categoryIds
+            combine(getAllQuotes(), selection) { quotes, saved ->
+                val animes = reconcileAnimeSelection(saved, quotes.animeNames())
+                quotes.filterByAnimes(animes) to animes
             }
                 .catch { error ->
                     _uiState.update { it.copy(isLoading = false, error = error.message) }
                 }
-                .collect { (quotes, categoryIds) ->
+                .collect { (quotes, animes) ->
                     val scrollTo = pendingFocusQuoteId?.let { id ->
                         pendingFocusQuoteId = null
                         quotes.indexOfFirst { it.id == id }.takeIf { it >= 0 }
@@ -72,7 +81,7 @@ class HomeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             quotes = quotes,
-                            appliedCategoryIds = categoryIds,
+                            appliedAnimes = animes,
                             isLoading = false,
                             error = null,
                             scrollToPage = scrollTo ?: it.scrollToPage

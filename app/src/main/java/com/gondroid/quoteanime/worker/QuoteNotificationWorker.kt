@@ -74,8 +74,9 @@ class QuoteNotificationWorker @AssistedInject constructor(
             if (!granted) return Outcome.NO_PERMISSION
         }
 
+        // The Settings anime selection (anime names, matched on `Quote.anime`; stale = all).
         val quote = getRandomQuote(
-            preferences.selectedCategoryIds,
+            animes = preferences.selectedCategoryIds,
             excludeId = preferences.lastNotificationQuoteId.ifEmpty { null }
         ) ?: return Outcome.TRANSIENT_ERROR
 

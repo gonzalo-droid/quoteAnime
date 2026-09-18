@@ -1,6 +1,11 @@
 package com.gondroid.quoteanime.domain.model
 
 data class UserPreferences(
+    /**
+     * The Settings anime selection: **anime names** (`Quote.anime`), empty = every anime. The
+     * name predates the selector and is kept for the DataStore key and parity with iOS; it
+     * holds no emotion categories. See `AnimeSelection.kt`.
+     */
     val selectedCategoryIds: Set<String> = emptySet(),
     val notificationsEnabled: Boolean = false,
     val notificationStartHour: Int = 8,

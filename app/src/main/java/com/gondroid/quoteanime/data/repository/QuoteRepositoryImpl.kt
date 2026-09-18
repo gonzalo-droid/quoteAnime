@@ -5,8 +5,10 @@ import com.gondroid.quoteanime.data.local.db.entity.toDomain
 import com.gondroid.quoteanime.data.local.db.entity.toFavoriteEntity
 import com.gondroid.quoteanime.data.remote.QuoteRemoteDataSource
 import com.gondroid.quoteanime.data.remote.dto.toDomain
-import com.gondroid.quoteanime.domain.model.Category
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.domain.model.animeNamesOf
+import com.gondroid.quoteanime.domain.model.hasEmotion
+import com.gondroid.quoteanime.domain.model.pickRandomFromAnimes
 import com.gondroid.quoteanime.domain.repository.QuoteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -36,8 +38,8 @@ class QuoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getCategories(): Flow<List<Category>> =
-        remoteDataSource.getCategories().map { dtos -> dtos.map { it.toDomain() } }
+    override fun getAnimes(): Flow<List<String>> =
+        remoteDataSource.getAllQuotes().map { dtos -> animeNamesOf(dtos.map { it.anime }) }
 
     override fun getAllQuotes(): Flow<List<Quote>> =
         combine(
@@ -53,17 +55,7 @@ class QuoteRepositoryImpl @Inject constructor(
         }
 
     override fun getQuotesByCategory(categoryId: String): Flow<List<Quote>> =
-        combine(
-            remoteDataSource.getQuotesByCategory(categoryId),
-            favoriteQuoteDao.getFavoriteIds()
-        ) { dtos, favoriteIds ->
-            dtos.map { dto ->
-                dto.toDomain(
-                    isFavorite = dto.id in favoriteIds,
-                    imageUrl = resolveImageUrl(dto.animeSlug)
-                )
-            }
-        }
+        getAllQuotes().map { quotes -> quotes.filter { it.hasEmotion(categoryId) } }
 
     override fun getFavorites(): Flow<List<Quote>> =
         favoriteQuoteDao.getFavorites().map { entities ->
@@ -75,9 +67,12 @@ class QuoteRepositoryImpl @Inject constructor(
     override fun isFavorite(quoteId: String): Flow<Boolean> =
         favoriteQuoteDao.isFavorite(quoteId)
 
-    override suspend fun getRandomQuote(categoryIds: Set<String>, excludeId: String?): Quote? {
-        val dto = remoteDataSource.getRandomQuote(categoryIds, excludeId) ?: return null
-        return dto.toDomain(imageUrl = resolveImageUrl(dto.animeSlug))
+    override suspend fun getRandomQuote(animes: Set<String>, excludeId: String?): Quote? {
+        val quote = remoteDataSource.getAllQuotesOnce()
+            .map { it.toDomain() }
+            .pickRandomFromAnimes(animes, excludeId)
+            ?: return null
+        return quote.copy(imageUrl = resolveImageUrl(quote.animeSlug))
     }
 
     override suspend fun addFavorite(quote: Quote) =

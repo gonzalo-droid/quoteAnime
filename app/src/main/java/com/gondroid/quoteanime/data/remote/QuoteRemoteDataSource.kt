@@ -1,8 +1,6 @@
 package com.gondroid.quoteanime.data.remote
 
-import com.gondroid.quoteanime.data.remote.dto.CategoryDto
 import com.gondroid.quoteanime.data.remote.dto.QuoteDto
-import com.gondroid.quoteanime.data.remote.dto.toDomain
 import com.gondroid.quoteanime.data.remote.dto.toQuoteDto
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -33,31 +31,6 @@ class QuoteRemoteDataSource @Inject constructor(
         }
     }
 
-    fun getCategories(): Flow<List<CategoryDto>> = callbackFlow {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val categorySet = mutableSetOf<String>()
-                for (child in snapshot.children) {
-                    val dto = child.toQuoteDto() ?: continue
-                    // New schema: categories array; old schema: anime field
-                    if (!dto.categories.isNullOrEmpty()) {
-                        categorySet.addAll(dto.categories)
-                    } else {
-                        dto.anime?.let { categorySet.add(it) }
-                    }
-                }
-                val categories = categorySet.sorted().map { CategoryDto(id = it, name = it) }
-                trySend(categories)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                close(error.toException())
-            }
-        }
-        quotesRef.addValueEventListener(listener)
-        awaitClose { quotesRef.removeEventListener(listener) }
-    }
-
     fun getAllQuotes(): Flow<List<QuoteDto>> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -73,38 +46,11 @@ class QuoteRemoteDataSource @Inject constructor(
         awaitClose { quotesRef.removeEventListener(listener) }
     }
 
-    fun getQuotesByCategory(categoryId: String): Flow<List<QuoteDto>> = callbackFlow {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val quotes = snapshot.children
-                    .mapNotNull { it.toQuoteDto() }
-                    .filter { dto ->
-                        if (!dto.categories.isNullOrEmpty()) categoryId in dto.categories
-                        else dto.anime == categoryId
-                    }
-                trySend(quotes)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                close(error.toException())
-            }
-        }
-        quotesRef.addValueEventListener(listener)
-        awaitClose { quotesRef.removeEventListener(listener) }
-    }
-
-    suspend fun getRandomQuote(categoryIds: Set<String>, excludeId: String? = null): QuoteDto? {
-        val snapshot = quotesRef.get().await()
-        val allQuotes = snapshot.children.mapNotNull { it.toQuoteDto() }
-        val filtered = if (categoryIds.isEmpty()) allQuotes
-                       else allQuotes.filter { dto ->
-                           if (!dto.categories.isNullOrEmpty()) dto.categories.any { it in categoryIds }
-                           else dto.anime in categoryIds
-                       }
-        val candidates = if (!excludeId.isNullOrEmpty() && filtered.size > 1)
-            filtered.filter { it.id != excludeId }
-        else
-            filtered
-        return candidates.randomOrNull()
-    }
+    /**
+     * One-shot read of every quote, for the notification and widget workers. The anime filter
+     * and the random pick live in the domain (`pickRandomFromAnimes`) so Home, the workers and
+     * their tests share one rule.
+     */
+    suspend fun getAllQuotesOnce(): List<QuoteDto> =
+        quotesRef.get().await().children.mapNotNull { it.toQuoteDto() }
 }

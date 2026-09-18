@@ -5,10 +5,13 @@ import app.cash.turbine.test
 import com.gondroid.quoteanime.domain.model.Quote
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
+import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
+import com.gondroid.quoteanime.domain.usecase.ReconcileAnimeSelectionUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
 import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.util.MainDispatcherRule
+import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
@@ -38,6 +41,9 @@ import org.junit.Test
  *  - onToggleFavorite: delegates to ToggleFavoriteUseCase
  *  - Empty quotes: list is empty after loading
  *  - Anime selection: the feed only holds the selected animes; empty selection = all
+ *  - Anime selection matches `anime`, not the emotion `categories` every quote carries
+ *  - Stale selection (emotions saved by the old selector): all stale → every anime and the
+ *    selection is cleared; mixed → only the animes, saved
  *  - Anime selection change: the feed follows it without reopening Home
  *  - Widget focus is applied once: later emissions (a favorite toggle) don't scroll back to it
  *  - Widget quote outside the selection: Home stays at the top
@@ -53,12 +59,14 @@ class HomeViewModelTest {
     private lateinit var getUserPreferences: GetUserPreferencesUseCase
     private val preferences = MutableStateFlow(UserPreferences())
     private lateinit var toggleFavorite: ToggleFavoriteUseCase
+    private lateinit var preferencesRepository: UserPreferencesRepository
     private lateinit var shareInterstitialManager: ShareInterstitialManager
 
+    // Like production, every quote carries emotion categories next to its anime.
     private val sampleQuotes = listOf(
-        Quote(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", isFavorite = false),
-        Quote(id = "2", quote = "I will be King!", author = "Luffy", anime = "One Piece", isFavorite = true),
-        Quote(id = "3", quote = "Bankai!", author = "Ichigo", anime = "Bleach", isFavorite = false)
+        Quote(id = "1", quote = "Believe it!", author = "Naruto", anime = "Naruto", categories = listOf("motivación", "reflexión"), isFavorite = false),
+        Quote(id = "2", quote = "I will be King!", author = "Luffy", anime = "One Piece", categories = listOf("motivación"), isFavorite = true),
+        Quote(id = "3", quote = "Bankai!", author = "Ichigo", anime = "Bleach", categories = listOf("amistad"), isFavorite = false)
     )
 
     @Before
@@ -67,6 +75,11 @@ class HomeViewModelTest {
         getUserPreferences = mockk()
         every { getUserPreferences() } returns preferences
         toggleFavorite = mockk()
+        preferencesRepository = mockk()
+        // Behaves like DataStore: a write is echoed by the preferences flow.
+        coEvery { preferencesRepository.updateSelectedCategories(any()) } coAnswers {
+            preferences.value = preferences.value.copy(selectedCategoryIds = firstArg())
+        }
         shareInterstitialManager = mockk(relaxed = true)
     }
 
@@ -76,7 +89,10 @@ class HomeViewModelTest {
             if (widgetQuoteId != null) mapOf("quoteId" to widgetQuoteId) else emptyMap()
         )
     ): HomeViewModel =
-        HomeViewModel(savedStateHandle, getAllQuotes, getUserPreferences, toggleFavorite, shareInterstitialManager)
+        HomeViewModel(
+            savedStateHandle, getAllQuotes, getUserPreferences,
+            ReconcileAnimeSelectionUseCase(preferencesRepository), toggleFavorite, shareInterstitialManager
+        )
 
     // ── Initial / loading state ───────────────────────────────────────────────
 
@@ -271,7 +287,7 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("1", "3"), viewModel.uiState.value.quotes.map { it.id })
-        assertEquals(setOf("Naruto", "Bleach"), viewModel.uiState.value.appliedCategoryIds)
+        assertEquals(setOf("Naruto", "Bleach"), viewModel.uiState.value.appliedAnimes)
     }
 
     @Test
@@ -302,15 +318,54 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `given a quote tagged with categories, when filtering, then its categories decide, not its anime`() = runTest {
-        val tagged = Quote(id = "9", quote = "q", author = "a", anime = "Naruto", categories = listOf("Shonen"))
-        every { getAllQuotes() } returns flowOf(sampleQuotes + tagged)
-        preferences.value = UserPreferences(selectedCategoryIds = setOf("Shonen"))
+    fun `given an anime selection, when filtering, then the anime decides, not the emotion categories`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("One Piece"))
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        assertEquals(listOf("9"), viewModel.uiState.value.quotes.map { it.id })
+        // Quote 1 shares One Piece's "motivación" emotion but is from Naruto.
+        assertEquals(listOf("2"), viewModel.uiState.value.quotes.map { it.id })
+    }
+
+    // ── Stale selection saved by the selector that listed emotions ────────────
+
+    @Test
+    fun `given only emotions were saved, when quotes load, then the feed shows every anime and the selection is cleared`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("motivación", "reflexión"))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("1", "2", "3"), viewModel.uiState.value.quotes.map { it.id })
+        assertEquals(emptySet<String>(), viewModel.uiState.value.appliedAnimes)
+        coVerify(exactly = 1) { preferencesRepository.updateSelectedCategories(emptySet()) }
+        assertEquals(emptySet<String>(), preferences.value.selectedCategoryIds)
+    }
+
+    @Test
+    fun `given animes and emotions were saved, when quotes load, then only the animes are kept and saved`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("Bleach", "motivación"))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("3"), viewModel.uiState.value.quotes.map { it.id })
+        coVerify(exactly = 1) { preferencesRepository.updateSelectedCategories(setOf("Bleach")) }
+    }
+
+    @Test
+    fun `given a valid selection, when quotes load, then nothing is rewritten`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("Naruto"))
+
+        buildViewModel()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { preferencesRepository.updateSelectedCategories(any()) }
     }
 
     // ── Widget focus is one-shot ──────────────────────────────────────────────

@@ -39,7 +39,8 @@ class UpdateQuoteWidgetWorker @AssistedInject constructor(
 
         return runCatching {
             val preferences = getUserPreferences().first()
-            val quote       = getRandomQuote(preferences.selectedCategoryIds)
+            // The Settings anime selection (anime names, matched on `Quote.anime`; stale = all).
+            val quote       = getRandomQuote(animes = preferences.selectedCategoryIds)
             // Preferences (the widget's Glance state store) can only hold primitives, not a
             // Bitmap, so the photo is downloaded once here, cached to a file, and only its
             // content:// URI is written to state — RemoteViews/Icon know how to resolve that

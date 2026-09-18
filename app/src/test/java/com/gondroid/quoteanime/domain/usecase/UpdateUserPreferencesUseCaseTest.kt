@@ -11,8 +11,8 @@ import org.junit.Test
 
 /**
  * Scenarios covered:
- *  - setCategories: delegates correct Set<String> to repository
- *  - setCategories with empty set: delegates empty set (means "all categories")
+ *  - setSelectedAnimes: delegates correct Set<String> to repository
+ *  - setSelectedAnimes with empty set: delegates empty set (means "all categories")
  *  - setNotificationsEnabled(true) and (false): delegates correct boolean
  *  - setNotificationTimeRange: delegates all four time parameters correctly
  *  - setFrequency: delegates correct timesPerDay value
@@ -31,20 +31,20 @@ class UpdateUserPreferencesUseCaseTest {
     }
 
     @Test
-    fun `setCategories with non-empty set delegates to repository`() = runTest {
+    fun `setSelectedAnimes with non-empty set delegates to repository`() = runTest {
         val categoryIds = setOf("Naruto", "One Piece", "Bleach")
         coJustRun { repository.updateSelectedCategories(categoryIds) }
 
-        useCase.setCategories(categoryIds)
+        useCase.setSelectedAnimes(categoryIds)
 
         coVerify(exactly = 1) { repository.updateSelectedCategories(categoryIds) }
     }
 
     @Test
-    fun `setCategories with empty set delegates empty set to repository`() = runTest {
+    fun `setSelectedAnimes with empty set delegates empty set to repository`() = runTest {
         coJustRun { repository.updateSelectedCategories(emptySet()) }
 
-        useCase.setCategories(emptySet())
+        useCase.setSelectedAnimes(emptySet())
 
         coVerify(exactly = 1) { repository.updateSelectedCategories(emptySet()) }
     }

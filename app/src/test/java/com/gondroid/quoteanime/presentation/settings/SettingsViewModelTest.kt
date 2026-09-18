@@ -2,12 +2,13 @@ package com.gondroid.quoteanime.presentation.settings
 
 import android.content.Context
 import app.cash.turbine.test
-import com.gondroid.quoteanime.domain.model.Category
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
-import com.gondroid.quoteanime.domain.usecase.GetCategoriesUseCase
+import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
+import com.gondroid.quoteanime.domain.usecase.GetAnimesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
 import com.gondroid.quoteanime.domain.usecase.ObservePremiumStatusUseCase
+import com.gondroid.quoteanime.domain.usecase.ReconcileAnimeSelectionUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
@@ -31,11 +32,11 @@ import org.junit.Test
 
 /**
  * Scenarios covered:
- *  - Initial state: populated from combine(getCategories, getUserPreferences)
- *  - onCategoryToggled: adds category to set, persists, reschedules if notifications enabled
- *  - onCategoryToggled: removes category if already present (toggle behavior)
- *  - onSelectAllCategories: empties selectedCategoryIds set, persists
- *  - allCategoriesSelected: true when set is empty
+ *  - Initial state: populated from combine(getAnimes, getUserPreferences)
+ *  - onAnimeToggled: adds the anime to the set, persists, reschedules if notifications enabled
+ *  - onAnimeToggled: removes the anime if already present (toggle behavior)
+ *  - onSelectAllAnimes: empties selectedAnimes set, persists
+ *  - allAnimesSelected: true when set is empty
  *  - onNotificationsEnabled: persists true, schedules worker
  *  - onNotificationsDisabled: persists false, cancels worker (does NOT reschedule)
  *  - onTimeRangeChanged: persists all 4 params and reschedules
@@ -47,6 +48,8 @@ import org.junit.Test
  *  - Anime list still loading (RTDB offline): the rest of the screen is not blocked
  *  - Anime list fails: empty list, the screen keeps working
  *  - Toggles show at once and stack (two quick taps keep both animes)
+ *  - Stale selection (emotions saved by the old selector): all stale → cleared; mixed → only
+ *    the animes; left alone while the anime list is unknown
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -55,18 +58,15 @@ class SettingsViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var context: Context
-    private lateinit var getCategories: GetCategoriesUseCase
+    private lateinit var getAnimes: GetAnimesUseCase
+    private lateinit var preferencesRepository: UserPreferencesRepository
     private lateinit var getUserPreferences: GetUserPreferencesUseCase
     private lateinit var updatePreferences: UpdateUserPreferencesUseCase
     private lateinit var notificationScheduler: NotificationScheduler
     private lateinit var widgetScheduler: WidgetScheduler
     private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
 
-    private val allCategories = listOf(
-        Category(id = "Naruto", name = "Naruto"),
-        Category(id = "One Piece", name = "One Piece"),
-        Category(id = "Bleach", name = "Bleach")
-    )
+    private val allAnimes = listOf("Bleach", "Naruto", "One Piece")
 
     private val defaultPrefs = UserPreferences(
         selectedCategoryIds = setOf("Naruto"),
@@ -85,7 +85,9 @@ class SettingsViewModelTest {
     @Before
     fun setup() {
         context = mockk(relaxed = true)
-        getCategories = mockk()
+        getAnimes = mockk()
+        preferencesRepository = mockk()
+        coJustRun { preferencesRepository.updateSelectedCategories(any()) }
         getUserPreferences = mockk()
         updatePreferences = mockk()
         notificationScheduler = mockk()
@@ -93,10 +95,10 @@ class SettingsViewModelTest {
         observePremiumStatus = mockk()
 
         // Default stubs
-        every { getCategories() } returns flowOf(allCategories)
+        every { getAnimes() } returns flowOf(allAnimes)
         every { getUserPreferences() } returns flowOf(defaultPrefs)
         every { observePremiumStatus() } returns flowOf(false)
-        coJustRun { updatePreferences.setCategories(any()) }
+        coJustRun { updatePreferences.setSelectedAnimes(any()) }
         coJustRun { updatePreferences.setNotificationsEnabled(any()) }
         coJustRun { updatePreferences.setNotificationTimeRange(any(), any(), any(), any()) }
         coJustRun { updatePreferences.setFrequency(any()) }
@@ -109,21 +111,21 @@ class SettingsViewModelTest {
     }
 
     private fun buildViewModel() = SettingsViewModel(
-        context, getCategories, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler,
-        observePremiumStatus
+        context, getAnimes, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler,
+        observePremiumStatus, ReconcileAnimeSelectionUseCase(preferencesRepository)
     )
 
     // ── Initial state ─────────────────────────────────────────────────────────
 
     @Test
-    fun `initial state is populated from categories and user preferences`() = runTest {
+    fun `initial state is populated from animes and user preferences`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(3, state.categories.size)
-            assertEquals(setOf("Naruto"), state.selectedCategoryIds)
+            assertEquals(3, state.animes.size)
+            assertEquals(setOf("Naruto"), state.selectedAnimes)
             assertFalse(state.notificationsEnabled)
             assertEquals(8, state.notificationStartHour)
             assertEquals(0, state.notificationStartMinute)
@@ -135,88 +137,88 @@ class SettingsViewModelTest {
         }
     }
 
-    // ── Category toggle ───────────────────────────────────────────────────────
+    // ── Anime toggle ───────────────────────────────────────────────────────
 
     @Test
-    fun `onCategoryToggled with new id adds it to selectedCategoryIds and persists`() = runTest {
+    fun `onAnimeToggled with new id adds it to selectedAnimes and persists`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onCategoryToggled("One Piece")
+        viewModel.onAnimeToggled("One Piece")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { updatePreferences.setCategories(setOf("Naruto", "One Piece")) }
+        coVerify(exactly = 1) { updatePreferences.setSelectedAnimes(setOf("Naruto", "One Piece")) }
     }
 
     @Test
-    fun `onCategoryToggled with existing id removes it and persists`() = runTest {
+    fun `onAnimeToggled with existing id removes it and persists`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         // "Naruto" is initially selected — toggling it should remove it
-        viewModel.onCategoryToggled("Naruto")
+        viewModel.onAnimeToggled("Naruto")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { updatePreferences.setCategories(emptySet()) }
+        coVerify(exactly = 1) { updatePreferences.setSelectedAnimes(emptySet()) }
     }
 
     @Test
-    fun `onCategoryToggled does NOT schedule notifications when notifications are disabled`() = runTest {
+    fun `onAnimeToggled does NOT schedule notifications when notifications are disabled`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onCategoryToggled("One Piece")
+        viewModel.onAnimeToggled("One Piece")
         advanceUntilIdle()
 
         verify(exactly = 0) { notificationScheduler.schedule(any()) }
     }
 
     @Test
-    fun `onCategoryToggled reschedules notifications when notifications are enabled`() = runTest {
+    fun `onAnimeToggled reschedules notifications when notifications are enabled`() = runTest {
         every { getUserPreferences() } returns flowOf(prefsWithNotificationsEnabled)
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onCategoryToggled("One Piece")
+        viewModel.onAnimeToggled("One Piece")
         advanceUntilIdle()
 
         verify(exactly = 1) { notificationScheduler.schedule(any()) }
     }
 
-    // ── Select all categories ─────────────────────────────────────────────────
+    // ── Select all animes ─────────────────────────────────────────────────
 
     @Test
-    fun `onSelectAllCategories empties selectedCategoryIds and persists empty set`() = runTest {
+    fun `onSelectAllAnimes empties selectedAnimes and persists empty set`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onSelectAllCategories()
+        viewModel.onSelectAllAnimes()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { updatePreferences.setCategories(emptySet()) }
+        coVerify(exactly = 1) { updatePreferences.setSelectedAnimes(emptySet()) }
     }
 
     @Test
-    fun `allCategoriesSelected is true when selectedCategoryIds is empty`() = runTest {
+    fun `allAnimesSelected is true when selectedAnimes is empty`() = runTest {
         every { getUserPreferences() } returns flowOf(defaultPrefs.copy(selectedCategoryIds = emptySet()))
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         viewModel.uiState.test {
-            assertTrue(awaitItem().allCategoriesSelected)
+            assertTrue(awaitItem().allAnimesSelected)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `allCategoriesSelected is false when selectedCategoryIds is not empty`() = runTest {
+    fun `allAnimesSelected is false when selectedAnimes is not empty`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         viewModel.uiState.test {
-            assertFalse(awaitItem().allCategoriesSelected)
+            assertFalse(awaitItem().allAnimesSelected)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -421,38 +423,38 @@ class SettingsViewModelTest {
 
     @Test
     fun `given the anime list never arrives, then the screen still loads with the section loading`() = runTest {
-        every { getCategories() } returns kotlinx.coroutines.flow.flow { kotlinx.coroutines.awaitCancellation() }
+        every { getAnimes() } returns kotlinx.coroutines.flow.flow { kotlinx.coroutines.awaitCancellation() }
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
-        assertTrue(state.categoriesLoading)
-        assertTrue(state.categories.isEmpty())
-        assertEquals(setOf("Naruto"), state.selectedCategoryIds)
+        assertTrue(state.animesLoading)
+        assertTrue(state.animes.isEmpty())
+        assertEquals(setOf("Naruto"), state.selectedAnimes)
     }
 
     @Test
     fun `given the anime list fails, then the section is empty and the screen keeps working`() = runTest {
-        every { getCategories() } returns kotlinx.coroutines.flow.flow { throw RuntimeException("offline") }
+        every { getAnimes() } returns kotlinx.coroutines.flow.flow { throw RuntimeException("offline") }
 
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
-        assertFalse(state.categoriesLoading)
-        assertTrue(state.categories.isEmpty())
+        assertFalse(state.animesLoading)
+        assertTrue(state.animes.isEmpty())
     }
 
     @Test
-    fun `given the anime list arrives, then categoriesLoading is false`() = runTest {
+    fun `given the anime list arrives, then animesLoading is false`() = runTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        assertFalse(viewModel.uiState.value.categoriesLoading)
-        assertEquals(3, viewModel.uiState.value.categories.size)
+        assertFalse(viewModel.uiState.value.animesLoading)
+        assertEquals(3, viewModel.uiState.value.animes.size)
     }
 
     @Test
@@ -461,12 +463,12 @@ class SettingsViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onCategoryToggled("One Piece")
-        viewModel.onCategoryToggled("Bleach")
+        viewModel.onAnimeToggled("One Piece")
+        viewModel.onAnimeToggled("Bleach")
 
-        assertEquals(setOf("Naruto", "One Piece", "Bleach"), viewModel.uiState.value.selectedCategoryIds)
+        assertEquals(setOf("Naruto", "One Piece", "Bleach"), viewModel.uiState.value.selectedAnimes)
         advanceUntilIdle()
-        coVerify { updatePreferences.setCategories(setOf("Naruto", "One Piece", "Bleach")) }
+        coVerify { updatePreferences.setSelectedAnimes(setOf("Naruto", "One Piece", "Bleach")) }
     }
 
     @Test
@@ -474,8 +476,60 @@ class SettingsViewModelTest {
         val viewModel = buildViewModel()
         advanceUntilIdle()
 
-        viewModel.onSelectAllCategories()
+        viewModel.onSelectAllAnimes()
 
-        assertTrue(viewModel.uiState.value.allCategoriesSelected)
+        assertTrue(viewModel.uiState.value.allAnimesSelected)
+    }
+
+    // ── Stale selection saved by the selector that listed emotions ────────────
+
+    @Test
+    fun `given the anime list, then it holds the anime names`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(allAnimes, viewModel.uiState.value.animes)
+    }
+
+    @Test
+    fun `given only emotions were saved, when the anime list arrives, then the selection is cleared and saved`() = runTest {
+        every { getUserPreferences() } returns flowOf(defaultPrefs.copy(selectedCategoryIds = setOf("motivación", "reflexión")))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.allAnimesSelected)
+        coVerify(exactly = 1) { preferencesRepository.updateSelectedCategories(emptySet()) }
+    }
+
+    @Test
+    fun `given animes and emotions were saved, when the anime list arrives, then only the animes stay selected`() = runTest {
+        every { getUserPreferences() } returns flowOf(defaultPrefs.copy(selectedCategoryIds = setOf("Naruto", "motivación")))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(setOf("Naruto"), viewModel.uiState.value.selectedAnimes)
+        coVerify(exactly = 1) { preferencesRepository.updateSelectedCategories(setOf("Naruto")) }
+    }
+
+    @Test
+    fun `given the anime list never arrives, then a stale selection is not touched`() = runTest {
+        every { getUserPreferences() } returns flowOf(defaultPrefs.copy(selectedCategoryIds = setOf("motivación")))
+        every { getAnimes() } returns kotlinx.coroutines.flow.flow { kotlinx.coroutines.awaitCancellation() }
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(setOf("motivación"), viewModel.uiState.value.selectedAnimes)
+        coVerify(exactly = 0) { preferencesRepository.updateSelectedCategories(any()) }
+    }
+
+    @Test
+    fun `given a valid selection, then nothing is rewritten`() = runTest {
+        buildViewModel()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { preferencesRepository.updateSelectedCategories(any()) }
     }
 }

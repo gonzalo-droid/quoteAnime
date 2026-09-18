@@ -69,7 +69,6 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
-import com.gondroid.quoteanime.domain.model.Category
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
@@ -165,11 +164,11 @@ fun SettingsScreen(
                 item {
                     SectionHeader(stringResource(R.string.settings_animes_title))
                     AnimeSelectionSection(
-                        categories = uiState.categories,
-                        selectedIds = uiState.selectedCategoryIds,
-                        isLoading = uiState.categoriesLoading,
-                        onSelectAll = viewModel::onSelectAllCategories,
-                        onToggle = viewModel::onCategoryToggled
+                        animes = uiState.animes,
+                        selected = uiState.selectedAnimes,
+                        isLoading = uiState.animesLoading,
+                        onSelectAll = viewModel::onSelectAllAnimes,
+                        onToggle = viewModel::onAnimeToggled
                     )
                 }
 
@@ -324,11 +323,11 @@ private fun PremiumSettingsRow(isPremium: Boolean, onClick: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AnimeSelectionSection(
-    categories: List<Category>,
-    selectedIds: Set<String>,
+    animes: List<String>,
+    selected: Set<String>,
     isLoading: Boolean,
     onSelectAll: () -> Unit,
-    onToggle: (categoryId: String) -> Unit
+    onToggle: (anime: String) -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
@@ -348,7 +347,7 @@ internal fun AnimeSelectionSection(
                 )
             }
 
-            categories.isEmpty() -> Text(
+            animes.isEmpty() -> Text(
                 stringResource(R.string.settings_animes_empty),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
@@ -360,14 +359,14 @@ internal fun AnimeSelectionSection(
             ) {
                 AnimeChip(
                     label = stringResource(R.string.settings_animes_all),
-                    selected = selectedIds.isEmpty(),
+                    selected = selected.isEmpty(),
                     onClick = onSelectAll
                 )
-                categories.forEach { category ->
+                animes.forEach { anime ->
                     AnimeChip(
-                        label = category.name,
-                        selected = category.id in selectedIds,
-                        onClick = { onToggle(category.id) }
+                        label = anime,
+                        selected = anime in selected,
+                        onClick = { onToggle(anime) }
                     )
                 }
             }
