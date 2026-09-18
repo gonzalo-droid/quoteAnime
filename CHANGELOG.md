@@ -17,6 +17,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   abres la app sin red; solo la lista de animes espera a que vuelva la conexión
 - **Frase del widget en Inicio**: después de abrir una frase desde el widget, marcar otra como
   favorita ya no te devuelve a la frase del widget
+- **Textos en inglés de verdad**: con el teléfono en inglés, varios textos seguían en español
+  porque estaban escritos en el código: los pasos del tutorial del widget, la sección Widget
+  de Ajustes, las emociones del Catálogo, los mensajes de Inicio sin frases o con error, el
+  lema de la pantalla de inicio, el botón de favorito de las tarjetas y los estados de carga y
+  error del widget de frases. Ahora se muestran en tu idioma
 - **Frecuencia de notificaciones de frases**: el usuario recibía otra cantidad que la
   elegida — el intervalo era `24 / frecuencia` con división entera y un trabajo periódico de
   24 h descartaba los disparos fuera de la ventana (con 8–22, elegir 5 entregaba 4). Ahora
