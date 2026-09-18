@@ -14,9 +14,13 @@ sealed interface AppDeepLink {
         /** Intent extra the quote widget uses to ask for a specific quote. */
         const val EXTRA_QUOTE_ID = "widget_quote_id"
 
-        /** Reads the two intent extras that can open a destination; a quote wins over Mi Rutina. */
+        /**
+         * Reads the two intent extras that can open a destination; a quote wins over Mi Rutina.
+         * A blank quote id counts as no quote: the widget has none while loading or after an
+         * error, and navigating to `home?quoteId=` with it would clear the back stack.
+         */
         fun from(quoteId: String?, openRoutine: Boolean): AppDeepLink? = when {
-            quoteId != null -> Quote(quoteId)
+            !quoteId.isNullOrBlank() -> Quote(quoteId)
             openRoutine -> Routine
             else -> null
         }
@@ -85,7 +89,10 @@ class DeepLinkRouter(pending: AppDeepLink? = null) {
                 DeepLinkRouter(
                     when {
                         token == ROUTINE_TOKEN -> AppDeepLink.Routine
-                        token.startsWith(QUOTE_PREFIX) -> AppDeepLink.Quote(token.removePrefix(QUOTE_PREFIX))
+                        token.startsWith(QUOTE_PREFIX) -> AppDeepLink.from(
+                            quoteId = token.removePrefix(QUOTE_PREFIX),
+                            openRoutine = false
+                        )
                         else -> null
                     }
                 )
