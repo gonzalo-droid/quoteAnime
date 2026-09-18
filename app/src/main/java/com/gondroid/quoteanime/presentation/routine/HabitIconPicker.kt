@@ -59,9 +59,10 @@ fun HabitIconPickerContent(
 ) {
     var query by remember { mutableStateOf("") }
 
-    val visibleCategories = HabitIcons.CATEGORIES
-        .map { category -> category to category.keys.filter { matchesQuery(describeIcon(it), query) } }
-        .filter { (_, keys) -> keys.isNotEmpty() }
+    // Labels are resolved here (stringResource needs composition) so the search rule itself
+    // stays a plain function in HabitIconSearch.
+    val labels = HabitIcons.CATEGORIES.flatMap { it.keys }.associateWith { describeIcon(it) }
+    val visibleCategories = HabitIconSearch.filter(HabitIcons.CATEGORIES, query) { labels.getValue(it) }
 
     Column(modifier = modifier.fillMaxSize()) {
         // Same header treatment as HabitEditorSheet's own title row (headlineSmall, 24dp
@@ -112,14 +113,14 @@ fun HabitIconPickerContent(
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items = visibleCategories, key = { it.first.titleRes }) { (category, keys) ->
+            items(items = visibleCategories, key = { it.titleRes }) { category ->
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = stringResource(category.titleRes),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    keys.chunked(ICON_GRID_COLUMNS).forEach { rowKeys ->
+                    category.keys.chunked(ICON_GRID_COLUMNS).forEach { rowKeys ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -141,9 +142,6 @@ fun HabitIconPickerContent(
         }
     }
 }
-
-private fun matchesQuery(description: String, query: String): Boolean =
-    query.isBlank() || description.contains(query, ignoreCase = true)
 
 @Composable
 private fun IconCell(
