@@ -329,7 +329,7 @@ internal fun InformationSection(
 private fun PreviewRatingSection() {
     QuoteAnimeTheme {
         androidx.compose.foundation.layout.Column {
-            SectionHeader("Calificación")
+            SectionHeader(stringResource(R.string.rating))
             RatingSection()
         }
     }
@@ -340,7 +340,7 @@ private fun PreviewRatingSection() {
 private fun PreviewSocialSection() {
     QuoteAnimeTheme {
         androidx.compose.foundation.layout.Column {
-            SectionHeader("Síguenos")
+            SectionHeader(stringResource(R.string.follow_us))
             SocialSection()
         }
     }
@@ -351,7 +351,7 @@ private fun PreviewSocialSection() {
 private fun PreviewInformationSection() {
     QuoteAnimeTheme {
         androidx.compose.foundation.layout.Column {
-            SectionHeader("Información")
+            SectionHeader(stringResource(R.string.version))
             InformationSection(versionName = "1.0.4")
         }
     }

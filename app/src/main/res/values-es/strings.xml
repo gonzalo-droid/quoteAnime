@@ -6,7 +6,7 @@
     <string name="widget_description">Muestra una frase motivacional en tu pantalla de inicio</string>
     <string name="widget_refresh">Actualizar frase</string>
     <string name="widget_loading">Cargando frase…</string>
-    <string name="widget_error">No se pudo cargar la frase. Toca para reintentar.</string>
+    <string name="widget_error">No se pudo cargar la frase.</string>
     <string name="routine_widget_description">Sigue tus hábitos desde la pantalla de inicio</string>
     <string name="routine_widget_title">Mi rutina</string>
     <string name="routine_widget_progress">%1$d/%2$d hoy</string>
@@ -381,4 +381,33 @@
     <string name="settings_animes_description">Elige de qué animes quieres ver frases en el inicio y recibir por notificación. Si no eliges ninguno, se muestran todos.</string>
     <string name="settings_animes_all">Todos los animes</string>
     <string name="settings_animes_empty">Todavía no hay animes disponibles.</string>
+
+    <!-- Textos que estaban fijos en español en el código -->
+    <string name="home_error">No se pudieron cargar las frases.</string>
+    <string name="home_empty">Sin frases disponibles.</string>
+    <string name="splash_tagline">frases que marcaron nuestra vida</string>
+    <string name="settings_widget_tutorial_subtitle">Tutorial paso a paso para añadirlo a tu pantalla de inicio</string>
+    <string name="settings_widget_size_title">Tamaño del widget</string>
+    <string name="settings_widget_size_body">Mantén presionado el widget en tu pantalla de inicio y arrastra las esquinas para ajustar el tamaño. El contenido se adapta automáticamente.</string>
+    <string name="settings_widget_updates_title">Actualizaciones del widget</string>
+    <string name="widget_tutorial_title">Cómo agregar el widget</string>
+    <string name="widget_tutorial_step_counter">Paso %1$d de %2$d</string>
+    <string name="widget_tutorial_step1_title">Mantén presionado</string>
+    <string name="widget_tutorial_step1_body">Toca y sostén cualquier área vacía de tu pantalla de inicio hasta que aparezca el menú de opciones.</string>
+    <string name="widget_tutorial_step2_title">Toca \"Widgets\"</string>
+    <string name="widget_tutorial_step2_body">En el menú que aparece en la parte inferior, selecciona la opción Widgets para abrir la galería.</string>
+    <string name="widget_tutorial_step3_title">Busca Quote Anime</string>
+    <string name="widget_tutorial_step3_body">Desplázate por la lista hasta encontrar Quote Anime y mantén presionado el widget.</string>
+    <string name="widget_tutorial_step4_title">Arrastra y suelta</string>
+    <string name="widget_tutorial_step4_body">Arrastra el widget a la posición que prefieras en tu pantalla de inicio y suéltalo.</string>
+    <string name="emotion_motivation">Motivación</string>
+    <string name="emotion_fight">Lucha</string>
+    <string name="emotion_sadness">Tristeza</string>
+    <string name="emotion_love">Amor</string>
+    <string name="emotion_friendship">Amistad</string>
+    <string name="emotion_reflection">Reflexión</string>
+    <string name="emotion_loneliness">Soledad</string>
+    <string name="emotion_sacrifice">Sacrificio</string>
+    <string name="emotion_hope">Esperanza</string>
+    <string name="emotion_pride">Orgullo</string>
 </resources>

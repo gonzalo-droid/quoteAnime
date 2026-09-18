@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -127,7 +128,7 @@ private fun SplashContent() {
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "frases que marcaron nuestra vida",
+                text = stringResource(R.string.splash_tagline),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
                 color = TextSecondary,

@@ -1,6 +1,7 @@
 package com.gondroid.quoteanime.presentation.settings
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,30 +52,30 @@ import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 
 private data class TutorialStep(
     @param:DrawableRes val imageRes: Int,
-    val title: String,
-    val description: String
+    @param:StringRes val title: Int,
+    @param:StringRes val description: Int
 )
 
 private val tutorialSteps = listOf(
     TutorialStep(
         R.drawable.widget_tutorial_step1,
-        "Mantén presionado",
-        "Toca y sostén cualquier área vacía de tu pantalla de inicio hasta que aparezca el menú de opciones."
+        R.string.widget_tutorial_step1_title,
+        R.string.widget_tutorial_step1_body
     ),
     TutorialStep(
         R.drawable.widget_tutorial_step2,
-        "Toca \"Widgets\"",
-        "En el menú que aparece en la parte inferior, selecciona la opción Widgets para abrir la galería."
+        R.string.widget_tutorial_step2_title,
+        R.string.widget_tutorial_step2_body
     ),
     TutorialStep(
         R.drawable.widget_tutorial_step3,
-        "Busca Quote Anime",
-        "Desplázate por la lista hasta encontrar Quote Anime y mantén presionado el widget."
+        R.string.widget_tutorial_step3_title,
+        R.string.widget_tutorial_step3_body
     ),
     TutorialStep(
         R.drawable.widget_tutorial_step4,
-        "Arrastra y suelta",
-        "Arrastra el widget a la posición que prefieras en tu pantalla de inicio y suéltalo."
+        R.string.widget_tutorial_step4_title,
+        R.string.widget_tutorial_step4_body
     )
 )
 
@@ -90,7 +91,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        "Cómo agregar el widget",
+                        stringResource(R.string.widget_tutorial_title),
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -133,7 +134,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                 ) {
                     Image(
                         painter = painterResource(step.imageRes),
-                        contentDescription = step.title,
+                        contentDescription = stringResource(step.title),
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
                             .aspectRatio(240f / 400f),
@@ -148,7 +149,11 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                             .padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Paso ${page + 1} de ${tutorialSteps.size}",
+                            text = stringResource(
+                                R.string.widget_tutorial_step_counter,
+                                page + 1,
+                                tutorialSteps.size
+                            ),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold
@@ -156,7 +161,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                     }
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = step.title,
+                        text = stringResource(step.title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
@@ -164,7 +169,7 @@ fun WidgetTutorialScreen(onNavigateBack: () -> Unit) {
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = step.description,
+                        text = stringResource(step.description),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center

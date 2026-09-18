@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.catalog
 
+import androidx.annotation.StringRes
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -82,24 +83,28 @@ import kotlinx.coroutines.launch
 
 // ── Emotion catalog definitions ───────────────────────────────────────────────
 
+/**
+ * [categoryId] is the value stored in the Realtime Database, so it stays in Spanish whatever the
+ * device language; only [label] is shown.
+ */
 private data class EmotionOption(
     val categoryId: String,
-    val label: String,
+    @param:StringRes val label: Int,
     val icon: ImageVector,
     val color: Color
 )
 
 private val emotions = listOf(
-    EmotionOption("motivación",  "Motivación",  Icons.Default.Bolt,            Color(0xFFFF8F00)),
-    EmotionOption("lucha",       "Lucha",        Icons.Default.Shield,           Color(0xFFD32F2F)),
-    EmotionOption("tristeza",    "Tristeza",     Icons.Default.WaterDrop,        Color(0xFF546E7A)),
-    EmotionOption("amor",        "Amor",         Icons.Default.Favorite,         Color(0xFFE91E63)),
-    EmotionOption("amistad",     "Amistad",      Icons.Default.People,           Color(0xFF388E3C)),
-    EmotionOption("reflexión",   "Reflexión",    Icons.Default.Psychology,       Color(0xFF4527A0)),
-    EmotionOption("soledad",     "Soledad",      Icons.Default.Nightlight,       Color(0xFF37474F)),
-    EmotionOption("sacrificio",  "Sacrificio",   Icons.Default.SelfImprovement,  Color(0xFF880E4F)),
-    EmotionOption("esperanza",   "Esperanza",    Icons.Default.WbSunny,          Color(0xFFF57F17)),
-    EmotionOption("orgullo",     "Orgullo",      Icons.Default.EmojiEvents,      Color(0xFFAD8000))
+    EmotionOption("motivación",  R.string.emotion_motivation, Icons.Default.Bolt,            Color(0xFFFF8F00)), // i18n-ignore: RTDB id
+    EmotionOption("lucha",       R.string.emotion_fight,      Icons.Default.Shield,          Color(0xFFD32F2F)),
+    EmotionOption("tristeza",    R.string.emotion_sadness,    Icons.Default.WaterDrop,       Color(0xFF546E7A)),
+    EmotionOption("amor",        R.string.emotion_love,       Icons.Default.Favorite,        Color(0xFFE91E63)),
+    EmotionOption("amistad",     R.string.emotion_friendship, Icons.Default.People,          Color(0xFF388E3C)),
+    EmotionOption("reflexión",   R.string.emotion_reflection, Icons.Default.Psychology,      Color(0xFF4527A0)), // i18n-ignore: RTDB id
+    EmotionOption("soledad",     R.string.emotion_loneliness, Icons.Default.Nightlight,      Color(0xFF37474F)),
+    EmotionOption("sacrificio",  R.string.emotion_sacrifice,  Icons.Default.SelfImprovement, Color(0xFF880E4F)),
+    EmotionOption("esperanza",   R.string.emotion_hope,       Icons.Default.WbSunny,         Color(0xFFF57F17)),
+    EmotionOption("orgullo",     R.string.emotion_pride,      Icons.Default.EmojiEvents,     Color(0xFFAD8000))
 )
 
 // ── Root composable ───────────────────────────────────────────────────────────
@@ -197,7 +202,12 @@ fun CatalogScreen(
                 filterLabel = when (filter) {
                     is CatalogFilter.Favorites -> stringResource(R.string.catalog_favorites)
                     is CatalogFilter.All -> stringResource(R.string.catalog_all)
-                    is CatalogFilter.ByEmotion -> filter.emotionLabel
+                    // Resolved here, not stored in the filter: the label must follow the
+                    // device language, and a filter restored from navigation only has the id.
+                    is CatalogFilter.ByEmotion ->
+                        emotions.firstOrNull { it.categoryId == filter.categoryId }
+                            ?.let { stringResource(it.label) }
+                            ?: filter.emotionLabel
                 },
                 quotes = uiState.quotes,
                 isLoading = uiState.isLoading,
@@ -302,7 +312,7 @@ private fun CatalogSelectorContent(
                             modifier = Modifier.weight(1f),
                             onClick = {
                                 onFilterSelected(
-                                    CatalogFilter.ByEmotion(emotion.categoryId, emotion.label)
+                                    CatalogFilter.ByEmotion(emotion.categoryId, emotion.categoryId)
                                 )
                             }
                         )
@@ -382,7 +392,7 @@ private fun EmotionCard(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = emotion.label,
+                text = stringResource(emotion.label),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -619,7 +629,7 @@ private fun PreviewQuoteDetailFavorite() {
 private fun PreviewPrimaryFilterCardFavorites() {
     QuoteAnimeTheme {
         PrimaryFilterCard(
-            label = "Favoritos",
+            label = stringResource(R.string.catalog_favorites),
             icon = Icons.Default.Favorite,
             color = AccentPurple,
             onClick = {}
@@ -634,7 +644,7 @@ private fun PreviewEmotionCardAmor() {
         EmotionCard(
             emotion = EmotionOption(
                 categoryId = "amor",
-                label = "Amor",
+                label = R.string.emotion_love,
                 icon = Icons.Default.Favorite,
                 color = Color(0xFFE91E63)
             ),

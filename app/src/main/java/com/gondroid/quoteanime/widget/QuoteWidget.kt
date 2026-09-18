@@ -156,7 +156,7 @@ class QuoteWidget : GlanceAppWidget() {
     @Composable
     private fun LoadingContent() {
         Text(
-            text = "Cargando frase…",
+            text = LocalContext.current.getString(R.string.widget_loading),
             style = TextStyle(color = ColorTextSecondary, fontSize = 13.sp)
         )
     }
@@ -169,7 +169,7 @@ class QuoteWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "No se pudo cargar la frase.",
+                text = LocalContext.current.getString(R.string.widget_error),
                 style = TextStyle(color = ColorTextSecondary, fontSize = 12.sp)
             )
             Spacer(GlanceModifier.height(8.dp))
