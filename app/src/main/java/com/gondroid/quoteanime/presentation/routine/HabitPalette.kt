@@ -27,4 +27,13 @@ object HabitPalette {
     )
 
     fun colorAt(index: Int): Color = COLORS[index.mod(COLORS.size)]
+
+    /**
+     * Whether the swatch at [swatchIndex] is the chosen one for a habit whose stored index is
+     * [selectedIndex]. Wraps the same way as [colorAt], so the swatch drawn and announced as
+     * selected is always the color the habit is actually shown in — even for an out-of-range
+     * index that came from a remote template.
+     */
+    fun isSelected(swatchIndex: Int, selectedIndex: Int): Boolean =
+        selectedIndex.mod(COLORS.size) == swatchIndex
 }

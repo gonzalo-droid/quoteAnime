@@ -29,6 +29,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   actualización la incluya. Los títulos escritos como texto normal se muestran tal cual
 - **Widget de frases sin frase**: tocarlo mientras carga o tras un error abre la app
   normalmente, en lugar de navegar con una frase vacía y perder la pantalla en la que estabas
+- **Buscador de íconos sin tildes**: escribir "musica" ahora encuentra "Tocar música", y un
+  espacio al final (el que suele dejar el autocorrector) ya no vacía los resultados
+- **TalkBack en el editor de hábitos**: al recorrer los íconos y los colores ahora se anuncia
+  cuál está elegido ("Seleccionado, Color 3"), en lugar de leer solo "botón"
+- **Íconos con el mismo nombre en inglés**: "Darte un gusto" y "Darte un capricho" se
+  llamaban igual en inglés ("Treat yourself"), así que TalkBack los anunciaba igual; el
+  segundo ahora es "Pamper yourself"
+
+### Changed
+- **Textos en español con un mismo registro**: los mensajes de Mi Rutina, el onboarding, la
+  pantalla Premium, la hoja de cancelación y el error de carga de páginas que hablaban de
+  "vos" ("Probá", "Ya sos premium", "Cancelá") ahora te tratan de "tú", como el resto de la
+  app y la versión de iOS
 
 ## [1.2.1]
 

@@ -2,7 +2,6 @@ package com.gondroid.quoteanime.presentation.routine
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
@@ -59,9 +56,10 @@ fun HabitIconPickerContent(
 ) {
     var query by remember { mutableStateOf("") }
 
-    val visibleCategories = HabitIcons.CATEGORIES
-        .map { category -> category to category.keys.filter { matchesQuery(describeIcon(it), query) } }
-        .filter { (_, keys) -> keys.isNotEmpty() }
+    // Labels are resolved here (stringResource needs composition) so the search rule itself
+    // stays a plain function in HabitIconSearch.
+    val labels = HabitIcons.CATEGORIES.flatMap { it.keys }.associateWith { describeIcon(it) }
+    val visibleCategories = HabitIconSearch.filter(HabitIcons.CATEGORIES, query) { labels.getValue(it) }
 
     Column(modifier = modifier.fillMaxSize()) {
         // Same header treatment as HabitEditorSheet's own title row (headlineSmall, 24dp
@@ -112,14 +110,14 @@ fun HabitIconPickerContent(
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items = visibleCategories, key = { it.first.titleRes }) { (category, keys) ->
+            items(items = visibleCategories, key = { it.titleRes }) { category ->
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = stringResource(category.titleRes),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    keys.chunked(ICON_GRID_COLUMNS).forEach { rowKeys ->
+                    category.keys.chunked(ICON_GRID_COLUMNS).forEach { rowKeys ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -142,9 +140,6 @@ fun HabitIconPickerContent(
     }
 }
 
-private fun matchesQuery(description: String, query: String): Boolean =
-    query.isBlank() || description.contains(query, ignoreCase = true)
-
 @Composable
 private fun IconCell(
     iconKey: String,
@@ -157,14 +152,13 @@ private fun IconCell(
         modifier = modifier
             .size(48.dp)
             .clip(CircleShape)
-            .clickable(onClick = onClick)
+            .selectableOption(label = description, selected = selected, onClick = onClick)
             .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .border(
                 width = 1.dp,
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                 shape = CircleShape
             )
-            .semantics { contentDescription = description }
             .testTag("icon_picker_cell_$iconKey"),
         contentAlignment = Alignment.Center
     ) {

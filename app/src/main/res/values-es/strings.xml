@@ -46,7 +46,7 @@
     <string name="routine_streak_days">%1$d días seguidos</string>
     <string name="routine_progress_today">%1$d de %2$d hoy</string>
     <string name="routine_empty_title">Tu primer hábito te espera</string>
-    <string name="routine_empty_body">Elegí hasta 3 hábitos y marcá cada día que los cumplas — la constancia hace el resto.</string>
+    <string name="routine_empty_body">Elige hasta 3 hábitos y marca cada día que los cumplas — la constancia hace el resto.</string>
     <string name="routine_add_habit">Añadir hábito</string>
     <string name="routine_limit_reached">Has alcanzado el máximo de %1$d hábitos activos.</string>
     <string name="routine_current_streak">Racha: %1$d</string>
@@ -60,7 +60,7 @@
     <string name="routine_filter_active">Activos</string>
     <string name="routine_filter_archived">Archivados</string>
     <string name="routine_archived_empty_title">Hábitos archivados</string>
-    <string name="routine_archived_empty_body">Cuando archivás un hábito se pausa y deja de sumar a tu racha, pero conserva todo su historial — restauralo cuando quieras.</string>
+    <string name="routine_archived_empty_body">Cuando archivas un hábito se pausa y deja de sumar a tu racha, pero conserva todo su historial — restáuralo cuando quieras.</string>
     <string name="routine_archived_empty_subtext">Todavía no archivaste ninguno.</string>
     <string name="routine_confirm_archive_title">¿Archivar este hábito?</string>
     <string name="routine_confirm_archive_body">Se moverá al filtro de Archivados y dejará de recordarte. Su historial se conserva — puedes restaurarlo cuando quieras.</string>
@@ -274,7 +274,7 @@
     <string name="routine_intro_action">Empezar</string>
     <string name="routine_intro_dismiss">Ahora no</string>
     <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>
-    <string name="onboarding_habit_subtitle">Elige una sugerencia para arrancar hoy mismo — podés cambiarlo cuando quieras.</string>
+    <string name="onboarding_habit_subtitle">Elige una sugerencia para arrancar hoy mismo — puedes cambiarlo cuando quieras.</string>
     <string name="onboarding_habit_create">Comenzar</string>
     <string name="onboarding_habit_skip">Saltar</string>
     <string name="onboarding_quote_1">No me rindo. \nNunca me rendiré. \nEse es mi camino ninja.</string>
@@ -335,23 +335,23 @@
     <string name="widget_tutorial_done">Entendido</string>
 
     <string name="paywall_title">Hazte Premium</string>
-    <string name="paywall_subtitle">Desbloqueá todo el potencial de tu rutina.</string>
+    <string name="paywall_subtitle">Desbloquea todo el potencial de tu rutina.</string>
     <string name="paywall_benefit_habits_title">Hábitos ilimitados</string>
-    <string name="paywall_benefit_habits_body">Sin el límite de 3 hábitos activos — creá todos los que necesites.</string>
+    <string name="paywall_benefit_habits_body">Sin el límite de 3 hábitos activos — crea todos los que necesites.</string>
     <string name="paywall_benefit_ads_title">Sin anuncios</string>
-    <string name="paywall_benefit_ads_body">Navegá el catálogo de frases sin banners.</string>
+    <string name="paywall_benefit_ads_body">Navega el catálogo de frases sin banners.</string>
     <string name="paywall_benefit_themes_title">Temas exclusivos</string>
-    <string name="paywall_benefit_themes_body">Accedé a colecciones temáticas exclusivas, como Pokémon y Black Clover.</string>
+    <string name="paywall_benefit_themes_body">Accede a colecciones temáticas exclusivas, como Pokémon y Black Clover.</string>
     <string name="paywall_subscribe">Suscribirme</string>
-    <string name="paywall_disclaimer">Cancelá cuando quieras desde Google Play.</string>
-    <string name="paywall_already_premium">✨ Ya sos premium</string>
+    <string name="paywall_disclaimer">Cancela cuando quieras desde Google Play.</string>
+    <string name="paywall_already_premium">✨ Ya eres premium</string>
     <string name="paywall_remove_debug">Quitar premium (solo pruebas)</string>
     <string name="paywall_locked_template_cd">Sugerencia exclusiva para premium</string>
-    <string name="paywall_offers_unavailable">Los planes de suscripción no están disponibles en este momento. Probá de nuevo más tarde.</string>
+    <string name="paywall_offers_unavailable">Los planes de suscripción no están disponibles en este momento. Prueba de nuevo más tarde.</string>
     <string name="paywall_free_trial">%1$d días de prueba gratis</string>
     <string name="paywall_purchase_pending">Tu compra está pendiente — vamos a desbloquear premium apenas se complete.</string>
     <string name="paywall_purchase_cancelled">Compra cancelada.</string>
-    <string name="paywall_purchase_error">Algo salió mal con la compra. Probá de nuevo.</string>
+    <string name="paywall_purchase_error">Algo salió mal con la compra. Prueba de nuevo.</string>
     <string name="settings_premium_title">Premium</string>
     <string name="settings_premium_subtitle_free">Hábitos ilimitados, sin anuncios y temas exclusivos</string>
     <string name="settings_premium_subtitle_active">Activo ✨</string>
@@ -360,19 +360,19 @@
     <!-- Gestión de la suscripción / retención -->
     <string name="paywall_manage_subscription">Gestionar suscripción</string>
     <string name="paywall_manage_unavailable">Google Play no está disponible en este dispositivo.</string>
-    <string name="cancel_sheet_title">¿Seguro que querés cancelar?</string>
-    <string name="cancel_sheet_intro">Si cancelás, al terminar tu periodo actual vas a perder:</string>
-    <string name="cancel_sheet_loss_habits">Volvés al límite de 3 hábitos activos.</string>
+    <string name="cancel_sheet_title">¿Seguro que quieres cancelar?</string>
+    <string name="cancel_sheet_intro">Si cancelas, al terminar tu periodo actual vas a perder:</string>
+    <string name="cancel_sheet_loss_habits">Vuelves al límite de 3 hábitos activos.</string>
     <string name="cancel_sheet_loss_ads">Los anuncios regresan al catálogo.</string>
     <string name="cancel_sheet_loss_themes">Pokémon, Black Clover y los demás se bloquean otra vez.</string>
-    <string name="cancel_sheet_reassurance">Tranquilo: conservás todo hasta el final del periodo que ya pagaste.</string>
+    <string name="cancel_sheet_reassurance">Tranquilo: conservas todo hasta el final del periodo que ya pagaste.</string>
     <string name="cancel_sheet_keep">Seguir siendo premium</string>
     <string name="cancel_sheet_confirm">Cancelar de todos modos</string>
 
     <string name="webview_error_title">No pudimos cargar la página</string>
-    <string name="webview_error_body">Revisá tu conexión e intentá de nuevo.</string>
+    <string name="webview_error_body">Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="webview_retry">Reintentar</string>
 
-    <string name="paywall_error_play_unavailable">Google Play no está disponible ahora. Intentá más tarde.</string>
-    <string name="paywall_error_network">Sin conexión. Revisá tu red e intentá de nuevo.</string>
+    <string name="paywall_error_play_unavailable">Google Play no está disponible ahora. Inténtalo más tarde.</string>
+    <string name="paywall_error_network">Sin conexión. Revisa tu red e intenta de nuevo.</string>
 </resources>
