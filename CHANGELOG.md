@@ -3,6 +3,17 @@
 All notable changes to Quote Anime are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+- **Frecuencia de notificaciones de frases**: el usuario recibía otra cantidad que la
+  elegida — el intervalo era `24 / frecuencia` con división entera y un trabajo periódico de
+  24 h descartaba los disparos fuera de la ventana (con 8–22, elegir 5 entregaba 4). Ahora
+  `QuoteNotificationSlotCalculator` reparte exactamente N horarios de punta a punta en la
+  ventana y cada notificación agenda la siguiente
+- Las ventanas horarias que cruzan la medianoche (ej. 22:00–02:00) no enviaban ninguna
+  notificación: el chequeo de ventana asumía inicio < fin
+
 ## [1.2.1]
 
 ### Added — Google Play Billing real

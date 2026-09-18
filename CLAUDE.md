@@ -161,16 +161,18 @@ com.gondroid.quoteanime/
 | Clase | Responsabilidad |
 |---|---|
 | `NotificationHelper` | Crea los canales (`quote_notifications`, `habit_reminders`), construye y muestra la notificación con `BigTextStyle` |
-| `NotificationScheduler` | Envuelve WorkManager: `schedule(UserPreferences)` calcula el delay inicial hasta el inicio de la ventana y encola `PeriodicWorkRequest` cada `24 / frecuencia` horas, con red requerida; `cancel()` cancela por nombre único |
+| `NotificationScheduler` | Encola **un** `OneTimeWorkRequest` único (`quote_notification_next`, `REPLACE`) con delay hasta el próximo horario de `QuoteNotificationSlotCalculator`, con red requerida. Cada `schedule()` cancela además el periódico viejo (`quote_notification_work`) — así migran solas las instalaciones anteriores |
 | `HabitReminderScheduler` | Un `OneTimeWorkRequest` único por hábito (`ExistingWorkPolicy.REPLACE`) → `HabitReminderWorker`; `NextReminderCalculator` calcula el próximo disparo |
 | `HabitReminderReceiver` | Maneja la acción "Done" de la notificación de recordatorio |
-| `QuoteNotificationWorker` | `CoroutineWorker` + `@HiltWorker`; lee prefs, llama `GetRandomQuoteUseCase`, muestra notificación; reintenta hasta 3 veces en error de red |
+| `QuoteNotificationWorker` | `CoroutineWorker` + `@HiltWorker`; muestra la notificación si está dentro de la ventana (con 30 min de gracia al final) y **encadena el próximo horario** llamando a `NotificationScheduler.schedule()` como último paso — también al fallar, nunca al reintentar. Reintenta hasta 3 veces |
 
-**Flujo de scheduling**: `SettingsViewModel` → `NotificationScheduler.schedule(prefs)` → `WorkManager.enqueueUniquePeriodicWork(UPDATE)` → `QuoteNotificationWorker.doWork()` → `NotificationHelper.showQuoteNotification()`
+**Flujo de scheduling**: `SettingsViewModel` → `NotificationScheduler.schedule(prefs)` → `enqueueUniqueWork(REPLACE)` → `QuoteNotificationWorker.doWork()` → `NotificationHelper.showQuoteNotification()` → `NotificationScheduler.schedule(prefs)` (próximo horario)
 
-**Gotcha — la frecuencia real no es la elegida**: el intervalo es `24L / notificationFrequency`, **división entera**. Elegir 5 da 4 h (6 por día), elegir 7 da 3 h (8 por día). Además `QuoteNotificationWorker` descarta los disparos fuera de la ventana horaria, así que con la ventana por defecto (8–22) llegan menos de las elegidas.
+**Reparto de horarios**: `QuoteNotificationSlotCalculator` (puro, con tests) reparte N notificaciones de punta a punta en la ventana — 3 por día en 08:00–22:00 → 08:00, 15:00, 22:00. Soporta ventanas que cruzan la medianoche (22:00–02:00) e interpreta inicio == fin como 24 h.
 
-**Por qué NO se usa `SCHEDULE_EXACT_ALARM`**: `PeriodicWorkRequest` usa `JobScheduler`/`AlarmManager` internamente gestionado por WorkManager. Para frases motivacionales la ventana de ±30 min es aceptable y evita el diálogo de permiso especial de Android 12+.
+**No usar `runCatching` en el worker**: atrapa también la cancelación, y un worker cancelado porque el usuario apagó las notificaciones seguiría y encadenaría el próximo horario. Por eso existe `attempt { }`, que relanza `CancellationException`.
+
+**Por qué NO se usa `SCHEDULE_EXACT_ALARM`**: WorkManager (vía `JobScheduler`/`AlarmManager`) nunca adelanta, solo atrasa; para frases motivacionales ese margen es aceptable y evita el diálogo de permiso especial de Android 12+. El margen de gracia de 30 min del worker existe justamente por esos atrasos.
 
 **WorkManager y reinicios**: WorkManager registra su propio `BroadcastReceiver` para `BOOT_COMPLETED` internamente. El permiso `RECEIVE_BOOT_COMPLETED` en el manifest es suficiente — no hace falta un `BootReceiver` propio.
 
