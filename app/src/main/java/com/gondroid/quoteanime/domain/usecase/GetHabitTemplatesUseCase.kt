@@ -3,6 +3,7 @@ package com.gondroid.quoteanime.domain.usecase
 import com.gondroid.quoteanime.data.remote.HabitTemplateRemoteDataSource
 import com.gondroid.quoteanime.domain.model.DefaultHabitTemplates
 import com.gondroid.quoteanime.domain.model.HabitTemplate
+import com.gondroid.quoteanime.domain.model.HabitTemplateTitles
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,8 +27,11 @@ class GetHabitTemplatesUseCase @Inject constructor(
     operator fun invoke(): Flow<List<HabitTemplate>> =
         remoteDataSource.getTemplates()
             .map { templates ->
-                if (templates.isEmpty()) DefaultHabitTemplates.ALL
-                else templates.sortedBy { it.order }
+                // A title key this build can't name is dropped rather than shown raw; if
+                // that leaves nothing, the bundled list is still better than no suggestions.
+                val displayable = templates.filter(HabitTemplateTitles::isDisplayable)
+                if (displayable.isEmpty()) DefaultHabitTemplates.ALL
+                else displayable.sortedBy { it.order }
             }
             .onStart { emit(DefaultHabitTemplates.ALL) }
             .catch { /* keep the last emitted list */ }

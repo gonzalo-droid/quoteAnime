@@ -22,6 +22,8 @@ import org.junit.Test
  *  - An empty remote node keeps the bundled defaults
  *  - A remote failure keeps the bundled defaults (never an empty list)
  *  - A remote failure after a remote list keeps that list
+ *  - A remote template whose title key this build doesn't know is dropped; literal titles stay
+ *  - If every remote template is dropped, the bundled defaults stay
  */
 class GetHabitTemplatesUseCaseTest {
 
@@ -97,6 +99,35 @@ class GetHabitTemplatesUseCaseTest {
         useCase().test {
             assertEquals(DefaultHabitTemplates.ALL, awaitItem())
             assertEquals(remoteTemplates, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `given a remote template with an unknown title key, when collected, then it is dropped and the rest stay`() = runTest {
+        every { remote.getTemplates() } returns flowOf(
+            listOf(
+                HabitTemplate("bleach", "template_theme_bleach", "sword", order = 1),
+                HabitTemplate("ninja", "template_theme_ninja", "dumbbell", order = 2),
+                HabitTemplate("read", "Leer 20 minutos", "book", order = 3)
+            )
+        )
+
+        useCase().test {
+            assertEquals(DefaultHabitTemplates.ALL, awaitItem())
+            assertEquals(listOf("ninja", "read"), awaitItem().map { it.id })
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `given only unknown title keys remotely, when collected, then the bundled defaults stay`() = runTest {
+        every { remote.getTemplates() } returns flowOf(
+            listOf(HabitTemplate("bleach", "template_theme_bleach", "sword", order = 1))
+        )
+
+        useCase().test {
+            assertEquals(DefaultHabitTemplates.ALL, awaitItem())
             awaitComplete()
         }
     }
