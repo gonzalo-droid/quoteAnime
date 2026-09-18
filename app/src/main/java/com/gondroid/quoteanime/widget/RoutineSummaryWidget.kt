@@ -39,6 +39,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gondroid.quoteanime.MainActivity
+import com.gondroid.quoteanime.presentation.navigation.AppDeepLink
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.notification.NotificationHelper
 import com.gondroid.quoteanime.presentation.routine.HabitPalette
@@ -80,7 +81,7 @@ class RoutineSummaryWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val openIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, true)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = AppDeepLink.LAUNCH_FLAGS
         }
 
         Box(
