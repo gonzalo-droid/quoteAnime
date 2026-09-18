@@ -22,6 +22,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   de Ajustes, las emociones del Catálogo, los mensajes de Inicio sin frases o con error, el
   lema de la pantalla de inicio, el botón de favorito de las tarjetas y los estados de carga y
   error del widget de frases. Ahora se muestran en tu idioma
+- **La app ya no se reinicia al tocar un widget o una notificación**: con la app abierta,
+  tocar el widget de frases, los de Mi Rutina, un recordatorio o una notificación de frase
+  reiniciaba la app desde la pantalla de inicio. Ahora la app sigue donde estaba y abre lo que
+  pediste; la notificación de frase ya no borra la pantalla en la que estabas
+- **Abrir desde Recientes no repite el último atajo**: volver a la app desde la lista de apps
+  recientes ya no te lleva otra vez a Mi Rutina o a la frase del último widget que tocaste
 - **Frecuencia de notificaciones de frases**: el usuario recibía otra cantidad que la
   elegida — el intervalo era `24 / frecuencia` con división entera y un trabajo periódico de
   24 h descartaba los disparos fuera de la ventana (con 8–22, elegir 5 entregaba 4). Ahora
