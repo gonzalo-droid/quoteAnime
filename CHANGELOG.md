@@ -13,6 +13,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   ventana y cada notificación agenda la siguiente
 - Las ventanas horarias que cruzan la medianoche (ej. 22:00–02:00) no enviaban ninguna
   notificación: el chequeo de ventana asumía inicio < fin
+- **Widgets de Mi Rutina tras "Hecho"**: marcar un hábito desde el botón "Hecho" del
+  recordatorio ahora actualiza al instante el widget de resumen y el de cada hábito; antes
+  seguían mostrando el día sin marcar hasta el siguiente refresco diario
+- **Onboarding respetado al abrir desde una notificación o un widget**: tocar un recordatorio
+  o el widget de frases con la app cerrada ya no se salta el onboarding si no lo terminaste.
+  Primero se muestra el onboarding y, al terminarlo, se abre lo que pediste. Si ya lo habías
+  completado, vas directo (sin la animación de inicio), y "atrás" desde Mi Rutina vuelve a
+  Inicio en lugar de cerrar la app
+- **Sugerencias de hábitos sin conexión**: el editor de hábitos y el onboarding muestran las
+  sugerencias incluidas en la app al instante, y se reemplazan por las del servidor cuando
+  llegan. Antes, sin red, quedaban sin ninguna sugerencia
+- **Sin claves internas en pantalla**: una sugerencia nueva publicada en el servidor que esta
+  versión todavía no sabe nombrar ya no aparece como `template_…`; se omite hasta que una
+  actualización la incluya. Los títulos escritos como texto normal se muestran tal cual
+- **Widget de frases sin frase**: tocarlo mientras carga o tras un error abre la app
+  normalmente, en lugar de navegar con una frase vacía y perder la pantalla en la que estabas
 
 ## [1.2.1]
 
