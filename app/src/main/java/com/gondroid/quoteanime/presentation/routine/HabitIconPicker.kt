@@ -2,7 +2,6 @@ package com.gondroid.quoteanime.presentation.routine
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gondroid.quoteanime.R
@@ -155,14 +152,13 @@ private fun IconCell(
         modifier = modifier
             .size(48.dp)
             .clip(CircleShape)
-            .clickable(onClick = onClick)
+            .selectableOption(label = description, selected = selected, onClick = onClick)
             .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .border(
                 width = 1.dp,
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                 shape = CircleShape
             )
-            .semantics { contentDescription = description }
             .testTag("icon_picker_cell_$iconKey"),
         contentAlignment = Alignment.Center
     ) {

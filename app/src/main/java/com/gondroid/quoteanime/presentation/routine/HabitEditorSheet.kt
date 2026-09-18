@@ -340,12 +340,16 @@ fun HabitEditorContent(
                             rowColors.forEach { color ->
                                 val index = HabitPalette.COLORS.indexOf(color)
                                 val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
+                                val isSelected = HabitPalette.isSelected(index, state.colorIndex)
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .aspectRatio(1f)
-                                        .clickable { onColorSelected(index) }
-                                        .semantics { contentDescription = colorDescription }
+                                        .selectableOption(
+                                            label = colorDescription,
+                                            selected = isSelected,
+                                            onClick = { onColorSelected(index) }
+                                        )
                                         .testTag("color_$index"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -354,8 +358,8 @@ fun HabitEditorContent(
                                             .fillMaxSize(0.6f)
                                             .background(color, CircleShape)
                                             .border(
-                                                width = if (state.colorIndex == index) 2.dp else 0.dp,
-                                                color = if (state.colorIndex == index) Color.White else Color.Transparent,
+                                                width = if (isSelected) 2.dp else 0.dp,
+                                                color = if (isSelected) Color.White else Color.Transparent,
                                                 shape = CircleShape
                                             )
                                     )
