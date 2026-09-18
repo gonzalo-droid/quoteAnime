@@ -3,7 +3,9 @@ package com.gondroid.quoteanime.presentation.home
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.gondroid.quoteanime.domain.model.Quote
+import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.usecase.GetAllQuotesUseCase
+import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
 import com.gondroid.quoteanime.domain.usecase.ToggleFavoriteUseCase
 import com.gondroid.quoteanime.presentation.ads.ShareInterstitialManager
 import com.gondroid.quoteanime.util.MainDispatcherRule
@@ -35,6 +37,10 @@ import org.junit.Test
  *  - onScrollToPageConsumed: clears scrollToPage
  *  - onToggleFavorite: delegates to ToggleFavoriteUseCase
  *  - Empty quotes: list is empty after loading
+ *  - Anime selection: the feed only holds the selected animes; empty selection = all
+ *  - Anime selection change: the feed follows it without reopening Home
+ *  - Widget focus is applied once: later emissions (a favorite toggle) don't scroll back to it
+ *  - Widget quote outside the selection: Home stays at the top
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -43,6 +49,8 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var getAllQuotes: GetAllQuotesUseCase
+    private lateinit var getUserPreferences: GetUserPreferencesUseCase
+    private val preferences = MutableStateFlow(UserPreferences())
     private lateinit var toggleFavorite: ToggleFavoriteUseCase
     private lateinit var shareInterstitialManager: ShareInterstitialManager
 
@@ -55,6 +63,8 @@ class HomeViewModelTest {
     @Before
     fun setup() {
         getAllQuotes = mockk()
+        getUserPreferences = mockk()
+        every { getUserPreferences() } returns preferences
         toggleFavorite = mockk()
         shareInterstitialManager = mockk(relaxed = true)
     }
@@ -65,7 +75,7 @@ class HomeViewModelTest {
             if (widgetQuoteId != null) mapOf("quoteId" to widgetQuoteId) else emptyMap()
         )
     ): HomeViewModel =
-        HomeViewModel(savedStateHandle, getAllQuotes, toggleFavorite, shareInterstitialManager)
+        HomeViewModel(savedStateHandle, getAllQuotes, getUserPreferences, toggleFavorite, shareInterstitialManager)
 
     // ── Initial / loading state ───────────────────────────────────────────────
 
@@ -247,5 +257,89 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(4, viewModel.uiState.value.quotes.size)
+    }
+
+    // ── Anime selection ───────────────────────────────────────────────────────
+
+    @Test
+    fun `given an anime selection, when quotes load, then the feed only holds those animes`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("Naruto", "Bleach"))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("1", "3"), viewModel.uiState.value.quotes.map { it.id })
+        assertEquals(setOf("Naruto", "Bleach"), viewModel.uiState.value.appliedCategoryIds)
+    }
+
+    @Test
+    fun `given an empty selection, when quotes load, then the feed holds every anime`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = emptySet())
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("1", "2", "3"), viewModel.uiState.value.quotes.map { it.id })
+    }
+
+    @Test
+    fun `given Home is open, when the selection changes in Settings, then the feed follows it`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        assertEquals(3, viewModel.uiState.value.quotes.size)
+
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("One Piece"))
+        advanceUntilIdle()
+        assertEquals(listOf("2"), viewModel.uiState.value.quotes.map { it.id })
+
+        preferences.value = UserPreferences(selectedCategoryIds = emptySet())
+        advanceUntilIdle()
+        assertEquals(3, viewModel.uiState.value.quotes.size)
+    }
+
+    @Test
+    fun `given a quote tagged with categories, when filtering, then its categories decide, not its anime`() = runTest {
+        val tagged = Quote(id = "9", quote = "q", author = "a", anime = "Naruto", categories = listOf("Shonen"))
+        every { getAllQuotes() } returns flowOf(sampleQuotes + tagged)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("Shonen"))
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf("9"), viewModel.uiState.value.quotes.map { it.id })
+    }
+
+    // ── Widget focus is one-shot ──────────────────────────────────────────────
+
+    @Test
+    fun `given the widget focus was consumed, when the feed re-emits, then it does not scroll back`() = runTest {
+        val quotesFlow = MutableStateFlow(sampleQuotes)
+        every { getAllQuotes() } returns quotesFlow
+
+        val viewModel = buildViewModel(widgetQuoteId = "3")
+        advanceUntilIdle()
+        assertEquals(2, viewModel.uiState.value.scrollToPage)
+        viewModel.onScrollToPageConsumed()
+
+        // A favorite toggle makes Room re-emit the whole list.
+        quotesFlow.value = sampleQuotes.map { if (it.id == "1") it.copy(isFavorite = true) else it }
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.scrollToPage)
+    }
+
+    @Test
+    fun `given the widget quote is outside the selection, when quotes load, then Home stays at the top`() = runTest {
+        every { getAllQuotes() } returns flowOf(sampleQuotes)
+        preferences.value = UserPreferences(selectedCategoryIds = setOf("Naruto"))
+
+        val viewModel = buildViewModel(widgetQuoteId = "2")
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.scrollToPage)
+        assertEquals(listOf("1"), viewModel.uiState.value.quotes.map { it.id })
     }
 }

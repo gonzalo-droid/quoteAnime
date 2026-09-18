@@ -6,6 +6,8 @@ import com.gondroid.quoteanime.domain.model.WidgetSize
 
 data class SettingsUiState(
     val categories: List<Category> = emptyList(),
+    /** True until the anime list first arrives; the rest of the screen doesn't wait for it. */
+    val categoriesLoading: Boolean = true,
     val selectedCategoryIds: Set<String> = emptySet(),
     val notificationsEnabled: Boolean = false,
     val notificationStartHour: Int = 8,

@@ -44,6 +44,9 @@ import org.junit.Test
  *  - onWidgetSizeChanged: persists size and triggers immediate widget update
  *  - onWidgetUpdateTimesChanged: persists times and reschedules widget
  *  - Race condition: reschedule uses the new value, not the old reactive state
+ *  - Anime list still loading (RTDB offline): the rest of the screen is not blocked
+ *  - Anime list fails: empty list, the screen keeps working
+ *  - Toggles show at once and stack (two quick taps keep both animes)
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -412,5 +415,67 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 1) { updatePreferences.setWidgetUpdateTimesPerDay(4) }
         verify(exactly = 1) { widgetScheduler.schedule(4) }
+    }
+
+    // ── Anime list independence ───────────────────────────────────────────────
+
+    @Test
+    fun `given the anime list never arrives, then the screen still loads with the section loading`() = runTest {
+        every { getCategories() } returns kotlinx.coroutines.flow.flow { kotlinx.coroutines.awaitCancellation() }
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertTrue(state.categoriesLoading)
+        assertTrue(state.categories.isEmpty())
+        assertEquals(setOf("Naruto"), state.selectedCategoryIds)
+    }
+
+    @Test
+    fun `given the anime list fails, then the section is empty and the screen keeps working`() = runTest {
+        every { getCategories() } returns kotlinx.coroutines.flow.flow { throw RuntimeException("offline") }
+
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertFalse(state.categoriesLoading)
+        assertTrue(state.categories.isEmpty())
+    }
+
+    @Test
+    fun `given the anime list arrives, then categoriesLoading is false`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.categoriesLoading)
+        assertEquals(3, viewModel.uiState.value.categories.size)
+    }
+
+    @Test
+    fun `given two quick toggles before DataStore echoes, then both animes stay selected`() = runTest {
+        // defaultPrefs never re-emits, like a DataStore that hasn't written yet.
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onCategoryToggled("One Piece")
+        viewModel.onCategoryToggled("Bleach")
+
+        assertEquals(setOf("Naruto", "One Piece", "Bleach"), viewModel.uiState.value.selectedCategoryIds)
+        advanceUntilIdle()
+        coVerify { updatePreferences.setCategories(setOf("Naruto", "One Piece", "Bleach")) }
+    }
+
+    @Test
+    fun `given a selection, when choosing all, then the state is empty at once`() = runTest {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.onSelectAllCategories()
+
+        assertTrue(viewModel.uiState.value.allCategoriesSelected)
     }
 }

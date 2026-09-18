@@ -5,7 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Elige tus animes en Ajustes**: una nueva sección "Animes" te deja marcar de qué animes
+  quieres frases. El feed de Inicio muestra solo esos animes (igual que en iOS), y las
+  notificaciones y el widget de frases también los respetan. "Todos los animes" (o no marcar
+  ninguno) vuelve a mostrar todos. El cambio se guarda al instante y el feed se actualiza al
+  volver a Inicio
+
 ### Fixed
+- **Ajustes sin conexión**: la pantalla de Ajustes ya no se queda cargando para siempre si
+  abres la app sin red; solo la lista de animes espera a que vuelva la conexión
+- **Frase del widget en Inicio**: después de abrir una frase desde el widget, marcar otra como
+  favorita ya no te devuelve a la frase del widget
 - **Frecuencia de notificaciones de frases**: el usuario recibía otra cantidad que la
   elegida — el intervalo era `24 / frecuencia` con división entera y un trabajo periódico de
   24 h descartaba los disparos fuera de la ventana (con 8–22, elegir 5 entregaba 4). Ahora
