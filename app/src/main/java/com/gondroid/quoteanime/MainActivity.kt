@@ -13,7 +13,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -23,7 +23,10 @@ import androidx.navigation.compose.rememberNavController
 import com.gondroid.quoteanime.notification.NotificationHelper
 import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
 import com.gondroid.quoteanime.domain.usecase.RestorePurchasesUseCase
-import com.gondroid.quoteanime.presentation.navigation.Screen
+import com.gondroid.quoteanime.presentation.navigation.AppDeepLink
+import com.gondroid.quoteanime.presentation.navigation.DeepLinkRouter
+import com.gondroid.quoteanime.presentation.navigation.isInMainContent
+import com.gondroid.quoteanime.presentation.navigation.showMainBackStack
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -66,34 +69,24 @@ class MainActivity : ComponentActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.registerListener(installStateListener)
 
-        val initialQuoteId = intent.getStringExtra("widget_quote_id")
-        val openRoutine = intent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)
+        // Read on every onCreate, including the re-creation that CLEAR_TOP taps cause.
+        val initialDeepLink = intent.toAppDeepLink()
 
         setContent {
             QuoteAnimeTheme {
                 val navController = rememberNavController()
-                var pendingQuoteId by remember { mutableStateOf(initialQuoteId) }
-                var pendingOpenRoutine by remember { mutableStateOf(openRoutine) }
+                val deepLinkRouter = rememberSaveable(saver = DeepLinkRouter.Saver) {
+                    DeepLinkRouter(initialDeepLink)
+                }
 
-                // Handle widget tap / habit reminder tap when app is already in foreground (onNewIntent)
+                // Widget tap / habit reminder tap while the activity is alive (onNewIntent):
+                // applied now if the app is past the splash and the onboarding, parked until
+                // they finish otherwise.
                 DisposableEffect(Unit) {
                     val listener = Consumer<Intent> { newIntent ->
-                        val newQuoteId = newIntent.getStringExtra("widget_quote_id")
-                        if (newQuoteId != null) {
-                            navController.navigate(
-                                Screen.Home.createRoute(newQuoteId)
-                            ) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    inclusive = true
-                                }
-                            }
-                        } else if (newIntent.getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)) {
-                            navController.navigate(Screen.Routine.route) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    inclusive = true
-                                }
-                            }
-                        }
+                        val link = newIntent.toAppDeepLink() ?: return@Consumer
+                        deepLinkRouter.open(link, isMainReady = navController.isInMainContent())
+                            ?.let(navController::showMainBackStack)
                     }
                     addOnNewIntentListener(listener)
                     onDispose { removeOnNewIntentListener(listener) }
@@ -101,8 +94,7 @@ class MainActivity : ComponentActivity() {
 
                 AppNavGraph(
                     navController = navController,
-                    startQuoteId = pendingQuoteId,
-                    openRoutine = pendingOpenRoutine
+                    deepLinkRouter = deepLinkRouter
                 )
 
                 // Dialog shown when a flexible update has been fully downloaded
@@ -188,3 +180,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+private fun Intent.toAppDeepLink(): AppDeepLink? = AppDeepLink.from(
+    quoteId = getStringExtra(AppDeepLink.EXTRA_QUOTE_ID),
+    openRoutine = getBooleanExtra(NotificationHelper.EXTRA_OPEN_ROUTINE, false)
+)
