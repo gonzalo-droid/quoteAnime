@@ -31,17 +31,19 @@ exclusive themes.
 
 | Feature | Detail |
 |---|---|
-| **Full-screen quote feed** | `VerticalPager`, one quote per page, a different gradient on each |
+| **Full-screen quote feed** | `VerticalPager`, one quote per page, a different gradient on each, drawn from the anime you selected |
 | **Favorites** | Saved locally in Room, available offline and reachable from the Catalog |
 | **Catalog** | Filter by anime series or by favorites, horizontal chip row |
+| **Anime selection** | Settings → Anime; drives the Home feed, the notifications and the quote widget |
 | **Share as image** | Any quote renders to a bitmap and goes out through the system share sheet |
-| **Quote notifications** | Configurable time window, 1–10 deliveries per day, scheduled with WorkManager |
+| **Quote notifications** | Time window plus 1–10 per day, spread end to end across the window; each notification schedules the next one |
 | **Quote widget** | Glance widget that adapts its layout to the size you drop it at; tapping it opens the feed on that quote |
 | **Mi Rutina (habit tracker)** | Create and edit habits from themed templates (ninja, One Piece, saiyan, Pokémon, Black Clover), 17-week heatmap, current and record streak, month calendar, archive / restore / delete with confirmation, per-habit reminders |
 | **Routine widgets** | A summary widget for all active habits, plus a per-habit widget whose habit is chosen in a configuration activity when you drop it on the home screen |
 | **Premium subscription** | Unlimited habits, no ads, exclusive themes — real Google Play Billing, with plans and offers read from Play Console at runtime and the entitlement re-synced on every app start |
 | **Onboarding** | Four pages on first launch — three quote pages plus picking a first habit |
 | **Dark theme** | Always dark, no dynamic color |
+| **Localization** | Spanish and English, following the device language |
 | **Ads** | AdMob banner plus an interstitial after sharing, both hidden for Premium users |
 
 ---
@@ -137,6 +139,7 @@ App launch
       ├── First run → Onboarding (3 quote pages + first habit) → Home
       └── Seen      → Home
            ├── Catalog (filter by anime or favorites)
+           ├── Settings → Anime (which series the feed and notifications use)
            ├── Settings (notifications, widget, Premium row)
            │    └── Paywall (benefits + real Google Play Billing plans)
            └── Mi Rutina (habit list, Active / Archived tabs)
@@ -199,8 +202,8 @@ otherwise the paywall renders with an empty plan list.
 ./gradlew build                # Full build
 ./gradlew assembleDebug        # Debug APK
 ./gradlew assembleRelease      # Release APK
-./gradlew test                 # Unit tests (210 tests)
-./gradlew connectedAndroidTest # Instrumented tests (22, requires a device/emulator)
+./gradlew test                 # Unit tests (336 tests)
+./gradlew connectedAndroidTest # Instrumented tests (24, requires a device/emulator)
 ```
 
 ---
