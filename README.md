@@ -1,6 +1,6 @@
 # Quote Anime
 
-![Version](https://img.shields.io/badge/version-1.2.1-blue)
+![Version](https://img.shields.io/badge/version-1.2.2-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-24-brightgreen)
 ![License](https://img.shields.io/badge/license-Proprietary-lightgrey)
 
@@ -232,7 +232,7 @@ The published privacy policy and terms of service are declared in
 
 ## Versioning
 
-Current release: **1.2.1** (versionCode 10)
+Current release: **1.2.2** (versionCode 11)
 
 This project follows [Semantic Versioning](https://semver.org/). The full release history
 lives in [CHANGELOG.md](CHANGELOG.md).

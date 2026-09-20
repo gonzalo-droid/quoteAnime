@@ -5,6 +5,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.2.2]
+
 ### Added
 - **Elige tus animes en Ajustes**: una nueva sección "Animes" te deja marcar de qué animes
   quieres frases. El feed de Inicio muestra solo esos animes (igual que en iOS), y las
