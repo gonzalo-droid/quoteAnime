@@ -1,47 +1,68 @@
 # Guion de capturas para el README. Lo ejecuta la skill readme-format.
+# Verificado el 2026-09-19 en un Pixel 10 Pro (1280x2856). Las coordenadas son
+# píxeles del dispositivo, que es lo que espera `adb shell input tap`.
 platform: android
 appId: com.gondroid.quoteanime
 launch: com.gondroid.quoteanime/.MainActivity
-locale: en_US
+locale: en-US          # se fija DESPUÉS del pm clear: el clear también borra el locale por app
 reset: true
 width: 240
+
+# Orden obligatorio del arranque:
+#   1. adb install -r    2. pm clear    3. cmd locale set-app-locales    4. am start
+# El demo mode de la barra se activa con una función de shell, no con una variable:
+# en zsh, `D="adb shell ..."; $D enter` no se parte en palabras y falla en silencio.
 
 screens:
   - id: 01-onboarding
     caption: Onboarding
     needs: clean
     steps:
-      - wait: 2500          # splash (2s) + transicion
+      - wait: 6000       # splash + primer arranque en frío del emulador
 
   - id: 02-home
     caption: Quote feed
     needs: clean
     steps:
-      - manual: true        # completar onboarding: 3 paginas + elegir primer habito
+      - tap: { x: 640, y: 2588 }   # "Next" ×3
+      - tap: { x: 640, y: 2588 }
+      - tap: { x: 640, y: 2588 }
+      - tap: { x: 640, y: 2588 }   # "Get started" (Ninja path viene preseleccionado)
+      - wait: 5000
 
   - id: 03-catalog
     caption: Catalog
     needs: clean
     steps:
-      - tap: { id: "nav_catalog" }
-      - wait: 600
+      - tap: { x: 129, y: 2640 }   # grilla, abajo a la izquierda
+      - wait: 4000
 
   - id: 04-routine
     caption: Mi Rutina
-    needs: populated        # necesita habitos marcados para que el heatmap muestre algo
+    needs: populated               # el heatmap vacío parece un estado vacío
     steps:
-      - tap: { id: "nav_routine" }
-      - wait: 600
+      - back: true
+      - tap: { x: 1148, y: 2640 }  # llama, abajo a la derecha
+      - tap: { x: 970, y: 721 }    # marcar hoy → racha 1
+      - tap: { x: 320, y: 721 }    # abrir el detalle (heatmap + calendario)
+      - wait: 3000
 
   - id: 05-settings
-    caption: Settings
+    caption: Settings & anime
     needs: clean
     steps:
-      - tap: { id: "nav_settings" }
-      - wait: 600
+      - back: true
+      - back: true
+      - tap: { x: 1184, y: 252 }   # engranaje
+      - wait: 4000
 
-  - id: 06-widgets
-    caption: Widgets
-    needs: populated
+  - id: 06-widget-settings
+    caption: Widget settings
+    needs: clean
     steps:
-      - manual: true        # agregar los 3 widgets a la home del launcher
+      - swipe: { from: [640, 2200], to: [640, 700], ms: 400 }
+      - swipe: { from: [640, 2200], to: [640, 900], ms: 400 }
+
+# No capturadas, requieren mano humana:
+#   - Widgets en la pantalla de inicio (hay que agregarlos al launcher)
+#   - Paywall (necesita el producto premium_subscription creado en Play Console)
