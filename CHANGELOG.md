@@ -70,6 +70,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   pantalla Premium, la hoja de cancelación y el error de carga de páginas que hablaban de
   "vos" ("Probá", "Ya sos premium", "Cancelá") ahora te tratan de "tú", como el resto de la
   app y la versión de iOS
+- **La app ya no se traba al abrirla con el teléfono exigido**: al arrancar, la biblioteca de
+  anuncios hacía su preparación en el hilo de la pantalla, y con el teléfono ocupado eso podía
+  congelar la app hasta que Android ofrecía cerrarla. Ahora se prepara en segundo plano, y el
+  anuncio que se precarga al inicio espera a que esté lista en vez de perderse
 
 ## [1.2.1]
 
