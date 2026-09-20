@@ -1,6 +1,5 @@
 package com.gondroid.quoteanime.presentation.settings
 
-import android.content.Context
 import app.cash.turbine.test
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.model.WidgetSize
@@ -57,7 +56,6 @@ class SettingsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var context: Context
     private lateinit var getAnimes: GetAnimesUseCase
     private lateinit var preferencesRepository: UserPreferencesRepository
     private lateinit var getUserPreferences: GetUserPreferencesUseCase
@@ -84,7 +82,6 @@ class SettingsViewModelTest {
 
     @Before
     fun setup() {
-        context = mockk(relaxed = true)
         getAnimes = mockk()
         preferencesRepository = mockk()
         coJustRun { preferencesRepository.updateSelectedCategories(any()) }
@@ -111,7 +108,7 @@ class SettingsViewModelTest {
     }
 
     private fun buildViewModel() = SettingsViewModel(
-        context, getAnimes, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler,
+        getAnimes, getUserPreferences, updatePreferences, notificationScheduler, widgetScheduler,
         observePremiumStatus, ReconcileAnimeSelectionUseCase(preferencesRepository)
     )
 

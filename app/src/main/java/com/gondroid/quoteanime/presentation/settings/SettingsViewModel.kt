@@ -1,11 +1,7 @@
 package com.gondroid.quoteanime.presentation.settings
 
-import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.gondroid.quoteanime.domain.model.WidgetSize
 import com.gondroid.quoteanime.domain.usecase.GetAnimesUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
@@ -14,9 +10,7 @@ import com.gondroid.quoteanime.domain.usecase.ReconcileAnimeSelectionUseCase
 import com.gondroid.quoteanime.domain.usecase.UpdateUserPreferencesUseCase
 import com.gondroid.quoteanime.notification.NotificationScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
-import com.gondroid.quoteanime.worker.QuoteNotificationWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +24,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val getAnimes: GetAnimesUseCase,
     private val getUserPreferences: GetUserPreferencesUseCase,
     private val updatePreferences: UpdateUserPreferencesUseCase,
@@ -155,15 +148,6 @@ class SettingsViewModel @Inject constructor(
             updatePreferences.setWidgetUpdateTimesPerDay(times)
             widgetScheduler.schedule(times)
         }
-    }
-
-    // ── Debug ─────────────────────────────────────────────────────────────────
-    fun onTestNotification() {
-        Log.d("testNotification", "init")
-
-        WorkManager.getInstance(context).enqueue(
-                    OneTimeWorkRequestBuilder<QuoteNotificationWorker>().build()
-        )
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
