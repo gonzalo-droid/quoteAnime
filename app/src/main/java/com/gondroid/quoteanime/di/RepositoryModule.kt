@@ -12,6 +12,8 @@ import com.gondroid.quoteanime.domain.repository.BillingRepository
 import com.gondroid.quoteanime.domain.repository.HabitRepository
 import com.gondroid.quoteanime.domain.repository.QuoteRepository
 import com.gondroid.quoteanime.domain.repository.UserPreferencesRepository
+import com.gondroid.quoteanime.presentation.ads.AdsInitializer
+import com.gondroid.quoteanime.presentation.ads.AdsReadiness
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,6 +23,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAdsReadiness(impl: AdsInitializer): AdsReadiness
 
     @Binds
     @Singleton

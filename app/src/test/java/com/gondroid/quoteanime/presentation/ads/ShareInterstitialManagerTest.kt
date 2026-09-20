@@ -13,10 +13,14 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import com.gondroid.quoteanime.util.MainDispatcherRule
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -25,11 +29,21 @@ import org.junit.Test
  */
 class ShareInterstitialManagerTest {
 
+    /** The preload waits for the SDK before loading, so the main dispatcher has to run eagerly. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
+
     private val observePremiumStatus = mockk<ObservePremiumStatusUseCase>()
+
+    /** Stands in for the real initializer: the SDK is already up, so the preload proceeds. */
+    private val adsReady = object : AdsReadiness {
+        override suspend fun awaitReady() = Unit
+    }
 
     private fun manager(isPremium: Boolean): ShareInterstitialManager {
         every { observePremiumStatus() } returns MutableStateFlow(isPremium)
-        return ShareInterstitialManager(observePremiumStatus)
+        return ShareInterstitialManager(observePremiumStatus, adsReady)
     }
 
     @Before

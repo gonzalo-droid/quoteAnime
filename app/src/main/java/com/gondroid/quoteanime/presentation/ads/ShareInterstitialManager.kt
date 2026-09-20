@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,8 +36,11 @@ private const val SHARES_PER_AD = 3
  */
 @Singleton
 class ShareInterstitialManager @Inject constructor(
-    observePremiumStatus: ObservePremiumStatusUseCase
+    observePremiumStatus: ObservePremiumStatusUseCase,
+    private val adsReadiness: AdsReadiness
 ) {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
 
     private var interstitialAd: InterstitialAd? = null
     private var shareCount = 0
@@ -55,7 +59,7 @@ class ShareInterstitialManager @Inject constructor(
         // Unconfined: the collector only assigns a volatile flag, so it doesn't need a
         // dispatcher of its own — and it means the flag is already set by the time the
         // constructor returns, which is what makes the gate testable.
-        CoroutineScope(SupervisorJob() + Dispatchers.Unconfined).launch {
+        scope.launch {
             observePremiumStatus().collect { isPremium = it }
         }
     }
@@ -65,21 +69,29 @@ class ShareInterstitialManager @Inject constructor(
         if (isPremium) return
         if (interstitialAd != null || isLoading) return
         isLoading = true
-        InterstitialAd.load(
-            context,
-            INTERSTITIAL_AD_UNIT_ID,
-            AdRequest.Builder().build(),
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    interstitialAd = ad
-                    isLoading = false
-                }
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    interstitialAd = null
-                    isLoading = false
-                }
+        // Home already calls this at startup, when the SDK may still be initializing on its own
+        // thread. Waiting is what keeps that first interstitial from being dropped; the load
+        // itself goes back to the main thread, which the SDK requires.
+        scope.launch {
+            adsReadiness.awaitReady()
+            withContext(Dispatchers.Main) {
+                InterstitialAd.load(
+                    context,
+                    INTERSTITIAL_AD_UNIT_ID,
+                    AdRequest.Builder().build(),
+                    object : InterstitialAdLoadCallback() {
+                        override fun onAdLoaded(ad: InterstitialAd) {
+                            interstitialAd = ad
+                            isLoading = false
+                        }
+                        override fun onAdFailedToLoad(error: LoadAdError) {
+                            interstitialAd = null
+                            isLoading = false
+                        }
+                    }
+                )
             }
-        )
+        }
     }
 
     /**
