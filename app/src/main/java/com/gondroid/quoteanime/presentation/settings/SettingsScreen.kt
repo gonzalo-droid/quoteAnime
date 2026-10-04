@@ -68,6 +68,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.Role
 import com.gondroid.quoteanime.R
 import com.gondroid.quoteanime.di.PremiumGate
 import kotlinx.coroutines.launch
@@ -176,6 +185,15 @@ fun SettingsScreen(
                 }
 
                 item { SectionDivider() }
+
+                if (AppLanguage.isPickerAvailable) {
+                    item {
+                        SectionHeader(stringResource(R.string.settings_language_title))
+                        LanguageSection()
+                    }
+
+                    item { SectionDivider() }
+                }
 
                 item {
                     SectionHeader(stringResource(R.string.notifications))
@@ -314,6 +332,85 @@ private fun PremiumSettingsRow(isPremium: Boolean, onClick: () -> Unit) {
         modifier = Modifier.clickable(onClick = onClick)
     )
 }
+
+/**
+ * The app's language (Android 13+ only — see [AppLanguage]). Choosing one hands it to the
+ * system, which recreates the activity in that language, so there is nothing to keep in the
+ * view model: the row reads the current value again when it comes back.
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+private fun LanguageSection() {
+    val context = LocalContext.current
+    val current = remember { AppLanguage.current(context) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = { Text(stringResource(current.labelRes)) },
+        supportingContent = { Text(stringResource(R.string.settings_language_note)) },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Filled.Language,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        colors = listItemColors,
+        modifier = Modifier.clickable { showDialog = true }
+    )
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    stringResource(R.string.settings_language_title),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Column(Modifier.selectableGroup()) {
+                    AppLanguage.entries.forEach { language ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                                .selectable(
+                                    selected = language == current,
+                                    role = Role.RadioButton,
+                                    onClick = {
+                                        showDialog = false
+                                        if (language != current) AppLanguage.apply(context, language)
+                                    }
+                                )
+                        ) {
+                            RadioButton(selected = language == current, onClick = null)
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                stringResource(language.labelRes),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+}
+
+private val AppLanguage.labelRes: Int
+    get() = when (this) {
+        AppLanguage.SYSTEM -> R.string.settings_language_system
+        AppLanguage.ENGLISH -> R.string.settings_language_english
+        AppLanguage.SPANISH -> R.string.settings_language_spanish
+    }
 
 /**
  * Which animes the feed, the notifications and the quote widget draw from. **Nothing selected

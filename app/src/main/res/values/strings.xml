@@ -377,6 +377,11 @@
     <string name="paywall_error_network">No connection. Check your network and try again.</string>
 
     <!-- Settings: anime selection (feed, notifications and widget) -->
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_note">Changes the app\'s texts. Quotes are only available in Spanish.</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_spanish" translatable="false">Español</string>
     <string name="settings_animes_title">Anime</string>
     <string name="settings_animes_description">Choose which anime you want to see quotes from in the feed, in notifications and in the widget. If you don\'t choose any, all of them are shown.</string>
     <string name="settings_animes_all">All anime</string>
