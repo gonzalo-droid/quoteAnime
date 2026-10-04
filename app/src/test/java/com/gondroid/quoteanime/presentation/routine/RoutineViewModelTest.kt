@@ -69,7 +69,7 @@ class RoutineViewModelTest {
     private lateinit var habitRepository: HabitRepository
     private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private val calculateStreak = CalculateStreakUseCase()
-    private val premiumGate = PremiumGate()
+    private val premiumGate = PremiumGate(paymentsEnabled = true)
 
     private fun habit(id: String, createdAt: Long = 0L) = Habit(
         id = id,

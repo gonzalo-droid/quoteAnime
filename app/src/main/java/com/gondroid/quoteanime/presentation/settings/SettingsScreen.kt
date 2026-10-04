@@ -69,6 +69,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.di.PremiumGate
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.gondroid.quoteanime.ui.theme.QuoteAnimeTheme
@@ -152,14 +153,16 @@ fun SettingsScreen(
 
                 item { SectionDivider() }
 
-                item {
-                    PremiumSettingsRow(
-                        isPremium = uiState.isPremium,
-                        onClick = onNavigateToPaywall
-                    )
-                }
+                if (PremiumGate.PAYMENTS_ENABLED) {
+                    item {
+                        PremiumSettingsRow(
+                            isPremium = uiState.isPremium,
+                            onClick = onNavigateToPaywall
+                        )
+                    }
 
-                item { SectionDivider() }
+                    item { SectionDivider() }
+                }
 
                 item {
                     SectionHeader(stringResource(R.string.settings_animes_title))

@@ -93,6 +93,7 @@ com.gondroid.quoteanime/
 - **Startup routing**: `SplashViewModel` reads `GetOnboardingCompletedUseCase` and routes to `Onboarding` or `Home`.
 - **Deep links (widgets, notifications)**: `MainActivity` is `launchMode="singleTop"` and every intent to it uses `AppDeepLink.LAUNCH_FLAGS` (`NEW_TASK | CLEAR_TOP | SINGLE_TOP`, never `CLEAR_TASK`) — a tap with the app open arrives via `onNewIntent` → `DeepLinkRouter`. `AppDeepLink.fromLaunch` ignores intents flagged `FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY` (reopen from Recents). Free-text route args go through `encodeRouteArg`; Navigation decodes them, so destinations must **not** decode again. `MainActivityLaunchTest` pins the manifest and the flags.
 - **Premium gating**: `PremiumGate.maxActiveHabits(isPremium)` — `FREE_HABIT_LIMIT = 3`. The entitlement flag is `IS_PREMIUM` in DataStore; ads are hidden when it is set.
+- **Payments are switched off** (`PremiumGate.PAYMENTS_ENABLED = false`) until `premium_subscription` exists in Play Console: the Settings premium row and the Mi Rutina upgrade button are hidden, habits are unlimited and `GetHabitTemplatesUseCase` strips `isPremiumOnly`. `isPremium` itself is untouched, so ads still show. iOS has the same switch (`PremiumConfig.paymentsEnabled`). Tests that exercise the paid plan build `PremiumGate(paymentsEnabled = true)`.
 
 ## HomeScreen & CatalogScreen
 

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gondroid.quoteanime.R
+import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.Habit
 import com.gondroid.quoteanime.domain.model.HabitWithProgress
 import com.gondroid.quoteanime.domain.model.StreakState
@@ -206,8 +207,10 @@ fun RoutineContent(
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            TextButton(onClick = onNavigateToPaywall) {
-                                Text(stringResource(R.string.routine_limit_reached_upgrade))
+                            if (PremiumGate.PAYMENTS_ENABLED) {
+                                TextButton(onClick = onNavigateToPaywall) {
+                                    Text(stringResource(R.string.routine_limit_reached_upgrade))
+                                }
                             }
                         }
                     }

@@ -2,6 +2,7 @@ package com.gondroid.quoteanime.domain.usecase
 
 import app.cash.turbine.test
 import com.gondroid.quoteanime.data.remote.HabitTemplateRemoteDataSource
+import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.DefaultHabitTemplates
 import com.gondroid.quoteanime.domain.model.HabitTemplate
 import io.mockk.every
@@ -24,6 +25,7 @@ import org.junit.Test
  *  - A remote failure after a remote list keeps that list
  *  - A remote template whose title key this build doesn't know is dropped; literal titles stay
  *  - If every remote template is dropped, the bundled defaults stay
+ *  - With payments off, no template comes out premium-only
  */
 class GetHabitTemplatesUseCaseTest {
 
@@ -33,7 +35,7 @@ class GetHabitTemplatesUseCaseTest {
     @Before
     fun setup() {
         remote = mockk()
-        useCase = GetHabitTemplatesUseCase(remote)
+        useCase = GetHabitTemplatesUseCase(remote, PremiumGate(paymentsEnabled = true))
     }
 
     @Test
@@ -129,6 +131,19 @@ class GetHabitTemplatesUseCaseTest {
         useCase().test {
             assertEquals(DefaultHabitTemplates.ALL, awaitItem())
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun `given payments are off, when collected, then no template is premium-only`() = runTest {
+        every { remote.getTemplates() } returns MutableSharedFlow()
+        val unlocked = GetHabitTemplatesUseCase(remote, PremiumGate(paymentsEnabled = false))
+
+        unlocked().test {
+            val templates = awaitItem()
+            assertEquals(DefaultHabitTemplates.ALL.map { it.id }, templates.map { it.id })
+            assertEquals(emptyList<HabitTemplate>(), templates.filter { it.isPremiumOnly })
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

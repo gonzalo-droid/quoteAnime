@@ -30,7 +30,7 @@ class CreateHabitUseCaseTest {
     private lateinit var repository: HabitRepository
     private lateinit var observePremiumStatus: ObservePremiumStatusUseCase
     private lateinit var useCase: CreateHabitUseCase
-    private val premiumGate = PremiumGate()
+    private val premiumGate = PremiumGate(paymentsEnabled = true)
     private val today = LocalDate.parse("2026-07-25")
 
     @Before

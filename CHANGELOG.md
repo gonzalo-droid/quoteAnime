@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Premium en pausa**: la suscripción todavía no está a la venta, así que la app ya no la
+  ofrece en ningún lado — sin la opción "Premium" en Ajustes ni el botón para mejorar al
+  llegar al límite de Mi Rutina. Mientras tanto Mi Rutina no tiene límite de hábitos y todas
+  las sugerencias temáticas (Pokémon, Black Clover) están desbloqueadas. Los anuncios se
+  siguen mostrando. Se reactiva con `PremiumGate.PAYMENTS_ENABLED`
+- Los textos de Mi Rutina ya no dicen "hasta 3 hábitos"
+
 ## [1.2.2]
 
 ### Added

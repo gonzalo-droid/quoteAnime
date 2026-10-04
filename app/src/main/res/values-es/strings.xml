@@ -46,7 +46,7 @@
     <string name="routine_streak_days">%1$d días seguidos</string>
     <string name="routine_progress_today">%1$d de %2$d hoy</string>
     <string name="routine_empty_title">Tu primer hábito te espera</string>
-    <string name="routine_empty_body">Elige hasta 3 hábitos y marca cada día que los cumplas — la constancia hace el resto.</string>
+    <string name="routine_empty_body">Elige algunos hábitos y marca cada día que los cumplas — la constancia hace el resto.</string>
     <string name="routine_add_habit">Añadir hábito</string>
     <string name="routine_limit_reached">Has alcanzado el máximo de %1$d hábitos activos.</string>
     <string name="routine_current_streak">Racha: %1$d</string>
@@ -270,7 +270,7 @@
     <string name="habit_icon_picker_empty">No se encontraron iconos</string>
 
     <string name="routine_intro_title">Nuevo: Mi rutina</string>
-    <string name="routine_intro_body">Elige hasta 3 hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>
+    <string name="routine_intro_body">Elige algunos hábitos y píntalos cada día que los cumplas. Tu racha te espera.</string>
     <string name="routine_intro_action">Empezar</string>
     <string name="routine_intro_dismiss">Ahora no</string>
     <string name="onboarding_habit_title">¿Quieres empezar un hábito?</string>

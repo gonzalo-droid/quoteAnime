@@ -46,7 +46,7 @@
     <string name="routine_streak_days">%1$d day streak</string>
     <string name="routine_progress_today">%1$d of %2$d today</string>
     <string name="routine_empty_title">Your first habit awaits</string>
-    <string name="routine_empty_body">Pick up to 3 habits and check them off every day you keep them — consistency does the rest.</string>
+    <string name="routine_empty_body">Pick a few habits and check them off every day you keep them — consistency does the rest.</string>
     <string name="routine_add_habit">Add habit</string>
     <string name="routine_limit_reached">You have reached the maximum of %1$d active habits.</string>
     <string name="routine_current_streak">Streak: %1$d</string>
@@ -270,7 +270,7 @@
     <string name="habit_icon_picker_empty">No icons found</string>
 
     <string name="routine_intro_title">New: My routine</string>
-    <string name="routine_intro_body">Pick up to 3 habits and fill in every day you keep them. Your streak is waiting.</string>
+    <string name="routine_intro_body">Pick a few habits and fill in every day you keep them. Your streak is waiting.</string>
     <string name="routine_intro_action">Get started</string>
     <string name="routine_intro_dismiss">Not now</string>
     <string name="onboarding_habit_title">Want to start a habit?</string>

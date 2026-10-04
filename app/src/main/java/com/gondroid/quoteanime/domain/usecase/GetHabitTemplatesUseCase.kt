@@ -1,6 +1,7 @@
 package com.gondroid.quoteanime.domain.usecase
 
 import com.gondroid.quoteanime.data.remote.HabitTemplateRemoteDataSource
+import com.gondroid.quoteanime.di.PremiumGate
 import com.gondroid.quoteanime.domain.model.DefaultHabitTemplates
 import com.gondroid.quoteanime.domain.model.HabitTemplate
 import com.gondroid.quoteanime.domain.model.HabitTemplateTitles
@@ -22,7 +23,8 @@ import javax.inject.Inject
  * bundled list, or an earlier remote one — rather than emptying the list.
  */
 class GetHabitTemplatesUseCase @Inject constructor(
-    private val remoteDataSource: HabitTemplateRemoteDataSource
+    private val remoteDataSource: HabitTemplateRemoteDataSource,
+    private val premiumGate: PremiumGate
 ) {
     operator fun invoke(): Flow<List<HabitTemplate>> =
         remoteDataSource.getTemplates()
@@ -35,5 +37,6 @@ class GetHabitTemplatesUseCase @Inject constructor(
             }
             .onStart { emit(DefaultHabitTemplates.ALL) }
             .catch { /* keep the last emitted list */ }
+            .map(premiumGate::availableTemplates)
             .distinctUntilChanged()
 }
