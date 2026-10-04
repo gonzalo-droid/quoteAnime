@@ -8,6 +8,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.2.2]
 
 ### Added
+- **Idioma en Ajustes** (Android 13 o superior): una nueva sección "Idioma" te deja elegir
+  English, Español o el idioma del sistema solo para la app, sin cambiar el del teléfono. Es la
+  misma opción que Android muestra en Ajustes › Apps › Frases Anime › Idioma. Cambia toda la
+  app, las notificaciones y los widgets (que se redibujan al momento). Las frases siguen en
+  español porque solo existen en ese idioma. En Android 7 a 12 la app sigue el idioma del
+  teléfono, como antes
 - **Elige tus animes en Ajustes**: una nueva sección "Animes" te deja marcar de qué animes
   quieres frases. El feed de Inicio muestra solo esos animes (igual que en iOS), y las
   notificaciones y el widget de frases también los respetan. "Todos los animes" (o no marcar
