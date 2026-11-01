@@ -1,4 +1,4 @@
-# Quote Anime
+# AnimeQuotes
 
 ![Version](https://img.shields.io/badge/version-1.2.2-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-24-brightgreen)
@@ -6,7 +6,7 @@
 
 [Google Play](https://play.google.com/store/apps/details?id=com.gondroid.quoteanime)
 
-Quote Anime shows motivational quotes from the anime you already love, one per screen,
+AnimeQuotes shows motivational quotes from the anime you already love, one per screen,
 read the way you read a feed: swipe up for the next one. Save the ones that stick, filter
 them by series, share any of them as an image, and get one pushed to you on the schedule
 you choose.

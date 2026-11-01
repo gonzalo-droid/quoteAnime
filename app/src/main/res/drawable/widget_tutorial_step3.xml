@@ -71,13 +71,13 @@
         android:fillColor="#3D3580"
         android:fillAlpha="0.4" />
 
-    <!-- "Quote Anime" label above second (highlighted) card -->
+    <!-- "AnimeQuotes" label above second (highlighted) card -->
     <path
         android:pathData="M52,163 L115,163 Q116,163 116,165 L116,169 Q116,171 115,171 L52,171 Q51,171 51,169 L51,165 Q51,163 52,163 Z"
         android:fillColor="#A78BFA"
         android:fillAlpha="0.7" />
 
-    <!-- Widget card 2 - QUOTE ANIME (highlighted, selected) -->
+    <!-- Widget card 2 - ANIMEQUOTES (highlighted, selected) -->
     <path
         android:pathData="M44,175 Q44,168 51,168 L189,168 Q196,168 196,175 L196,265 Q196,272 189,272 L51,272 Q44,272 44,265 Z"
         android:fillColor="#1A1832"
