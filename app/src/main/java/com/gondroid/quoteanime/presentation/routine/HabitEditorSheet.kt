@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -93,11 +95,15 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
 
 /** Matches the app-wide "12/03/2026" display format requested for the editor's date rows. */
-private val DATE_DISPLAY_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+/** Date in the app language's own format ("1 nov 2026" / "Nov 1, 2026"), read at each call so
+ *  it follows a language change made in Settings. */
+private fun formatDisplayDate(date: LocalDate): String =
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()).format(date)
 
 /** 14 palette colors laid out as exactly 2 rows of 7. */
 private const val COLOR_COLUMNS = 7
@@ -241,322 +247,342 @@ fun HabitEditorContent(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 32.dp)
-                    .testTag("habit_editor_sheet"),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            // The form scrolls; the error and Save stay pinned under it, so Save is always
+            // reachable without scrolling to the end of a long form.
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 16.dp)
+                        .testTag("habit_editor_sheet"),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = stringResource(
-                            if (state.isEditing) R.string.habit_editor_edit_title
-                            else R.string.habit_editor_new_title
-                        ),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.testTag("habit_editor_close")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.cd_close)
+                        Text(
+                            text = stringResource(
+                                if (state.isEditing) R.string.habit_editor_edit_title
+                                else R.string.habit_editor_new_title
+                            ),
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.testTag("habit_editor_close")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.cd_close)
+                            )
+                        }
+                    }
+
+                    Text(stringResource(R.string.habit_editor_templates))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        state.templates.forEach { template ->
+                            // Resolve once per template so both the chip label and the click
+                            // handler use the same legible text (not the raw resource key).
+                            val resolvedTitle = resolveTemplateTitle(template.title)
+                            val resolvedDescription = resolveThemeDescription(template.themeKey)
+                            TemplateFilterChip(
+                                template = template,
+                                label = resolvedTitle,
+                                selected = state.templateId == template.id,
+                                isPremium = state.isPremium,
+                                onSelected = { onTemplateSelected(template, resolvedTitle, resolvedDescription) },
+                                onPremiumTapped = onPremiumTemplateTapped
+                            )
+                        }
+                    }
+
+                    state.themeKey?.let { themeKey ->
+                        ThemedSuggestionPreview(
+                            iconKey = state.iconKey,
+                            title = state.title,
+                            description = state.description,
+                            imageRes = HabitThemeImages.resFor(themeKey),
+                            accentColor = HabitPalette.colorAt(state.colorIndex),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("themed_suggestion_preview")
                         )
                     }
-                }
 
-                Text(stringResource(R.string.habit_editor_templates))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    state.templates.forEach { template ->
-                        // Resolve once per template so both the chip label and the click
-                        // handler use the same legible text (not the raw resource key).
-                        val resolvedTitle = resolveTemplateTitle(template.title)
-                        val resolvedDescription = resolveThemeDescription(template.themeKey)
-                        TemplateFilterChip(
-                            template = template,
-                            label = resolvedTitle,
-                            selected = state.templateId == template.id,
-                            isPremium = state.isPremium,
-                            onSelected = { onTemplateSelected(template, resolvedTitle, resolvedDescription) },
-                            onPremiumTapped = onPremiumTemplateTapped
-                        )
-                    }
-                }
-
-                state.themeKey?.let { themeKey ->
-                    ThemedSuggestionPreview(
-                        iconKey = state.iconKey,
-                        title = state.title,
-                        description = state.description,
-                        imageRes = HabitThemeImages.resFor(themeKey),
-                        accentColor = HabitPalette.colorAt(state.colorIndex),
+                    OutlinedTextField(
+                        value = state.title,
+                        onValueChange = onTitleChanged,
+                        label = { Text(stringResource(R.string.habit_editor_name)) },
+                        singleLine = true,
+                        isError = state.error is HabitEditorError.BlankTitle,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("themed_suggestion_preview")
+                            .testTag("habit_title_field")
                     )
-                }
 
-                OutlinedTextField(
-                    value = state.title,
-                    onValueChange = onTitleChanged,
-                    label = { Text(stringResource(R.string.habit_editor_name)) },
-                    singleLine = true,
-                    isError = state.error is HabitEditorError.BlankTitle,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("habit_title_field")
-                )
+                    OutlinedTextField(
+                        value = state.description,
+                        onValueChange = onDescriptionChanged,
+                        label = { Text(stringResource(R.string.habit_editor_description)) },
+                        placeholder = { Text(stringResource(R.string.habit_editor_description_placeholder)) },
+                        minLines = 2,
+                        maxLines = 4,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("habit_description_field")
+                    )
 
-                OutlinedTextField(
-                    value = state.description,
-                    onValueChange = onDescriptionChanged,
-                    label = { Text(stringResource(R.string.habit_editor_description)) },
-                    placeholder = { Text(stringResource(R.string.habit_editor_description_placeholder)) },
-                    minLines = 2,
-                    maxLines = 4,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("habit_description_field")
-                )
-
-                Text(stringResource(R.string.habit_editor_color))
-                // Two explicit rows of 7 (not a width-dependent FlowRow) so the layout is exactly
-                // 7 columns on every screen size, per design — each swatch takes equal weight so
-                // all 7 always fit one row instead of wrapping early on narrow phones.
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HabitPalette.COLORS.chunked(COLOR_COLUMNS).forEach { rowColors ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            rowColors.forEach { color ->
-                                val index = HabitPalette.COLORS.indexOf(color)
-                                val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
-                                val isSelected = HabitPalette.isSelected(index, state.colorIndex)
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
-                                        .selectableOption(
-                                            label = colorDescription,
-                                            selected = isSelected,
-                                            onClick = { onColorSelected(index) }
-                                        )
-                                        .testTag("color_$index"),
-                                    contentAlignment = Alignment.Center
-                                ) {
+                    Text(stringResource(R.string.habit_editor_color))
+                    // Two explicit rows of 7 (not a width-dependent FlowRow) so the layout is exactly
+                    // 7 columns on every screen size, per design — each swatch takes equal weight so
+                    // all 7 always fit one row instead of wrapping early on narrow phones.
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        HabitPalette.COLORS.chunked(COLOR_COLUMNS).forEach { rowColors ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                rowColors.forEach { color ->
+                                    val index = HabitPalette.COLORS.indexOf(color)
+                                    val colorDescription = stringResource(R.string.habit_editor_color_option, index + 1)
+                                    val isSelected = HabitPalette.isSelected(index, state.colorIndex)
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxSize(0.6f)
-                                            .background(color, CircleShape)
-                                            .border(
-                                                width = if (isSelected) 2.dp else 0.dp,
-                                                color = if (isSelected) Color.White else Color.Transparent,
-                                                shape = CircleShape
+                                            .weight(1f)
+                                            .aspectRatio(1f)
+                                            .selectableOption(
+                                                label = colorDescription,
+                                                selected = isSelected,
+                                                onClick = { onColorSelected(index) }
                                             )
-                                    )
+                                            .testTag("color_$index"),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize(0.6f)
+                                                .background(color, CircleShape)
+                                                .border(
+                                                    width = if (isSelected) 2.dp else 0.dp,
+                                                    color = if (isSelected) Color.White else Color.Transparent,
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // The icon is no longer chosen inline: this row shows the current pick and a
-                // chevron that opens the full-screen categorized picker (HabitIconPickerContent).
-                // Clipped + bordered the same way as the date/reminder groups below, so it reads
-                // as the same kind of grouped control instead of a bare, border-less row.
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(GROUP_CORNER_SHAPE)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
-                ) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.habit_editor_icon)) },
-                        supportingContent = { Text(describeIcon(state.iconKey)) },
-                        leadingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = HabitIcons.iconFor(state.iconKey),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowRight,
-                                contentDescription = null
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    // The icon is no longer chosen inline: this row shows the current pick and a
+                    // chevron that opens the full-screen categorized picker (HabitIconPickerContent).
+                    // Clipped + bordered the same way as the date/reminder groups below, so it reads
+                    // as the same kind of grouped control instead of a bare, border-less row.
+                    Column(
                         modifier = Modifier
-                            .clickable { showIconPicker = true }
-                            .testTag("habit_icon_row")
-                    )
-                }
-
-                // Grouped in one bordered card — same treatment as the reminder card below it,
-                // so the form's lower section reads as a consistent set of grouped controls
-                // instead of a mix of loose rows and cards. Clipped to the same rounded shape
-                // as the border so each ListItem's own background can't peek past the corners
-                // (ListItem defaults to colorScheme.surface, a shade lighter than the sheet's
-                // background) — every ListItem inside is made transparent for the same reason.
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(GROUP_CORNER_SHAPE)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
-                ) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.habit_editor_start_date)) },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Outlined.CalendarMonth,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        trailingContent = {
-                            Text(
-                                text = DATE_DISPLAY_FORMAT.format(state.startDate),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier.clickable { showStartPicker = true }
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.habit_editor_has_end_date)) },
-                        trailingContent = {
-                            Switch(
-                                checked = state.endDate != null,
-                                onCheckedChange = { checked ->
-                                    if (checked) showEndPicker = true else onEndDateChanged(null)
-                                }
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                    )
-                    if (state.endDate != null) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            .fillMaxWidth()
+                            .clip(GROUP_CORNER_SHAPE)
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
+                    ) {
                         ListItem(
-                            headlineContent = { Text(stringResource(R.string.habit_editor_end_date)) },
+                            headlineContent = { Text(stringResource(R.string.habit_editor_icon)) },
+                            supportingContent = { Text(describeIcon(state.iconKey)) },
+                            leadingContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = HabitIcons.iconFor(state.iconKey),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            },
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Filled.KeyboardArrowRight,
+                                    contentDescription = null
+                                )
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            modifier = Modifier
+                                .clickable { showIconPicker = true }
+                                .testTag("habit_icon_row")
+                        )
+                    }
+
+                    // Grouped in one bordered card — same treatment as the reminder card below it,
+                    // so the form's lower section reads as a consistent set of grouped controls
+                    // instead of a mix of loose rows and cards. Clipped to the same rounded shape
+                    // as the border so each ListItem's own background can't peek past the corners
+                    // (ListItem defaults to colorScheme.surface, a shade lighter than the sheet's
+                    // background) — every ListItem inside is made transparent for the same reason.
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(GROUP_CORNER_SHAPE)
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
+                    ) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.habit_editor_start_date)) },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Outlined.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
                             trailingContent = {
                                 Text(
-                                    text = DATE_DISPLAY_FORMAT.format(state.endDate),
+                                    text = formatDisplayDate(state.startDate),
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable { showEndPicker = true }
+                            modifier = Modifier.clickable { showStartPicker = true }
                         )
-                    }
-                }
-
-                // Grouped in one bordered card instead of loose ListItems, so the switch and its
-                // time/days detail read as a single unit rather than unrelated rows in the list.
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(GROUP_CORNER_SHAPE)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
-                ) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.habit_editor_reminder)) },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Outlined.NotificationsNone,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        trailingContent = {
-                            Switch(
-                                checked = state.reminderEnabled,
-                                onCheckedChange = { enabled -> onReminderToggleRequested(enabled) },
-                                modifier = Modifier.testTag("reminder_switch")
-                            )
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                    )
-
-                    if (state.reminderEnabled) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { showTimePicker = true },
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.habit_editor_reminder_time),
-                                    style = MaterialTheme.typography.bodyMedium
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.habit_editor_has_end_date)) },
+                            trailingContent = {
+                                Switch(
+                                    checked = state.endDate != null,
+                                    onCheckedChange = { checked ->
+                                        if (checked) showEndPicker = true else onEndDateChanged(null)
+                                    }
                                 )
-                                Text(
-                                    text = state.reminderTime.toString(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                DayOfWeek.entries.forEach { day ->
-                                    val selected = day in state.reminderDays
-                                    DayDot(
-                                        label = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                                        fullLabel = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                                        selected = selected,
-                                        onToggle = { onReminderDayToggled(day) },
-                                        modifier = Modifier.testTag("reminder_day_${day.name}")
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+                        if (state.endDate != null) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.habit_editor_end_date)) },
+                                trailingContent = {
+                                    Text(
+                                        text = formatDisplayDate(state.endDate),
+                                        color = MaterialTheme.colorScheme.primary
                                     )
+                                },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                modifier = Modifier.clickable { showEndPicker = true }
+                            )
+                        }
+                    }
+
+                    // Grouped in one bordered card instead of loose ListItems, so the switch and its
+                    // time/days detail read as a single unit rather than unrelated rows in the list.
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(GROUP_CORNER_SHAPE)
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, GROUP_CORNER_SHAPE)
+                    ) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.habit_editor_reminder)) },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Outlined.NotificationsNone,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = state.reminderEnabled,
+                                    onCheckedChange = { enabled -> onReminderToggleRequested(enabled) },
+                                    modifier = Modifier.testTag("reminder_switch")
+                                )
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+
+                        if (state.reminderEnabled) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { showTimePicker = true },
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.habit_editor_reminder_time),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = state.reminderTime.toString(),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    DayOfWeek.entries.forEach { day ->
+                                        val selected = day in state.reminderDays
+                                        DayDot(
+                                            label = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                                            fullLabel = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                                            selected = selected,
+                                            onToggle = { onReminderDayToggled(day) },
+                                            modifier = Modifier.testTag("reminder_day_${day.name}")
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                state.error?.let { error ->
-                    Text(
-                        text = when (error) {
-                            HabitEditorError.BlankTitle ->
-                                stringResource(R.string.habit_editor_error_blank)
-                            HabitEditorError.InvalidDateRange ->
-                                stringResource(R.string.habit_editor_error_dates)
-                            is HabitEditorError.LimitReached ->
-                                stringResource(R.string.habit_editor_error_limit, error.max)
-                        },
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Button(
-                    onClick = onSave,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("habit_save_button")
+                Surface(
+                    color = MaterialTheme.colorScheme.background,
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.habit_editor_save))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .imePadding()
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        state.error?.let { error ->
+                            Text(
+                                text = when (error) {
+                                    HabitEditorError.BlankTitle ->
+                                        stringResource(R.string.habit_editor_error_blank)
+                                    HabitEditorError.InvalidDateRange ->
+                                        stringResource(R.string.habit_editor_error_dates)
+                                    is HabitEditorError.LimitReached ->
+                                        stringResource(R.string.habit_editor_error_limit, error.max)
+                                },
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        Button(
+                            onClick = onSave,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("habit_save_button")
+                        ) {
+                            Text(stringResource(R.string.habit_editor_save))
+                        }
+                    }
                 }
             }
 
