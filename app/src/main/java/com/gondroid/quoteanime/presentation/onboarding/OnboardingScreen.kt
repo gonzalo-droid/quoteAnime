@@ -128,6 +128,7 @@ fun OnboardingScreen(
     // itself read the same legible text — never the raw "template_xxx" resource key.
     val selectedTemplate = uiState.templates.find { it.id == uiState.selectedTemplateId }
     val resolvedSelectedTitle = selectedTemplate?.let { resolveTemplateTitle(it.title) }
+    val resolvedSelectedDescription = resolveThemeDescription(selectedTemplate?.themeKey)
     val canCreate = !isHabitPage || resolvedSelectedTitle != null
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -187,7 +188,7 @@ fun OnboardingScreen(
                 onClick = {
                     if (isHabitPage) {
                         resolvedSelectedTitle?.let { title ->
-                            viewModel.onCreateHabit(title, onFinished)
+                            viewModel.onCreateHabit(title, resolvedSelectedDescription, onFinished)
                         }
                     } else {
                         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }

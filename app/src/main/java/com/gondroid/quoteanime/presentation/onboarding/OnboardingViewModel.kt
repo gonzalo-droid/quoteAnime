@@ -74,21 +74,31 @@ class OnboardingViewModel @Inject constructor(
     /**
      * [resolvedTitle] is the already-localized display text for the selected template
      * (resolved in composable scope by the caller) so the habit persists with legible
-     * text instead of the raw "template_xxx" string-resource key.
+     * text instead of the raw "template_xxx" string-resource key. [resolvedDescription] is the
+     * theme's description, resolved the same way.
+     *
+     * The habit is saved exactly as the editor saves the same suggestion: with the theme's
+     * color, cover image and description, not just its title and icon.
      */
-    fun onCreateHabit(resolvedTitle: String, onFinished: () -> Unit) {
+    fun onCreateHabit(
+        resolvedTitle: String,
+        resolvedDescription: String? = null,
+        onFinished: () -> Unit
+    ) {
         val state = _uiState.value
         val template = state.templates.find { it.id == state.selectedTemplateId } ?: return
         viewModelScope.launch {
             val result = createHabit(
                 title = resolvedTitle,
+                description = resolvedDescription,
                 iconKey = template.iconKey,
-                colorIndex = 0,
+                colorIndex = template.themeColorIndex ?: 0,
                 startDate = LocalDate.now(clock),
                 endDate = null,
                 reminderTime = null,
                 reminderDays = emptySet(),
-                templateId = template.id
+                templateId = template.id,
+                coverAnimeSlug = template.themeKey
             )
             when (result) {
                 is CreateHabitResult.Success -> {
