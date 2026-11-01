@@ -112,8 +112,8 @@ fun SettingsScreen(
             viewModel.onPermissionDeniedPermanently()
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.notification_permission_denied_message),
-                    actionLabel = context.getString(R.string.habit_editor_reminder_permission_denied_action)
+                    message = stringResource(R.string.notification_permission_denied_message),
+                    actionLabel = stringResource(R.string.habit_editor_reminder_permission_denied_action)
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     context.startActivity(
@@ -173,6 +173,7 @@ fun SettingsScreen(
                     item { SectionDivider() }
                 }
 
+                /*
                 item {
                     SectionHeader(stringResource(R.string.settings_animes_title))
                     AnimeSelectionSection(
@@ -183,8 +184,10 @@ fun SettingsScreen(
                         onToggle = viewModel::onAnimeToggled
                     )
                 }
-
                 item { SectionDivider() }
+                 */
+
+
 
                 if (AppLanguage.isPickerAvailable) {
                     item {
