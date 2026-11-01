@@ -91,6 +91,18 @@ class HabitDaoTest {
     }
 
     @Test
+    fun editingAHabitKeepsItsCompletions() = runTest {
+        habitDao.upsert(habit("h1"))
+        completionDao.insert(HabitCompletionEntity("h1", "2026-07-24", 1))
+        completionDao.insert(HabitCompletionEntity("h1", "2026-07-25", 1))
+
+        habitDao.upsert(habit("h1").copy(title = "Entrenar 30 min", colorIndex = 3))
+
+        assertEquals("Entrenar 30 min", habitDao.getById("h1")?.title)
+        assertEquals(2, completionDao.getByHabit("h1").first().size)
+    }
+
+    @Test
     fun insertingSameDayTwiceKeepsOneRow() = runTest {
         habitDao.upsert(habit("h1"))
         completionDao.insert(HabitCompletionEntity("h1", "2026-07-25", 1))

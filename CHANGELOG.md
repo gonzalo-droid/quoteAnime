@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Guardar siempre a la vista al crear o editar un hábito**: el botón queda fijo abajo y ya no
+  hay que bajar hasta el final del formulario
+- Las fechas del hábito se muestran en el formato de tu idioma ("1 nov 2026" / "Nov 1, 2026")
+
+### Fixed
+- **Editar un hábito borraba su racha y todo su historial.** Ahora los días marcados se conservan
+- El hábito creado en la bienvenida se guarda con la portada, el color y la descripción del tema
+  elegido, igual que desde el editor
+- La pantalla de inicio todavía decía "Quote Anime"; ahora dice AnimeQuotes
+- La vista previa del widget de un hábito aparecía en español con el teléfono en inglés
+
 ## [1.2.3]
 
 ### Changed
