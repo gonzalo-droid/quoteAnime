@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">AnimeQuotes</string>
     <string name="app_name_label">AnimeQuotes</string>
+    <!-- Static widget-picker preview of the single-habit widget -->
+    <string name="widget_preview_habit_title">Work out</string>
+    <string name="widget_preview_habit_streak">7 days</string>
     <string name="notification_channel_name">Motivational quotes</string>
     <string name="notification_channel_description">Get a motivational quote on your chosen schedule</string>
     <string name="widget_description">Shows a motivational quote on your home screen</string>

@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">AnimeQuotes</string>
     <string name="app_name_label">AnimeQuotes</string>
+    <!-- Vista previa estática del widget de un hábito en el selector de widgets -->
+    <string name="widget_preview_habit_title">Entrenar</string>
+    <string name="widget_preview_habit_streak">7 días</string>
     <string name="notification_channel_name">Frases motivacionales</string>
     <string name="notification_channel_description">Recibe una frase motivacional según tu horario elegido</string>
     <string name="widget_description">Muestra una frase motivacional en tu pantalla de inicio</string>

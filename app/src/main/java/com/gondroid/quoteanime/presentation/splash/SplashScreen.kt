@@ -107,7 +107,7 @@ private fun SplashContent() {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Quote",
+                text = "Anime", // i18n-ignore: brand name, never translated
                 fontSize = 42.sp,
                 fontFamily = FontFamily.Serif,
                 fontStyle = FontStyle.Italic,
@@ -116,7 +116,7 @@ private fun SplashContent() {
                 letterSpacing = 4.sp
             )
             Text(
-                text = "Anime",
+                text = "Quotes", // i18n-ignore: brand name, never translated
                 fontSize = 42.sp,
                 fontFamily = FontFamily.Serif,
                 fontStyle = FontStyle.Italic,
