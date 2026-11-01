@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">QuoteAnime</string>
-    <string name="app_name_label">Anime Quotes</string>
+    <string name="app_name">AnimeQuotes</string>
+    <string name="app_name_label">AnimeQuotes</string>
     <string name="notification_channel_name">Motivational quotes</string>
     <string name="notification_channel_description">Get a motivational quote on your chosen schedule</string>
     <string name="widget_description">Shows a motivational quote on your home screen</string>
@@ -29,8 +29,8 @@
     <string name="rating_app">Leave us a review</string>
     <string name="subtitle_rating_section">Leave us a review on Google Play</string>
     <string name="share_app">Share the app</string>
-    <string name="share_app_subtitle">Invite your friends to discover Anime Quotes</string>
-    <string name="share_app_message">Discover QuoteAnime! The best quotes from your favorite anime 🌟 Download it for free:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
+    <string name="share_app_subtitle">Invite your friends to discover AnimeQuotes</string>
+    <string name="share_app_message">Discover AnimeQuotes! The best quotes from your favorite anime 🌟 Download it for free:\nhttps://play.google.com/store/apps/details?id=com.gondroid.quoteanime</string>
     <string name="terms_and_conditions">Terms and conditions</string>
     <string name="politics_privacy">Privacy policy</string>
 
@@ -283,7 +283,7 @@
     <string name="onboarding_next">Next</string>
 
     <string name="update_ready_title">Update ready</string>
-    <string name="update_ready_body">A new version of Quote Anime is ready. Restart the app to apply it.</string>
+    <string name="update_ready_body">A new version of AnimeQuotes is ready. Restart the app to apply it.</string>
     <string name="update_ready_restart">Restart</string>
     <string name="update_ready_later">Later</string>
 
@@ -401,8 +401,8 @@
     <string name="widget_tutorial_step1_body">Touch and hold any empty area of your home screen until the options menu appears.</string>
     <string name="widget_tutorial_step2_title">Tap \"Widgets\"</string>
     <string name="widget_tutorial_step2_body">In the menu that appears at the bottom, select Widgets to open the gallery.</string>
-    <string name="widget_tutorial_step3_title">Search for Quote Anime</string>
-    <string name="widget_tutorial_step3_body">Scroll through the list until you find Quote Anime, then touch and hold the widget.</string>
+    <string name="widget_tutorial_step3_title">Search for AnimeQuotes</string>
+    <string name="widget_tutorial_step3_body">Scroll through the list until you find AnimeQuotes, then touch and hold the widget.</string>
     <string name="widget_tutorial_step4_title">Drag and drop</string>
     <string name="widget_tutorial_step4_body">Drag the widget to wherever you like on your home screen and let go.</string>
     <string name="emotion_motivation">Motivation</string>

@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **La app ahora se llama AnimeQuotes**, en inglés y en español: bajo el ícono, en la tarjeta
+  para compartir, en el mensaje para invitar amigos y en el tutorial del widget
+
 ## [1.2.2]
 
 ### Added
