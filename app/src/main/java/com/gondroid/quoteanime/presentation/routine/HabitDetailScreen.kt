@@ -73,7 +73,10 @@ import java.util.Locale
  *  this screen has the room for it (~6 months). */
 private const val DETAIL_HEATMAP_WEEKS = 26
 
-private val DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+/** Date in the app language's own format ("1 nov 2026" / "Nov 1, 2026"), read at each call so
+ *  it follows a language change made in Settings. */
+private fun formatDisplayDate(date: LocalDate): String =
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()).format(date)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -322,7 +325,7 @@ private fun SelectedDayCallout(date: LocalDate, isCompleted: Boolean, accent: Co
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = DATE_DISPLAY_FORMAT.format(date),
+            text = formatDisplayDate(date),
             style = MaterialTheme.typography.labelSmall
         )
         Text(

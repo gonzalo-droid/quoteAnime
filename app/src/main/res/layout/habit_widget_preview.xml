@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Entrenar"
+            android:text="@string/widget_preview_habit_title"
             android:textColor="#F0EAFF"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="7 días"
+            android:text="@string/widget_preview_habit_streak"
             android:textColor="#A78BFA"
             android:textSize="11sp" />
 

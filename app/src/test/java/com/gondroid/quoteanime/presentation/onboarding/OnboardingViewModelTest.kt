@@ -123,7 +123,7 @@ class OnboardingViewModelTest {
             CreateHabitResult.BlankTitle
         val viewModel = buildViewModel()
         advanceUntilIdle()
-        viewModel.onCreateHabit("", {})
+        viewModel.onCreateHabit("") {}
         advanceUntilIdle()
         assertEquals(HabitEditorError.BlankTitle, viewModel.uiState.value.error)
 
@@ -135,14 +135,18 @@ class OnboardingViewModelTest {
 
     @Test
     fun `given a successful creation, when finished, then both flags persist and onDone fires`() = runTest {
+        // The habit keeps the theme's color, cover and description, like the editor saves it.
         coEvery {
-            createHabit("Camino ninja", null, "dumbbell", 0, LocalDate.now(fixedClock), null, null, emptySet(), "free", null)
+            createHabit(
+                "Camino ninja", "Tu camino ninja", "dumbbell", 10, LocalDate.now(fixedClock),
+                null, null, emptySet(), "free", "ninja"
+            )
         } returns CreateHabitResult.Success(mockk(relaxed = true))
         val viewModel = buildViewModel()
         advanceUntilIdle()
         var finished = false
 
-        viewModel.onCreateHabit("Camino ninja") { finished = true }
+        viewModel.onCreateHabit("Camino ninja", "Tu camino ninja") { finished = true }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { setOnboardingCompleted() }

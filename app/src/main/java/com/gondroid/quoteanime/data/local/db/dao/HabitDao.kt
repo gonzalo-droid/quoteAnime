@@ -1,9 +1,8 @@
 package com.gondroid.quoteanime.data.local.db.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import com.gondroid.quoteanime.data.local.db.entity.HabitEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -22,7 +21,12 @@ interface HabitDao {
     @Query("SELECT * FROM habits WHERE id = :habitId")
     suspend fun getById(habitId: String): HabitEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    /**
+     * Must stay `@Upsert`, never `@Insert(onConflict = REPLACE)`: SQLite's REPLACE deletes the old
+     * row before inserting, and that delete cascades to habit_completions, so editing a habit wiped
+     * its whole history and streak.
+     */
+    @Upsert
     suspend fun upsert(habit: HabitEntity)
 
     @Query("UPDATE habits SET isArchived = 1 WHERE id = :habitId")
