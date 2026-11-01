@@ -5,7 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.2.4]
+
 ### Changed
+- Se ocultó la sección "Animes" de Ajustes
 - **Guardar siempre a la vista al crear o editar un hábito**: el botón queda fijo abajo y ya no
   hay que bajar hasta el final del formulario
 - Las fechas del hábito se muestran en el formato de tu idioma ("1 nov 2026" / "Nov 1, 2026")
