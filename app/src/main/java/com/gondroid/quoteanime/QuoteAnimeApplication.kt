@@ -9,7 +9,7 @@ import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
 import com.gondroid.quoteanime.domain.usecase.RestorePurchasesUseCase
 import com.gondroid.quoteanime.notification.RoutineWidgetScheduler
 import com.gondroid.quoteanime.notification.WidgetScheduler
-import com.gondroid.quoteanime.presentation.ads.AdsInitializer
+import com.gondroid.quoteanime.presentation.ads.AdsConsentManager
 import com.gondroid.quoteanime.widget.HabitWidget
 import com.gondroid.quoteanime.widget.QuoteWidget
 import com.gondroid.quoteanime.widget.RoutineSummaryWidget
@@ -30,7 +30,7 @@ class QuoteAnimeApplication : Application(), Configuration.Provider {
     @Inject lateinit var routineWidgetScheduler: RoutineWidgetScheduler
     @Inject lateinit var getUserPreferences: GetUserPreferencesUseCase
     @Inject lateinit var restorePurchases: RestorePurchasesUseCase
-    @Inject lateinit var adsInitializer: AdsInitializer
+    @Inject lateinit var adsConsentManager: AdsConsentManager
 
     /** Language the widgets were last drawn in — see [onConfigurationChanged]. */
     private var widgetLocales: String = ""
@@ -44,11 +44,13 @@ class QuoteAnimeApplication : Application(), Configuration.Provider {
         syncPremiumEntitlement()
     }
 
-    /** Off the main thread on purpose — the SDK's binder work there caused ANRs. */
+    /**
+     * Starts ads only if a consent saved in an earlier launch allows it; a first launch waits for
+     * MainActivity to ask (see [AdsConsentManager]). The SDK itself initializes off the main
+     * thread — its binder work there caused ANRs.
+     */
     private fun initializeAds() {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            adsInitializer.initialize()
-        }
+        adsConsentManager.startAdsIfAllowed()
     }
 
     /** Catches a subscription cancelled/expired outside the app — see [RestorePurchasesUseCase]. */

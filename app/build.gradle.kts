@@ -116,6 +116,7 @@ dependencies {
 
     // AdMob
     implementation(libs.google.admob)
+    implementation(libs.google.ump)
 
     // Play In-App Review
     implementation(libs.play.review)
