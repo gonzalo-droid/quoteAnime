@@ -20,10 +20,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import com.gondroid.quoteanime.notification.NotificationHelper
-import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
 import com.gondroid.quoteanime.domain.usecase.RestorePurchasesUseCase
+import com.gondroid.quoteanime.notification.NotificationHelper
+import com.gondroid.quoteanime.presentation.ads.AdsConsentManager
 import com.gondroid.quoteanime.presentation.navigation.AppDeepLink
+import com.gondroid.quoteanime.presentation.navigation.AppNavGraph
 import com.gondroid.quoteanime.presentation.navigation.DeepLinkRouter
 import com.gondroid.quoteanime.presentation.navigation.isInMainContent
 import com.gondroid.quoteanime.presentation.navigation.showMainBackStack
@@ -43,6 +44,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var restorePurchases: RestorePurchasesUseCase
+    @Inject lateinit var adsConsentManager: AdsConsentManager
 
     private lateinit var appUpdateManager: AppUpdateManager
 
@@ -65,6 +67,9 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Shows Google's ad-consent form where the law requires it, then starts the ads SDK.
+        adsConsentManager.gatherConsent(this)
 
         appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.registerListener(installStateListener)
