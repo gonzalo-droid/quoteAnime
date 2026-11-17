@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Las tarjetas de frases de Explorar y el detalle de la frase vuelven a usar su tipografía
+  (Playfair Display y Lora): los archivos de esas fuentes estaban dañados
+
 ## [1.3.0]
 
 ### Added
