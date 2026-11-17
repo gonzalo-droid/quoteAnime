@@ -5,6 +5,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.3.0]
+
 ### Added
 - **Consentimiento de anuncios**: donde la ley lo exige (Europa, Reino Unido y algunos estados de EE. UU.), la app
   pregunta antes de mostrar anuncios, con el formulario de Google. En Ajustes aparece "Opciones de
