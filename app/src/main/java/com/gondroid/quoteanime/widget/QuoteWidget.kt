@@ -1,5 +1,8 @@
 package com.gondroid.quoteanime.widget
 
+import com.gondroid.quoteanime.presentation.common.appLocale
+import com.gondroid.quoteanime.domain.model.textFor
+import com.gondroid.quoteanime.domain.model.Quote
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Icon
@@ -73,7 +76,15 @@ class QuoteWidget : GlanceAppWidget() {
     @Composable
     fun Content() {
         val prefs       = currentState<androidx.datastore.preferences.core.Preferences>()
-        val quoteText   = prefs[QuoteWidgetState.QUOTE_TEXT]
+        // Both languages are stored; the one shown follows the app language, so the redraw on
+        // a language change (QuoteAnimeApplication.onConfigurationChanged) switches it.
+        val quoteText   = Quote(
+            id = "",
+            anime = null,
+            author = null,
+            quote = prefs[QuoteWidgetState.QUOTE_TEXT],
+            quoteEn = prefs[QuoteWidgetState.QUOTE_TEXT_EN]
+        ).textFor(LocalContext.current.resources.configuration.appLocale)
         val quoteAuthor = prefs[QuoteWidgetState.QUOTE_AUTHOR]
         val quoteId     = prefs[QuoteWidgetState.QUOTE_ID]     ?: ""
         val quoteAnime  = prefs[QuoteWidgetState.QUOTE_ANIME]  ?: ""

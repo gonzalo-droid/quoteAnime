@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.components
 
+import com.gondroid.quoteanime.presentation.common.localizedText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -123,7 +124,7 @@ fun QuoteDetailContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = quote.quote.orEmpty(),
+                text = quote.localizedText(),
                 fontSize = 22.sp,
                 lineHeight = 34.sp,
                 fontFamily = Fraunces,

@@ -6,6 +6,8 @@ import com.google.firebase.database.DataSnapshot
 data class QuoteDto(
     val id: String,
     val quote: String?,
+    /** English translation; null on quotes not translated yet. */
+    val quoteEn: String? = null,
     val author: String?,
     val anime: String?,
     val categories: List<String>?,
@@ -22,6 +24,7 @@ fun DataSnapshot.toQuoteDto(): QuoteDto? {
     return QuoteDto(
         id = id,
         quote = child("quote").getValue(String::class.java),
+        quoteEn = child("quoteEn").getValue(String::class.java),
         author = child("author").getValue(String::class.java),
         anime = child("anime").getValue(String::class.java),
         categories = categories,
@@ -32,6 +35,7 @@ fun DataSnapshot.toQuoteDto(): QuoteDto? {
 fun QuoteDto.toDomain(isFavorite: Boolean = false, imageUrl: String? = null): Quote = Quote(
     id = id,
     quote = quote,
+    quoteEn = quoteEn,
     author = author,
     anime = anime,
     categories = categories ?: emptyList(),

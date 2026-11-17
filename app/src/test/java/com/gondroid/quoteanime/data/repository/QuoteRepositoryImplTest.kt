@@ -1,5 +1,9 @@
 package com.gondroid.quoteanime.data.repository
 
+import com.gondroid.quoteanime.domain.model.Quote
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emptyFlow
 import app.cash.turbine.test
 import com.gondroid.quoteanime.data.local.db.dao.FavoriteQuoteDao
 import com.gondroid.quoteanime.data.local.db.entity.FavoriteQuoteEntity
@@ -161,6 +165,7 @@ class QuoteRepositoryImplTest {
             FavoriteQuoteEntity(id = "2", quote = "I never give up.", author = "Naruto", anime = "Naruto")
         )
         every { favoriteQuoteDao.getFavorites() } returns flowOf(entities)
+        every { remoteDataSource.getAllQuotes() } returns emptyFlow()
 
         repository.getFavorites().test {
             val quotes = awaitItem()
@@ -173,8 +178,56 @@ class QuoteRepositoryImplTest {
     }
 
     @Test
+    fun `getFavorites - takes the English text of each favorite from the live quotes`() = runTest {
+        val entities = listOf(
+            FavoriteQuoteEntity(id = "1", quote = "¡Créelo!", author = "Naruto", anime = "Naruto"),
+            FavoriteQuoteEntity(id = "2", quote = "Nunca me rindo.", author = "Naruto", anime = "Naruto")
+        )
+        every { favoriteQuoteDao.getFavorites() } returns flowOf(entities)
+        every { remoteDataSource.getAllQuotes() } returns flowOf(
+            listOf(quoteDtoNaruto1.copy(quoteEn = "Believe it!"), quoteDtoNaruto2)
+        )
+
+        repository.getFavorites().test {
+            val quotes = expectMostRecentItemAfterCompletion()
+            assertEquals("Believe it!", quotes.first { it.id == "1" }.quoteEn)
+            assertNull("No translation stays null", quotes.first { it.id == "2" }.quoteEn)
+            assertEquals("Spanish text comes from Room", "¡Créelo!", quotes.first { it.id == "1" }.quote)
+        }
+    }
+
+    @Test
+    fun `getFavorites - shows the saved favorites before the live quotes arrive`() = runTest {
+        every { favoriteQuoteDao.getFavorites() } returns flowOf(
+            listOf(FavoriteQuoteEntity(id = "1", quote = "¡Créelo!", author = "Naruto", anime = "Naruto"))
+        )
+        // Offline: the RTDB listener never answers.
+        every { remoteDataSource.getAllQuotes() } returns flow { awaitCancellation() }
+
+        repository.getFavorites().test {
+            val quotes = awaitItem()
+            assertEquals("1", quotes.single().id)
+            assertNull(quotes.single().quoteEn)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getFavorites - a failing remote source still shows the saved favorites`() = runTest {
+        every { favoriteQuoteDao.getFavorites() } returns flowOf(
+            listOf(FavoriteQuoteEntity(id = "1", quote = "¡Créelo!", author = "Naruto", anime = "Naruto"))
+        )
+        every { remoteDataSource.getAllQuotes() } returns flow { throw IllegalStateException("permission denied") }
+
+        repository.getFavorites().test {
+            assertEquals("1", expectMostRecentItemAfterCompletion().single().id)
+        }
+    }
+
+    @Test
     fun `getFavorites - empty entity list maps to empty domain list`() = runTest {
         every { favoriteQuoteDao.getFavorites() } returns flowOf(emptyList())
+        every { remoteDataSource.getAllQuotes() } returns emptyFlow()
 
         repository.getFavorites().test {
             assertTrue(awaitItem().isEmpty())
@@ -232,6 +285,18 @@ class QuoteRepositoryImplTest {
 
         repeat(50) {
             assertEquals("2", repository.getRandomQuote(setOf("Naruto"), excludeId = "1")?.id)
+        }
+    }
+
+    /** Waits for the flow to complete and returns the last list it emitted. */
+    private suspend fun app.cash.turbine.ReceiveTurbine<List<Quote>>.expectMostRecentItemAfterCompletion(): List<Quote> {
+        var last: List<Quote>? = null
+        while (true) {
+            when (val event = awaitEvent()) {
+                is app.cash.turbine.Event.Item -> last = event.value
+                is app.cash.turbine.Event.Complete -> return checkNotNull(last)
+                is app.cash.turbine.Event.Error -> throw event.throwable
+            }
         }
     }
 }

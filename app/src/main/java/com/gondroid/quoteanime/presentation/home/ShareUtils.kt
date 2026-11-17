@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.home
 
+import com.gondroid.quoteanime.presentation.common.quoteText
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -36,7 +37,7 @@ suspend fun createShareBitmap(quote: Quote, context: Context): Bitmap {
     val background = loadBackgroundBitmap(context, quote.imageUrl)
     val appIcon = loadAppIconBitmap(context)
     return withContext(Dispatchers.Default) {
-        drawShareBitmap(quote, background, appIcon, context.getString(R.string.app_name_label))
+        drawShareBitmap(quote, context.quoteText(quote), background, appIcon, context.getString(R.string.app_name_label))
     }
 }
 
@@ -77,6 +78,8 @@ private fun loadAppIconBitmap(context: Context): Bitmap {
 
 private fun drawShareBitmap(
     quote: Quote,
+    /** [quote]'s text in the app's language — see [quoteText]. */
+    quoteText: String,
     background: Bitmap?,
     appIcon: Bitmap,
     label: String
@@ -148,7 +151,7 @@ private fun drawShareBitmap(
     }
 
     val maxTextWidth = w - H_PAD * 2
-    val lines = wrapText(quote.quote.orEmpty(), textPaint, maxTextWidth)
+    val lines = wrapText(quoteText, textPaint, maxTextWidth)
     val lineHeight = 70f
 
     // ── Layout constants ──────────────────────────────────────────────────

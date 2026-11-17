@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.presentation.components
 
+import com.gondroid.quoteanime.presentation.common.localizedText
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -76,7 +77,7 @@ fun QuoteCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = quote.quote.orEmpty(),
+                    text = quote.localizedText(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontFamily = Georgia,
                     fontStyle = FontStyle.Italic,

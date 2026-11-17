@@ -1,0 +1,22 @@
+<es-419>
+¡Llega Mi Rutina! 🔥
+• Crea hábitos con temas de anime, sigue tu racha y recibe recordatorios
+• Widgets nuevos para ver tus hábitos desde la pantalla de inicio
+• Frases traducidas cuando usas la app en inglés
+• Ahora nos llamamos AnimeQuotes
+• Elige el idioma de la app en Ajustes (Android 13+)
+• La app ya no se reinicia al tocar un widget o una notificación
+• Notificaciones de frases a la hora que elegiste
+• Mejoras de rendimiento y correcciones
+</es-419>
+<en-US>
+Say hi to My routine! 🔥
+• Build habits with anime themes, track your streak and get reminders
+• New widgets to see your habits from the home screen
+• Quotes now in English when the app is in English
+• We're now called AnimeQuotes
+• Pick the app language in Settings (Android 13+)
+• Tapping a widget or notification no longer restarts the app
+• Quote notifications arrive at the times you chose
+• Performance improvements and fixes
+</en-US>

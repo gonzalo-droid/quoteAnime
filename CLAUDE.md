@@ -27,7 +27,7 @@ Motivational anime quotes Android app. Quotes come from **Firebase Realtime Data
 ## Realtime Database Schema
 
 ```
-/quotes/{index}        → id: Long, quote: String, author: String, anime: String, categories: [String] (emociones), animeSlug?
+/quotes/{index}        → id: Long, quote: String (español), quoteEn?: String (inglés), author: String, anime: String, categories: [String] (emociones), animeSlug?, size?
 /habitTemplates/{id}   → title (string-resource key), iconKey, order, themeColorIndex?, themeKey?, isPremiumOnly
 /imagenes              → fetched once by QuoteRemoteDataSource
 ```
@@ -36,6 +36,8 @@ A quote is classified two ways, and they must not be mixed (a build did, and the
 
 - **Anime** (`anime`): the Settings anime list is **derived** from the distinct `anime` values (`GetAnimesUseCase`, sorted like iOS) — there is no `/animes` or `/categories` node. The selection (`UserPreferences.selectedCategoryIds`, a legacy name kept for the DataStore key and iOS parity) holds **anime names** and filters Home, notifications and the widget via `Quote.isFromAnimes` / `pickRandomFromAnimes` (`domain/model/AnimeSelection.kt`). Saved values that name no anime are dropped and saved back (`ReconcileAnimeSelectionUseCase`); if none survive, the selection becomes empty = every anime.
 - **Emotion** (`categories`): every production quote carries a list like `["motivación", "reflexión"]` (Spanish RTDB ids). Only the Catalogue's `ByEmotion` filter reads it (`GetQuotesByCategoryUseCase` → `Quote.hasEmotion`); the emotion chips are a fixed list in `CatalogScreen`.
+
+**Quote text by language**: `Quote.textFor(locale)` shows `quote` in Spanish and `quoteEn` in any other language, falling back to `quote` when `quoteEn` is null or blank. Read the language from the configuration (`presentation/common/QuoteText.kt`: `localizedText()` in Compose, `Context.quoteText()` elsewhere), never from `quote` directly. Favorites keep only the Spanish text in Room; `getFavorites` takes `quoteEn` from RTDB by id (no Room migration). The quote widget stores both texts (`QUOTE_TEXT`, `QUOTE_TEXT_EN`) and picks one when it draws.
 
 If `/habitTemplates` is empty or missing, the habit editor falls back to the local `DefaultHabitTemplates.ALL`.
 

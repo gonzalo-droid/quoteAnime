@@ -53,6 +53,9 @@ class UpdateQuoteWidgetWorker @AssistedInject constructor(
                     prefs.toMutablePreferences().apply {
                         if (quote != null) {
                             this[QuoteWidgetState.QUOTE_TEXT]   = quote.quote.orEmpty()
+                            val english = quote.quoteEn
+                            if (english != null) this[QuoteWidgetState.QUOTE_TEXT_EN] = english
+                            else remove(QuoteWidgetState.QUOTE_TEXT_EN)
                             this[QuoteWidgetState.QUOTE_AUTHOR] = quote.author.orEmpty()
                             this[QuoteWidgetState.QUOTE_ID]     = quote.id
                             this[QuoteWidgetState.QUOTE_ANIME]  = quote.anime.orEmpty()

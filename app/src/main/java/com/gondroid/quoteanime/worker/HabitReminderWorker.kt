@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.worker
 
+import com.gondroid.quoteanime.presentation.common.quoteText
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -51,7 +52,7 @@ class HabitReminderWorker @AssistedInject constructor(
             notificationHelper.showHabitReminder(
                 habitId = habit.id,
                 habitTitle = habit.title,
-                quoteText = quote?.quote.orEmpty()
+                quoteText = quote?.let { applicationContext.quoteText(it) }.orEmpty()
             )
         }
 

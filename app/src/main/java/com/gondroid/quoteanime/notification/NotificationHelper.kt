@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.notification
 
+import com.gondroid.quoteanime.presentation.common.quoteText
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -83,8 +84,8 @@ class NotificationHelper @Inject constructor(
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(quote.author.orEmpty())
-            .setContentText(quote.quote.orEmpty())
-            .setStyle(NotificationCompat.BigTextStyle().bigText(quote.quote.orEmpty()))
+            .setContentText(context.quoteText(quote))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.quoteText(quote)))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

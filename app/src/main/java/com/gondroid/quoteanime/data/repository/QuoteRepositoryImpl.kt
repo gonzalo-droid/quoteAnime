@@ -11,8 +11,10 @@ import com.gondroid.quoteanime.domain.model.hasEmotion
 import com.gondroid.quoteanime.domain.model.pickRandomFromAnimes
 import com.gondroid.quoteanime.domain.repository.QuoteRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class QuoteRepositoryImpl @Inject constructor(
@@ -57,10 +59,23 @@ class QuoteRepositoryImpl @Inject constructor(
     override fun getQuotesByCategory(categoryId: String): Flow<List<Quote>> =
         getAllQuotes().map { quotes -> quotes.filter { it.hasEmotion(categoryId) } }
 
+    /**
+     * Favorites come from Room, which keeps only the Spanish text. The English one (`quoteEn`)
+     * is taken from the live quotes by id: Room emits right away (the remote side starts
+     * empty), so the list never waits for the network, and offline it shows the Spanish text
+     * — the same fallback as an untranslated quote.
+     */
     override fun getFavorites(): Flow<List<Quote>> =
-        favoriteQuoteDao.getFavorites().map { entities ->
+        combine(
+            favoriteQuoteDao.getFavorites(),
+            remoteDataSource.getAllQuotes()
+                .map { dtos -> dtos.associate { it.id to it.quoteEn } }
+                .onStart { emit(emptyMap()) }
+                .catch { emit(emptyMap()) }
+        ) { entities, englishById ->
             entities.map { entity ->
                 entity.toDomain(imageUrl = resolveImageUrl(entity.animeSlug))
+                    .copy(quoteEn = englishById[entity.id])
             }
         }
 

@@ -4,7 +4,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object QuoteWidgetState {
+    /** Spanish text (`quote`). */
     val QUOTE_TEXT   = stringPreferencesKey("widget_quote_text")
+    /** English text (`quoteEn`), absent when the quote has none. Both are kept so a language
+     *  change redraws the widget in the new language without fetching another quote. */
+    val QUOTE_TEXT_EN = stringPreferencesKey("widget_quote_text_en")
     val QUOTE_AUTHOR = stringPreferencesKey("widget_quote_author")
     val QUOTE_ID     = stringPreferencesKey("widget_quote_id")
     val QUOTE_ANIME  = stringPreferencesKey("widget_quote_anime")

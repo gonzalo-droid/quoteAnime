@@ -18,8 +18,8 @@ android {
         applicationId = "com.gondroid.quoteanime"
         minSdk = 24
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.3.1"
+        versionCode = 8
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,6 +29,20 @@ android {
         }
     }
 
+    // Release signing, read from ~/.gradle/gradle.properties (outside the repo, which is public).
+    // Without those properties the release build is left unsigned instead of failing.
+    fun signingProperty(name: String) = providers.gradleProperty(name).orNull?.takeIf { it.isNotBlank() }
+    val releaseKeystore = signingProperty("QUOTEANIME_KEYSTORE_PATH")
+    val releaseStorePassword = signingProperty("QUOTEANIME_KEYSTORE_PASSWORD")
+    val releaseSigning = if (releaseKeystore != null && releaseStorePassword != null) {
+        signingConfigs.create("release") {
+            storeFile = file(releaseKeystore)
+            storePassword = releaseStorePassword
+            keyAlias = signingProperty("QUOTEANIME_KEY_ALIAS")
+            keyPassword = signingProperty("QUOTEANIME_KEY_PASSWORD")
+        }
+    } else null
+
     buildTypes {
         debug {
             // Google's public test units. Serving live ads to our own device is invalid
@@ -37,6 +51,7 @@ android {
             buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-3940256099942544/1033173712\"")
         }
         release {
+            signingConfig = releaseSigning
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

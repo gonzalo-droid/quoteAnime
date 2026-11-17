@@ -5,228 +5,74 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [1.3.1]
+## [1.2.0] - 2026-11-17
 
-### Fixed
-- Las tarjetas de frases de Explorar y el detalle de la frase vuelven a usar su tipografía
-  (Playfair Display y Lora): los archivos de esas fuentes estaban dañados
-
-## [1.3.0]
+Primera versión en producción desde 1.1.5 (versionCode 7 → 8). Reúne lo que en el repo se fue
+numerando 1.2.0 a 1.3.1 (builds 8 a 15), que nunca llegó a la tienda: se describe aquí lo que
+recibe quien actualiza desde 1.1.5. La novedad grande es **Mi Rutina**.
 
 ### Added
-- **Consentimiento de anuncios**: donde la ley lo exige (Europa, Reino Unido y algunos estados de EE. UU.), la app
-  pregunta antes de mostrar anuncios, con el formulario de Google. En Ajustes aparece "Opciones de
-  privacidad de anuncios" para cambiar la elección
-
-## [1.2.4]
+- **Mi Rutina (seguimiento de hábitos)**: crear, editar, archivar, restaurar y borrar hábitos
+  (borrar pide confirmación y elimina su historial). Racha actual y récord, heatmap estilo
+  GitHub y calendario mensual, pestañas Activos/Archivados, 126 íconos en 13 categorías con
+  buscador (encuentra "musica" sin tilde), 14 colores, descripción y fechas en el formato de tu
+  idioma. Sin límite de hábitos. Pestaña propia en la barra inferior
+- **Sugerencias temáticas de anime**: Camino ninja, Buscar el One Piece, Sé un saiyan, Sé un
+  maestro Pokémon y Sé el Rey Mago, con portada, color e ícono. Las del servidor reemplazan a
+  las incluidas en la app cuando llegan, así que sin conexión también hay sugerencias
+- **Recordatorios por hábito**: notificación en los días y la hora que elijas, con botón "Hecho"
+  que marca el día sin abrir la app
+- **Widgets de Mi Rutina**: uno de resumen con todos los hábitos activos y otro por hábito (con
+  su heatmap), que se elige al agregarlo. Se actualizan al instante al marcar o editar un
+  hábito
+- **Primer hábito en la bienvenida**: el onboarding suma una página para elegirlo, con el mismo
+  estilo que las de frases
+- **Frases en inglés**: con la app en inglés, las frases se muestran traducidas (`quoteEn` en
+  Firebase) en Inicio, el Catálogo, los favoritos, el detalle, la imagen para compartir, las
+  notificaciones, los recordatorios y el widget. Una frase todavía sin traducir se muestra en
+  español. Los favoritos guardados toman la traducción de Firebase al haber conexión
+- **Idioma en Ajustes** (Android 13 o superior): English, Español o el del sistema solo para la
+  app; cambia la app, las notificaciones y los widgets al momento
+- **Consentimiento de anuncios**: donde la ley lo exige (Europa, Reino Unido y algunos estados
+  de EE. UU.), la app pregunta antes de mostrar anuncios, con el formulario de Google. En
+  Ajustes aparece "Opciones de privacidad de anuncios" para cambiar la elección
 
 ### Changed
-- Se ocultó la sección "Animes" de Ajustes
-- **Guardar siempre a la vista al crear o editar un hábito**: el botón queda fijo abajo y ya no
-  hay que bajar hasta el final del formulario
-- Las fechas del hábito se muestran en el formato de tu idioma ("1 nov 2026" / "Nov 1, 2026")
+- **La app ahora se llama AnimeQuotes**, en inglés y en español: bajo el ícono, en la pantalla
+  de inicio, en la tarjeta para compartir, en la invitación y en el tutorial del widget
+- **Textos en inglés de verdad**: con el teléfono en inglés ya no quedan textos en español en
+  el tutorial del widget, Ajustes, las emociones del Catálogo, los mensajes de Inicio ni el
+  widget. En español, toda la app trata de "tú"
+- Guardar queda siempre a la vista al crear o editar un hábito
+- **Notificaciones de frases a la hora justa**: llegan exactamente las veces por día elegidas,
+  repartidas de punta a punta en la ventana horaria, también en ventanas que cruzan la
+  medianoche (22:00–02:00)
 
 ### Fixed
-- **Editar un hábito borraba su racha y todo su historial.** Ahora los días marcados se conservan
-- El hábito creado en la bienvenida se guarda con la portada, el color y la descripción del tema
-  elegido, igual que desde el editor
-- La pantalla de inicio todavía decía "Quote Anime"; ahora dice AnimeQuotes
-- La vista previa del widget de un hábito aparecía en español con el teléfono en inglés
+- **La app ya no se reinicia al tocar un widget o una notificación** con la app abierta: sigue
+  donde estaba y abre lo que pediste. Volver desde Recientes no repite el último atajo, y un
+  widget o recordatorio con la app cerrada respeta el onboarding si no lo terminaste
+- **La app ya no se traba al abrirla con el teléfono exigido**: los anuncios se preparan en
+  segundo plano
+- Las tarjetas y el detalle de las frases vuelven a usar su tipografía (Playfair Display y
+  Lora): los archivos de esas fuentes estaban dañados
+- Tocar el widget de frases mientras carga o tras un error abre la app sin perder la pantalla
+- TalkBack anuncia qué ícono y color están elegidos en el editor de hábitos
 
-## [1.2.3]
-
-### Changed
-- **La app ahora se llama AnimeQuotes**, en inglés y en español: bajo el ícono, en la tarjeta
-  para compartir, en el mensaje para invitar amigos y en el tutorial del widget
-
-## [1.2.2]
-
-### Added
-- **Idioma en Ajustes** (Android 13 o superior): una nueva sección "Idioma" te deja elegir
-  English, Español o el idioma del sistema solo para la app, sin cambiar el del teléfono. Es la
-  misma opción que Android muestra en Ajustes › Apps › Frases Anime › Idioma. Cambia toda la
-  app, las notificaciones y los widgets (que se redibujan al momento). Las frases siguen en
-  español porque solo existen en ese idioma. En Android 7 a 12 la app sigue el idioma del
-  teléfono, como antes
-- **Elige tus animes en Ajustes**: una nueva sección "Animes" te deja marcar de qué animes
-  quieres frases. El feed de Inicio muestra solo esos animes (igual que en iOS), y las
-  notificaciones y el widget de frases también los respetan. "Todos los animes" (o no marcar
-  ninguno) vuelve a mostrar todos. El cambio se guarda al instante y el feed se actualiza al
-  volver a Inicio
-
-### Fixed
-- **La sección "Animes" de Ajustes mostraba emociones**: en lugar de nombres de anime
-  listaba "motivación", "reflexión" y demás, y el feed, las notificaciones y el widget
-  filtraban por emoción. Ahora ves los animes (ordenados alfabéticamente, como en iOS) y lo que
-  eliges filtra por anime. Si habías marcado emociones, al abrir la app se descartan: si no
-  queda ningún anime marcado vuelves a ver todos, nunca un feed vacío. Los filtros por emoción
-  del Catálogo siguen igual
-- **Ajustes sin conexión**: la pantalla de Ajustes ya no se queda cargando para siempre si
-  abres la app sin red; solo la lista de animes espera a que vuelva la conexión
-- **Frase del widget en Inicio**: después de abrir una frase desde el widget, marcar otra como
-  favorita ya no te devuelve a la frase del widget
-- **Textos en inglés de verdad**: con el teléfono en inglés, varios textos seguían en español
-  porque estaban escritos en el código: los pasos del tutorial del widget, la sección Widget
-  de Ajustes, las emociones del Catálogo, los mensajes de Inicio sin frases o con error, el
-  lema de la pantalla de inicio, el botón de favorito de las tarjetas y los estados de carga y
-  error del widget de frases. Ahora se muestran en tu idioma
-- **La app ya no se reinicia al tocar un widget o una notificación**: con la app abierta,
-  tocar el widget de frases, los de Mi Rutina, un recordatorio o una notificación de frase
-  reiniciaba la app desde la pantalla de inicio. Ahora la app sigue donde estaba y abre lo que
-  pediste; la notificación de frase ya no borra la pantalla en la que estabas
-- **Abrir desde Recientes no repite el último atajo**: volver a la app desde la lista de apps
-  recientes ya no te lleva otra vez a Mi Rutina o a la frase del último widget que tocaste
-- **Frecuencia de notificaciones de frases**: el usuario recibía otra cantidad que la
-  elegida — el intervalo era `24 / frecuencia` con división entera y un trabajo periódico de
-  24 h descartaba los disparos fuera de la ventana (con 8–22, elegir 5 entregaba 4). Ahora
-  `QuoteNotificationSlotCalculator` reparte exactamente N horarios de punta a punta en la
-  ventana y cada notificación agenda la siguiente
-- Las ventanas horarias que cruzan la medianoche (ej. 22:00–02:00) no enviaban ninguna
-  notificación: el chequeo de ventana asumía inicio < fin
-- **Widgets de Mi Rutina tras "Hecho"**: marcar un hábito desde el botón "Hecho" del
-  recordatorio ahora actualiza al instante el widget de resumen y el de cada hábito; antes
-  seguían mostrando el día sin marcar hasta el siguiente refresco diario
-- **Onboarding respetado al abrir desde una notificación o un widget**: tocar un recordatorio
-  o el widget de frases con la app cerrada ya no se salta el onboarding si no lo terminaste.
-  Primero se muestra el onboarding y, al terminarlo, se abre lo que pediste. Si ya lo habías
-  completado, vas directo (sin la animación de inicio), y "atrás" desde Mi Rutina vuelve a
-  Inicio en lugar de cerrar la app
-- **Sugerencias de hábitos sin conexión**: el editor de hábitos y el onboarding muestran las
-  sugerencias incluidas en la app al instante, y se reemplazan por las del servidor cuando
-  llegan. Antes, sin red, quedaban sin ninguna sugerencia
-- **Sin claves internas en pantalla**: una sugerencia nueva publicada en el servidor que esta
-  versión todavía no sabe nombrar ya no aparece como `template_…`; se omite hasta que una
-  actualización la incluya. Los títulos escritos como texto normal se muestran tal cual
-- **Widget de frases sin frase**: tocarlo mientras carga o tras un error abre la app
-  normalmente, en lugar de navegar con una frase vacía y perder la pantalla en la que estabas
-- **Buscador de íconos sin tildes**: escribir "musica" ahora encuentra "Tocar música", y un
-  espacio al final (el que suele dejar el autocorrector) ya no vacía los resultados
-- **TalkBack en el editor de hábitos**: al recorrer los íconos y los colores ahora se anuncia
-  cuál está elegido ("Seleccionado, Color 3"), en lugar de leer solo "botón"
-- **Íconos con el mismo nombre en inglés**: "Darte un gusto" y "Darte un capricho" se
-  llamaban igual en inglés ("Treat yourself"), así que TalkBack los anunciaba igual; el
-  segundo ahora es "Pamper yourself"
-
-### Changed
-- **Premium en pausa**: la suscripción todavía no está a la venta, así que la app ya no la
-  ofrece en ningún lado — sin la opción "Premium" en Ajustes ni el botón para mejorar al
-  llegar al límite de Mi Rutina. Mientras tanto Mi Rutina no tiene límite de hábitos y todas
-  las sugerencias temáticas (Pokémon, Black Clover) están desbloqueadas. Los anuncios se
-  siguen mostrando. Se reactiva con `PremiumGate.PAYMENTS_ENABLED`
-- Los textos de Mi Rutina ya no dicen "hasta 3 hábitos"
-- **Textos en español con un mismo registro**: los mensajes de Mi Rutina, el onboarding, la
-  pantalla Premium, la hoja de cancelación y el error de carga de páginas que hablaban de
-  "vos" ("Probá", "Ya sos premium", "Cancelá") ahora te tratan de "tú", como el resto de la
-  app y la versión de iOS
-- **La app ya no se traba al abrirla con el teléfono exigido**: al arrancar, la biblioteca de
-  anuncios hacía su preparación en el hilo de la pantalla, y con el teléfono ocupado eso podía
-  congelar la app hasta que Android ofrecía cerrarla. Ahora se prepara en segundo plano, y el
-  anuncio que se precarga al inicio espera a que esté lista en vez de perderse
-
-## [1.2.1]
-
-### Added — Google Play Billing real
-- **Integración de `billing-ktx` 9.1.0**: reemplaza el flag mock de Premium por una
-  suscripción real. `BillingRepositoryImpl` consulta `ProductDetails` para el producto
-  `premium_subscription` (todos los base plans/ofertas configurados en Play Console se leen
-  dinámicamente, nada hardcodeado del lado del cliente), lanza el flujo de compra, acknowledgea
-  la compra y actualiza el mismo flag de DataStore que ya leía cada feature gateada — ningún
-  call-site existente (`ObservePremiumStatusUseCase` y sus 6 consumidores) cambió
-- **Paywall con planes reales**: la pantalla ya no tiene un botón "Suscribirme" fijo — muestra
-  la lista de planes disponibles (precio, trial si existe) leída de Play, con selección y
-  feedback de compra pendiente/cancelada/error vía snackbar
-- **Sincronización al iniciar la app**: `RestorePurchasesUseCase` corre en cada arranque
-  (`QuoteAnimeApplication.onCreate`) para detectar una suscripción cancelada o expirada fuera
-  de la app — no hay backend propio, así que la verificación es 100% del lado del cliente
-  (`Purchase.isAcknowledged` + `PurchaseState.PURCHASED`), una limitación consciente
-- Botón "Quitar premium (solo pruebas)" se mantiene, ahora exclusivamente para QA
-
-## [1.2.0]
-
-Everything below shipped after 1.1.5 but hasn't been tagged with a new `versionName` yet —
-grouped by feature area since it's too large to read commit-by-commit. The single biggest
-addition is **Mi Rutina**, a full habit-tracker feature that didn't exist in any prior release.
-
-### Added — Mi Rutina (habit tracker)
-- **Hábitos**: crear, editar, archivar/restaurar y borrar (permanente, con cascada a los
-  cumplimientos) — todas las acciones destructivas piden confirmación primero
-- **Sugerencias 100% temáticas**: 5 plantillas basadas en anime (Camino ninja, Buscar el One
-  Piece, Sé un saiyan, Sé un maestro Pokémon, Sé el Rey Mago), cada una con imagen de portada,
-  color e ícono; la primera sugerencia disponible se auto-selecciona al crear un hábito nuevo
-- **Racha y heatmap**: racha actual + récord (`CalculateStreakUseCase`), heatmap estilo GitHub
-  de 17 semanas en la card compacta y de 26 semanas con etiquetas de día/mes en el detalle
-- **Calendario mensual**: vista alternativa de un mes completo con los mismos datos que el heatmap
-- **Filtro Activos/Archivados**: tabs en la lista, con estados vacíos que explican qué hace
-  archivar y qué pasa con el historial
-- **Recordatorios por hábito**: notificación programable con acción "Hecho" desde la propia
-  notificación, día(s) de la semana configurables
-- **Selector de íconos**: pantalla completa con 126 íconos en 13 categorías y buscador
-- **Editor**: 14 colores, campo de descripción, fecha con formato dd/mm/aaaa, tarjeta de
-  recordatorio, vista previa temática con imagen de portada
-- **Onboarding**: 4ta página para elegir el primer hábito, mismo estilo visual (fondo, dots,
-  botón) que las 3 páginas de frases — antes era un formulario plano sin continuidad visual
-- **Widget "Mi rutina" (resumen)**: todos los hábitos activos con racha y check de "hoy" en un
-  solo widget; toca para abrir la pantalla de Rutina
-- **Widget por hábito**: heatmap individual de 9 semanas; al agregarlo, una pantalla de
-  configuración nueva (la primera de este tipo en la app) deja elegir qué hábito seguir en esa
-  instancia — se pueden agregar varios, uno por hábito
-- Ambos widgets se refrescan al instante al marcar/crear/editar/archivar/borrar un hábito desde
-  la app, además de un refresco diario de respaldo
-- Medición de eventos con Firebase Analytics (`RoutineAnalytics`): apertura de tab, hábito
-  creado/completado/archivado, racha rota/hito alcanzado
-- Español e inglés en toda la feature
-
-### Added — Premium (suscripción)
-- **Paywall**: pantalla con 3 beneficios — hábitos ilimitados, sin anuncios, temas exclusivos —
-  y botón de "Suscribirme"
-- **Entitlement local**: flag booleano en DataStore (`ObservePremiumStatusUseCase` /
-  `SetPremiumStatusUseCase`) — pre-billing a propósito: cuando se integre Google Play Billing
-  real, solo cambia el call-site del botón "Suscribirme", ningún lector del flag
-- **Hábitos ilimitados**: el límite gratuito (3 hábitos activos) se levanta reactivamente al
-  activar premium, en toda la app
-- **Sin anuncios**: el banner del detalle de frase (Catálogo) se oculta si sos premium
-- **Temas exclusivos**: las sugerencias de Pokémon y Black Clover quedan bloqueadas para
-  usuarios gratuitos (con candado en el chip); tocarlas abre el paywall en vez de seleccionarlas
-- Puntos de entrada al paywall: fila en Ajustes, mensaje de "límite alcanzado" en Mi Rutina, y
-  tocar una sugerencia bloqueada (editor u onboarding)
-
-### Fixed
-- Menú de "Editar/Archivar" (⋮ en la card de hábito) se desplazaba lejos del ícono en vez de
-  anclarse debajo — el `DropdownMenu` no estaba envuelto junto a su `IconButton` en un `Box`
-  propio, que es el patrón que Compose necesita para anclarlo correctamente
-- Fondo de los grupos con borde redondeado del editor (fechas, recordatorio) mostraba un
-  parche de color distinto en las esquinas — `ListItem` usa `colorScheme.surface` por defecto,
-  que no coincide con el fondo del sheet; se corrigió con `clip()` + `ListItem` transparente
-- Los chips de filtro "Activos/Archivados" cambiaban de posición al pasar de una pestaña vacía
-  a una con hábitos (padding inconsistente entre el estado vacío y la lista poblada)
-- Condición de carrera en el auto-select del onboarding: el estado premium se leía de un flow
-  separado que podía no haber emitido todavía, así que un usuario premium a veces veía la
-  primera sugerencia bloqueada como si fuera gratis
-- Botón de cerrar del detalle de hábito quedaba fuera de pantalla por falta de `weight(1f)`
-  en la fila de ícono+título
-- Migración destructiva de Room acotada a esquemas pre-v4 únicamente (no borraba datos en
-  actualizaciones posteriores)
-- Fugas de accesibilidad: heatmap y selectores de ícono/color sin semántica para lectores de
-  pantalla
-
-### Changed
-- Botón "Añadir hábito" movido del FAB flotante a una acción en el `TopAppBar` de Mi Rutina
-- Todos los modales de Mi Rutina unificados: título a la izquierda, botón de cerrar a la
-  derecha; detalle de hábito ahora es un bottom sheet fullscreen deslizable en vez de una
-  pantalla con push/pop
-- Copys de estado vacío reescritos (Activos: más motivacional; Archivados: explica qué implica
-  archivar antes de decir "no tenés ninguno")
-- Navegación por barra inferior con tab de Mi Rutina; recordatorio de hábito y widgets abren
-  la app directo en esa pantalla
-
-### Technical
-- Room v5: `HabitEntity`, `HabitCompletionEntity` (con `ForeignKey CASCADE`), `HabitDao`,
-  `HabitCompletionDao`
-- 24 use cases en `domain/usecase/` (uno por clase), incluyendo los nuevos de Premium
-- `HabitTemplate.isPremiumOnly` + campo homónimo en el DTO remoto (`/habitTemplates`)
-- +130 tests unitarios nuevos (viewmodels, use cases, DAO) — 229 tests unitarios en total
-- Compose `@Preview` agregado a cada vista del paquete `routine/` (múltiples estados: vacío,
-  poblado, error, archivado, límite alcanzado)
+### Internal
+- **Premium construido pero apagado**: Google Play Billing (`billing-ktx` 9.1.0, producto
+  `premium_subscription`), paywall y restauración en cada arranque están integrados, pero
+  `PremiumGate.PAYMENTS_ENABLED = false` los oculta hasta que la suscripción exista en Play
+  Console. Por eso no hay límite de hábitos ni temas bloqueados; los anuncios siguen
+- La sección "Animes" de Ajustes (elegir de qué animes ver frases) está construida y corregida
+  (lista animes, no emociones) pero oculta
+- Room v6 (`MIGRATION_4_5` conserva los favoritos, `MIGRATION_5_6` suma campos al hábito).
+  `quoteEn` no se guarda en Room: se toma de Firebase, sin migración
+- UMP 3.1.0 para el consentimiento; firma de release leída de `~/.gradle/gradle.properties`
+  (`QUOTEANIME_*`), fuera del repo
+- Sin errores de lint: fuera la API restringida `NavController.currentBackStack` y los textos
+  leídos con `LocalContext` en Compose
+- Firebase Analytics para Mi Rutina (`RoutineAnalytics`)
 
 ---
 
