@@ -102,6 +102,10 @@ fun SettingsScreen(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    // Resolved during composition: the snackbar runs in a coroutine, where stringResource
+    // can't be called, and context.getString would miss a language change.
+    val permissionDeniedMessage = stringResource(R.string.notification_permission_denied_message)
+    val permissionDeniedAction = stringResource(R.string.habit_editor_reminder_permission_denied_action)
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -112,10 +116,8 @@ fun SettingsScreen(
             viewModel.onPermissionDeniedPermanently()
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    // context.getString, not stringResource: this runs in a coroutine, outside
-                    // composition, where a @Composable call does not compile.
-                    message = context.getString(R.string.notification_permission_denied_message),
-                    actionLabel = context.getString(R.string.habit_editor_reminder_permission_denied_action)
+                    message = permissionDeniedMessage,
+                    actionLabel = permissionDeniedAction
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     context.startActivity(

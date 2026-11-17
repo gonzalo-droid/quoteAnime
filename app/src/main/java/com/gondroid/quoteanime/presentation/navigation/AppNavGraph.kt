@@ -255,7 +255,14 @@ private fun NavHostController.enterMain(routes: List<String>, leaving: String) {
 
 /** True once Home is on the back stack, i.e. the splash and the onboarding are behind us. */
 fun NavHostController.isInMainContent(): Boolean =
-    currentBackStack.value.any { it.destination.route == Screen.Home.routeWithArg }
+    // getBackStackEntry throws when the route is not on the stack. `currentBackStack` would
+    // read the same thing, but it is restricted API (lint: RestrictedApi).
+    try {
+        getBackStackEntry(Screen.Home.routeWithArg)
+        true
+    } catch (_: IllegalArgumentException) {
+        false
+    }
 
 /**
  * Shows a deep link's [routes] (see [mainBackStack]) while the app is already in its main
@@ -267,15 +274,27 @@ fun NavHostController.showMainBackStack(routes: List<String>) {
     val home = routes.first()
     val above = routes.drop(1)
     if (home == Screen.Home.route) {
-        val currentAboveHome = currentBackStack.value
-            .map { it.destination.route }
-            .dropWhile { it != Screen.Home.routeWithArg }
-            .drop(1)
         // Already showing exactly this (e.g. Mi Rutina with nothing on top): leave it alone.
-        if (currentAboveHome == above) return
+        if (isShowingAboveHome(above)) return
         popBackStack(Screen.Home.routeWithArg, inclusive = false)
     } else {
         navigate(home) { popUpTo(Screen.Home.routeWithArg) { inclusive = true } }
     }
     above.forEach { navigate(it) }
+}
+
+/**
+ * True when the top of the stack is Home followed by exactly [above]. Links put at most one
+ * route above Home (see [mainBackStack]), so the current and previous entries are enough —
+ * the public API, unlike the restricted `currentBackStack`. A longer [above] answers false,
+ * which only means the stack is rebuilt.
+ */
+private fun NavHostController.isShowingAboveHome(above: List<String>): Boolean {
+    val current = currentBackStackEntry?.destination?.route
+    return when (above.size) {
+        0 -> current == Screen.Home.routeWithArg
+        1 -> current == above[0] &&
+            previousBackStackEntry?.destination?.route == Screen.Home.routeWithArg
+        else -> false
+    }
 }

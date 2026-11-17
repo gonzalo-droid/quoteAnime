@@ -125,6 +125,9 @@ fun HabitEditorSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    // Resolved here so they follow a language change; the snackbar coroutine can't call them.
+    val permissionDeniedMessage = stringResource(R.string.habit_editor_reminder_permission_denied_message)
+    val permissionDeniedAction = stringResource(R.string.habit_editor_reminder_permission_denied_action)
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -134,8 +137,8 @@ fun HabitEditorSheet(
         } else {
             scope.launch {
                 val result = snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.habit_editor_reminder_permission_denied_message),
-                    actionLabel = context.getString(R.string.habit_editor_reminder_permission_denied_action)
+                    message = permissionDeniedMessage,
+                    actionLabel = permissionDeniedAction
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     context.startActivity(

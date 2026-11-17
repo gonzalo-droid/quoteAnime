@@ -154,10 +154,12 @@ internal fun SocialSection(
     onNavigateToWebView: (url: String, title: String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
+    val instagramTitle = stringResource(R.string.social_instagram)
+    val facebookTitle = stringResource(R.string.social_facebook)
 
     SocialItem(
         iconRes = R.drawable.ic_instagram,
-        name = stringResource(R.string.social_instagram),
+        name = instagramTitle,
         handle = stringResource(R.string.social_instagram_handle),
         iconTint = Color(0xFFE1306C),
         onClick = {
@@ -165,7 +167,7 @@ internal fun SocialSection(
             // never an external browser.
             val target = "https://www.instagram.com/animequoteapp/"
             openExternalLink(context, target) {
-                onNavigateToWebView(target, context.getString(R.string.social_instagram))
+                onNavigateToWebView(target, instagramTitle)
             }
         }
     )
@@ -177,7 +179,7 @@ internal fun SocialSection(
 
     SocialItem(
         iconRes = R.drawable.ic_facebook,
-        name = stringResource(R.string.social_facebook),
+        name = facebookTitle,
         handle = stringResource(R.string.social_facebook_handle),
         iconTint = Color(0xFF1877F2),
         onClick = {
@@ -185,7 +187,7 @@ internal fun SocialSection(
             // never an external browser.
             val target = "https://www.facebook.com/share/1Ay18mtNZh/?mibextid=wwXIfr"
             openExternalLink(context, target) {
-                onNavigateToWebView(target, context.getString(R.string.social_facebook))
+                onNavigateToWebView(target, facebookTitle)
             }
         }
     )
