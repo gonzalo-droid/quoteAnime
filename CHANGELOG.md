@@ -7,7 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.2.0] - 2026-11-17
 
-Primera versión en producción desde 1.1.5 (versionCode 7 → 8). Reúne lo que en el repo se fue
+Primera versión en producción desde 1.1.5 (versionCode 7 → 16; el 8 ya estaba usado en Play). Reúne lo que en el repo se fue
 numerando 1.2.0 a 1.3.1 (builds 8 a 15), que nunca llegó a la tienda: se describe aquí lo que
 recibe quien actualiza desde 1.1.5. La novedad grande es **Mi Rutina**.
 

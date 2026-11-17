@@ -18,7 +18,7 @@ android {
         applicationId = "com.gondroid.quoteanime"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8
+        versionCode = 16
         versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
