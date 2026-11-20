@@ -2,6 +2,7 @@ package com.gondroid.quoteanime.presentation.ads
 
 import android.app.Activity
 import android.content.Context
+import com.gondroid.quoteanime.BuildConfig
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
@@ -53,6 +54,9 @@ class AdsConsentManager @Inject constructor(
      * `Application.onCreate`: it only reads what UMP stored, it never shows anything.
      */
     fun startAdsIfAllowed() {
+        // Debug-only switch (always true in release): the SDK never starts, so the banner takes
+        // no space and the interstitial never loads — sharing goes straight through.
+        if (!BuildConfig.SHOW_ADS) return
         if (consentInformation.canRequestAds()) {
             scope.launch { adsInitializer.initialize() }
         }
@@ -64,6 +68,7 @@ class AdsConsentManager @Inject constructor(
      * (a new region, a new form version) between launches.
      */
     fun gatherConsent(activity: Activity) {
+        if (!BuildConfig.SHOW_ADS) return
         startAdsIfAllowed()
         if (!gathering.compareAndSet(false, true)) return
         val params = ConsentRequestParameters.Builder().build()
@@ -94,7 +99,7 @@ class AdsConsentManager @Inject constructor(
     }
 
     private fun refreshPrivacyOptions() {
-        _privacyOptionsRequired.value = consentInformation.privacyOptionsRequirementStatus ==
+        _privacyOptionsRequired.value = BuildConfig.SHOW_ADS && consentInformation.privacyOptionsRequirementStatus ==
             ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
     }
 }

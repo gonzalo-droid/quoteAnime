@@ -212,7 +212,7 @@ com.gondroid.quoteanime/
 ## Zonas peligrosas
 
 - **Migraciones de Room**: la DB es v6 con `exportSchema = true` (schemas en `app/schemas/`). `DatabaseModule` registra `MIGRATION_4_5` y `MIGRATION_5_6`, y solo permite reset destructivo desde las versiones 1–3. **Subir la versión exige escribir `MIGRATION_6_7`**: sin ella, los usuarios en v6 no tienen camino y la app crashea al abrir la DB. La 4→5 existe para no borrar los favoritos de usuarios reales.
-- **AdMob**: los ad unit IDs son `buildConfigField` por build type en `app/build.gradle.kts` (debug = IDs de prueba de Google, release = producción). El application ID es `meta-data` en el manifest.
+- **AdMob**: los ad unit IDs son `buildConfigField` por build type en `app/build.gradle.kts` (debug = IDs de prueba de Google, release = producción). El application ID es `meta-data` en el manifest. Para capturas de tienda, `./gradlew installDebug -PquoteAnime.showAds=false` apaga todos los anuncios en debug (`BuildConfig.SHOW_ADS`, siempre `true` en release): no arranca el SDK ni se pide el consentimiento.
 
 ## Convenciones
 

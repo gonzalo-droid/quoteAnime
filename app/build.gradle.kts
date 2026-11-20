@@ -49,6 +49,9 @@ android {
             // traffic and gets AdMob accounts suspended.
             buildConfigField("String", "AD_UNIT_BANNER", "\"ca-app-pub-3940256099942544/6300978111\"")
             buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-3940256099942544/1033173712\"")
+            // `-PquoteAnime.showAds=false` hides every ad (store screenshots): no SDK, no consent form.
+            val showAds = providers.gradleProperty("quoteAnime.showAds").orNull != "false"
+            buildConfigField("boolean", "SHOW_ADS", showAds.toString())
         }
         release {
             signingConfig = releaseSigning
@@ -60,6 +63,7 @@ android {
             )
             buildConfigField("String", "AD_UNIT_BANNER", "\"ca-app-pub-1427341798923689/4873365993\"")
             buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-1427341798923689/1127716194\"")
+            buildConfigField("boolean", "SHOW_ADS", "true") // release always shows ads
         }
     }
     compileOptions {
