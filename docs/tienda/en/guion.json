@@ -1,0 +1,37 @@
+{
+  "app": "AnimeQuotes",
+  "tiendas": ["play"],
+  "marca": {
+    "claro": "#F0EAFF",
+    "oscuro": "#0C0C1E",
+    "acento": "#7C5FC4",
+    "acentoSobreOscuro": "#A78BFA",
+    "detalle": "#FF6B8A",
+    "fuenteTitulo": "../marca/fraunces_bold.ttf",
+    "icono": "../marca/ic_app_logo-playstore.png"
+  },
+  "laminas": [
+    {"tipo": "portada", "fondo": "oscuro", "etiqueta": "01 · Home",
+     "titular": "An anime quote\n*for every day*", "sub": "Motivation from your favorite characters.",
+     "captura": {"play": "capturas/01-home_edward.png"}},
+    {"tipo": "telefono-abajo", "fondo": "claro", "etiqueta": "02 · My routine",
+     "titular": "Turn motivation\ninto *habits*", "sub": "Habits with anime themes.",
+     "captura": {"play": "capturas/08-routine.png"}},
+    {"tipo": "destacado", "fondo": "oscuro", "etiqueta": "03 · Consistency",
+     "titular": "Watch your *streak*\ngrow", "sub": "Every day you complete gets marked.",
+     "captura": {"play": "capturas/09-habit_detail.png"},
+     "zona": {"play": [40, 570, 1200, 360]}},
+    {"tipo": "dos-telefonos", "fondo": "claro", "etiqueta": "04 · Explore",
+     "titular": "Quotes for\n*how you feel*", "sub": "Motivation, fight, friendship and more.",
+     "captura": {"play": "capturas/05-motivation.png"}, "captura2": {"play": "capturas/04-explore.png"}},
+    {"tipo": "telefono-abajo", "fondo": "oscuro", "etiqueta": "05 · Notifications",
+     "titular": "A quote\n*on your schedule*", "sub": "You choose the time and how many a day.",
+     "captura": {"play": "capturas/11-settings.png"}},
+    {"tipo": "dos-telefonos", "fondo": "claro", "etiqueta": "06 · Favorites",
+     "titular": "Save the ones\n*that stay with you*", "sub": "Your quotes, always at hand.",
+     "captura": {"play": "capturas/06-favorites.png"}, "captura2": {"play": "capturas/07-detail.png"}},
+    {"tipo": "lista", "fondo": "acento", "titular": "*And more*",
+     "items": ["Home screen widget", "Share as image", "English & Spanish", "Reminders"]}
+  ],
+  "grafico": {"titular": "Anime *Quotes*", "sub": "Quotes that shaped our lives."}
+}
