@@ -382,7 +382,7 @@
 
     <!-- Settings: anime selection (feed, notifications and widget) -->
     <string name="settings_language_title">Language</string>
-    <string name="settings_language_note">Changes the app\'s texts. Quotes are only available in Spanish.</string>
+    <string name="settings_language_note">Changes the app\'s texts. Quotes appear in this language when a translation is available.</string>
     <string name="settings_language_system">System default</string>
     <string name="settings_language_english" translatable="false">English</string>
     <string name="settings_language_spanish" translatable="false">Español</string>

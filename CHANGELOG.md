@@ -5,6 +5,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Ajustes › Idioma decía que las frases solo están en español; ahora dice que se muestran en el idioma elegido cuando tienen traducción.
+
 ## [1.2.0] - 2026-11-17
 
 Primera versión en producción desde 1.1.5 (versionCode 7 → 11; los códigos 8 a 10 ya estaban usados en Play). Reúne lo que en el repo se fue
