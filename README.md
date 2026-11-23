@@ -229,8 +229,8 @@ AdMob libraries.
 The published privacy policy and terms of service are declared in
 `presentation/common/AppLinks.kt` and open inside the app's WebView:
 
-- https://www.animequote.app/privacy-policy
-- https://www.animequote.app/terms-and-conditions
+- https://nekodojo.app/apps/animequote/privacy
+- https://nekodojo.app/apps/animequote/terms
 
 ---
 
