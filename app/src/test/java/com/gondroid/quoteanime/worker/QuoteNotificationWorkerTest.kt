@@ -59,7 +59,7 @@ class QuoteNotificationWorkerTest {
         return QuoteNotificationWorker(
             mockk<Context>(relaxed = true), params,
             WorkerQuoteFixtures.realGetRandomQuote(), getUserPreferences, updatePreferences,
-            notificationHelper, scheduler
+            notificationHelper, scheduler, mockk(relaxed = true)
         )
     }
 

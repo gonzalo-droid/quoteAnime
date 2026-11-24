@@ -52,6 +52,10 @@ android {
             // `-PquoteAnime.showAds=false` hides every ad (store screenshots): no SDK, no consent form.
             val showAds = providers.gradleProperty("quoteAnime.showAds").orNull != "false"
             buildConfigField("boolean", "SHOW_ADS", showAds.toString())
+            // Crashlytics collects in release only; `-PquoteAnime.crashlytics=true` turns it on
+            // in debug to send a test crash.
+            manifestPlaceholders["crashlyticsCollectionEnabled"] =
+                providers.gradleProperty("quoteAnime.crashlytics").orNull == "true"
         }
         release {
             signingConfig = releaseSigning
@@ -64,6 +68,7 @@ android {
             buildConfigField("String", "AD_UNIT_BANNER", "\"ca-app-pub-1427341798923689/4873365993\"")
             buildConfigField("String", "AD_UNIT_INTERSTITIAL", "\"ca-app-pub-1427341798923689/1127716194\"")
             buildConfigField("boolean", "SHOW_ADS", "true") // release always shows ads
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
         }
     }
     compileOptions {

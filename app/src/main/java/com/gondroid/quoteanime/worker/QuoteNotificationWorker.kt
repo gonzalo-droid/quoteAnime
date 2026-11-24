@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.gondroid.quoteanime.data.analytics.CrashReporter
 import com.gondroid.quoteanime.domain.model.UserPreferences
 import com.gondroid.quoteanime.domain.usecase.GetRandomQuoteUseCase
 import com.gondroid.quoteanime.domain.usecase.GetUserPreferencesUseCase
@@ -32,7 +33,8 @@ class QuoteNotificationWorker @AssistedInject constructor(
     private val getUserPreferences: GetUserPreferencesUseCase,
     private val updateUserPreferences: UpdateUserPreferencesUseCase,
     private val notificationHelper: NotificationHelper,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    private val crashReporter: CrashReporter
 ) : CoroutineWorker(context, workerParams) {
 
     private enum class Outcome { DELIVERED, SKIPPED, NO_PERMISSION, TRANSIENT_ERROR }
@@ -95,6 +97,7 @@ class QuoteNotificationWorker @AssistedInject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            crashReporter.recordNonFatal(e, mapOf("source" to "quote_notification_worker"))
             null
         }
 

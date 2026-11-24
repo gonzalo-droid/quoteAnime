@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.data.remote
 
+import com.gondroid.quoteanime.data.analytics.CrashReporter
 import com.gondroid.quoteanime.data.remote.dto.toDomain
 import com.gondroid.quoteanime.data.remote.dto.toHabitTemplateDto
 import com.gondroid.quoteanime.domain.model.HabitTemplate
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 class HabitTemplateRemoteDataSource @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val crashReporter: CrashReporter
 ) {
     private val templatesRef = database.getReference("habitTemplates")
 
@@ -26,6 +28,8 @@ class HabitTemplateRemoteDataSource @Inject constructor(
             }
 
             override fun onCancelled(error: DatabaseError) {
+                // Offline never lands here (the listener waits): this is denied rules or a server error.
+                crashReporter.recordNonFatal(error.toException(), mapOf("source" to "rtdb_habit_templates"))
                 close(error.toException())
             }
         }

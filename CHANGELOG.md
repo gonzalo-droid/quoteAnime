@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Crashlytics registra como errores no fatales los fallos que la app antes callaba: el worker de notificaciones de frases y la lectura de frases y plantillas de hábitos en Realtime Database (permisos o error del servidor). Se suman a los de billing que ya se reportaban.
+- Crashlytics recolecta solo en release. En debug está apagado; `./gradlew installDebug -PquoteAnime.crashlytics=true` lo enciende para mandar un crash de prueba.
+
 ### Changed
 - La política de privacidad y los términos ahora se abren en nekodojo.app, el nuevo sitio de la app.
 

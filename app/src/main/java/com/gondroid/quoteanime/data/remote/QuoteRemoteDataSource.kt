@@ -1,5 +1,6 @@
 package com.gondroid.quoteanime.data.remote
 
+import com.gondroid.quoteanime.data.analytics.CrashReporter
 import com.gondroid.quoteanime.data.remote.dto.QuoteDto
 import com.gondroid.quoteanime.data.remote.dto.toQuoteDto
 import com.google.firebase.database.DataSnapshot
@@ -13,7 +14,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class QuoteRemoteDataSource @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val crashReporter: CrashReporter
 ) {
     private val quotesRef = database.getReference("quotes")
     private val imagenesRef = database.getReference("imagenes")
@@ -39,6 +41,8 @@ class QuoteRemoteDataSource @Inject constructor(
             }
 
             override fun onCancelled(error: DatabaseError) {
+                // Offline never lands here (the listener waits): this is denied rules or a server error.
+                crashReporter.recordNonFatal(error.toException(), mapOf("source" to "rtdb_quotes"))
                 close(error.toException())
             }
         }
